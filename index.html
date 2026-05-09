@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Incident Report — AgentBee Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0c0f14;
+      --surface: #13181f;
+      --surface2: #1a2130;
+      --border: #242d3d;
+      --border-focus: #3b82f6;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59,130,246,0.15);
+      --warning: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --comms: #8b5cf6;
+      --text: #e2e8f0;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --mono: 'DM Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      padding: 32px 20px 60px;
+    }
+
+    /* Grid noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 40px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #1e3a5f, #0f2545);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .header-text h1 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+
+    .header-text h1 span {
+      color: var(--accent);
+    }
+
+    .header-text p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 5px;
+      font-family: var(--mono);
+    }
+
+    /* Sections */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-family: var(--mono);
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Agent search */
+    .agent-search-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .agent-search-row .field {
+      flex: 1;
+    }
+
+    /* Field */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 10px 14px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    .field select option {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .field textarea {
+      resize: vertical;
+      line-height: 1.6;
+      min-height: 80px;
+    }
+
+    /* Grid layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* Agent resolved card */
+    .agent-card {
+      display: none;
+      background: linear-gradient(135deg, #0f2545, #0a1a30);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 10px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .agent-card.visible {
+      display: flex;
+    }
+
+    .agent-card-info {
+      flex: 1;
+    }
+
+    .agent-card-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .agent-card-meta {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .agent-card-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(59,130,246,0.15);
+      border: 1px solid rgba(59,130,246,0.3);
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    /* Search suggestions */
+    .suggestions-wrap {
+      position: relative;
+    }
+
+    .suggestions {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: var(--surface2);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      z-index: 100;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      display: none;
+    }
+
+    .suggestions.open { display: block; }
+
+    .suggestion-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 12px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+
+    .suggestion-item:last-child { border-bottom: none; }
+
+    .suggestion-item:hover,
+    .suggestion-item.active {
+      background: var(--accent-glow);
+      color: var(--accent);
+    }
+
+    .suggestion-name { font-size: 13px; color: var(--text); font-weight: 500; }
+    .suggestion-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #2563eb;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-comms {
+      background: linear-gradient(135deg, var(--comms), #7c3aed);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(139,92,246,0.2);
+    }
+
+    .btn-comms:hover:not(:disabled) {
+      box-shadow: 0 0 28px rgba(139,92,246,0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, var(--success), #059669);
+      color: #fff;
+      font-size: 14px;
+      padding: 13px 28px;
+      box-shadow: 0 0 20px rgba(16,185,129,0.2);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      box-shadow: 0 0 32px rgba(16,185,129,0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Institutions analysis */
+    .inst-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+      min-height: 30px;
+    }
+
+    .inst-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .inst-tag.authorised {
+      background: rgba(16,185,129,0.12);
+      border: 1px solid rgba(16,185,129,0.3);
+      color: var(--success);
+    }
+
+    .inst-tag.risk {
+      background: rgba(239,68,68,0.12);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: var(--danger);
+    }
+
+    .inst-tag.unknown {
+      background: rgba(100,116,139,0.12);
+      border: 1px solid rgba(100,116,139,0.3);
+      color: var(--text-muted);
+    }
+
+    .inst-tag .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot.green { background: var(--success); }
+    .dot.red { background: var(--danger); }
+    .dot.grey { background: var(--text-muted); }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Status bar */
+    .status-bar {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .status-bar.info {
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.2);
+      color: var(--accent);
+      display: block;
+    }
+
+    .status-bar.success {
+      background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.2);
+      color: var(--success);
+      display: block;
+    }
+
+    .status-bar.error {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      color: var(--danger);
+      display: block;
+    }
+
+    /* Footer actions */
+    .footer-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-actions .spacer { flex: 1; }
+
+    /* Loading spinner */
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Lookup button */
+    .btn-lookup {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 22px;
+      height: 40px;
+    }
+
+    .btn-lookup:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Analyse button */
+    .btn-analyse {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 7px;
+      font-family: var(--mono);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .btn-analyse:hover:not(:disabled) {
+      border-color: var(--warning);
+      color: var(--warning);
+    }
+
+    .btn-analyse:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Summary box */
+    .summary-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .summary-box.visible { display: block; }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    .summary-row:last-child { border-bottom: none; }
+
+    .summary-row span:last-child {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* Comms section */
+    .comms-section {
+      background: linear-gradient(135deg, rgba(139,92,246,0.05), rgba(124,58,237,0.08));
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .comms-info h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .comms-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      margin-top: 3px;
+    }
+
+    .comms-badge {
+      background: rgba(139,92,246,0.15);
+      border: 1px solid rgba(139,92,246,0.3);
+      color: var(--comms);
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--comms);
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 0 60px rgba(139,92,246,0.2);
+    }
+
+    .modal h2 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .modal p {
+      color: var(--text-muted);
+      font-size: 13px;
+      font-family: var(--mono);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 600px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .footer-actions { flex-direction: column-reverse; align-items: stretch; }
+      .comms-section { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">🛡️</div>
+    <div class="header-text">
+      <h1>New <span>Incident</span> Report</h1>
+      <p>AgentBee Admin · Incident Management System</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Agent -->
+  <div class="section">
+    <div class="section-label">01 · Agent Identification</div>
+    <div class="agent-search-row">
+      <div class="field suggestions-wrap">
+        <label>Agent Name</label>
+        <input type="text" id="agentSearch" placeholder="Type to search agents…" autocomplete="off" />
+        <div class="suggestions" id="suggestions"></div>
+      </div>
+      <button class="btn-lookup" id="lookupBtn" onclick="lookupAgent()">
+        <span>🔍</span> Lookup
+      </button>
+    </div>
+    <div class="agent-card" id="agentCard">
+      <div style="font-size:28px;">🏢</div>
+      <div class="agent-card-info">
+        <div class="agent-card-name" id="agentCardName"></div>
+        <div class="agent-card-meta" id="agentCardMeta"></div>
+      </div>
+      <div>
+        <div class="agent-card-badge" id="agentCardTier"></div>
+      </div>
+    </div>
+    <div id="agentStatus" class="status-bar"></div>
+  </div>
+
+  <!-- SECTION 2: Incident Details -->
+  <div class="section">
+    <div class="section-label">02 · Incident Classification</div>
+    <div class="grid-3" style="margin-bottom:14px;">
+      <div class="field">
+        <label>Report Type</label>
+        <select id="reportType">
+          <option value="">— Select —</option>
+          <option value="Incident Report">Incident Report</option>
+          <option value="Aggregator Report">Aggregator Report</option>
+          <option value="Data Analysis">Data Analysis</option>
+          <option value="Incentivisation">Incentivisation</option>
+          <option value="Individual Report">Individual Report</option>
+          <option value="Kudos">Kudos</option>
+          <option value="Market Intelligence">Market Intelligence</option>
+          <option value="Privacy Flag">Privacy Flag</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select id="category">
+          <option value="">— Select —</option>
+          <option value="Conduct & Ethics">Conduct &amp; Ethics</option>
+          <option value="Privacy">Privacy</option>
+          <option value="Reputational">Reputational</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Source Type</label>
+        <select id="sourceType">
+          <option value="">— Select —</option>
+          <option value="agentbee_report">AgentBee Report</option>
+          <option value="agentbee_research">AgentBee Research</option>
+          <option value="web_source">Web Source</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-bottom:14px;">
+      <div class="field">
+        <label>Incident Date</label>
+        <input type="date" id="incidentDate" />
+      </div>
+      <div class="field">
+        <label>Severity Weight</label>
+        <select id="severityWeight">
+          <option value="">— Select —</option>
+          <option value="0">0 — Informational</option>
+          <option value="5">5 — Minimal</option>
+          <option value="10">10 — Low</option>
+          <option value="20">20 — Low-Medium</option>
+          <option value="30">30 — Medium</option>
+          <option value="40">40 — Medium-High</option>
+          <option value="50">50 — High</option>
+          <option value="60">60 — Significant</option>
+          <option value="70">70 — Serious</option>
+          <option value="80">80 — Severe</option>
+          <option value="90">90 — Critical</option>
+          <option value="100">100 — Maximum</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:14px;">
+      <label>Source URL (optional)</label>
+      <input type="url" id="sourceUrl" placeholder="https://…" />
+    </div>
+    <div class="field">
+      <label>Incident Description</label>
+      <textarea id="description" rows="5" placeholder="Provide a detailed description of the incident…"></textarea>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Institutions -->
+  <div class="section">
+    <div class="section-label">03 · Institution Linkage</div>
+    <div class="field">
+      <label>Institution Names (one per line)</label>
+      <textarea id="institutionsList" rows="6" placeholder="University of Melbourne&#10;Monash University&#10;RMIT University&#10;…"></textarea>
+    </div>
+    <button class="btn-analyse" id="analyseBtn" onclick="analyseInstitutions()" disabled>
+      <span id="analyseBtnIcon">⚡</span> Analyse Authorisation Status
+    </button>
+    <div id="instResults" style="display:none;">
+      <div class="inst-tags" id="instTags"></div>
+      <div class="legend">
+        <div class="legend-item"><span class="dot green"></span> Authorised Agent → Your Agents widget</div>
+        <div class="legend-item"><span class="dot red"></span> Not Authorised → Risk Radar widget</div>
+        <div class="legend-item"><span class="dot grey"></span> Institution not found</div>
+      </div>
+    </div>
+    <div id="instStatus" class="status-bar"></div>
+  </div>
+
+  <!-- SECTION 4: Summary preview -->
+  <div class="section">
+    <div class="section-label">04 · Submission Preview</div>
+    <div class="summary-box visible" id="summaryBox">
+      <div class="summary-row"><span>Agent</span><span id="sum-agent">—</span></div>
+      <div class="summary-row"><span>Report Type</span><span id="sum-type">—</span></div>
+      <div class="summary-row"><span>Category</span><span id="sum-cat">—</span></div>
+      <div class="summary-row"><span>Severity</span><span id="sum-sev">—</span></div>
+      <div class="summary-row"><span>Date</span><span id="sum-date">—</span></div>
+      <div class="summary-row"><span>Institutions (authorised)</span><span id="sum-auth">—</span></div>
+      <div class="summary-row"><span>Institutions (risk radar)</span><span id="sum-risk">—</span></div>
+    </div>
+    <div id="submitStatus" class="status-bar"></div>
+  </div>
+
+  <!-- COMMS SECTION -->
+  <div class="comms-section">
+    <div class="comms-info">
+      <h3>📡 Communications Protocol</h3>
+      <p>Trigger notification workflow for affected institutions once report is submitted.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+      <span class="comms-badge">coming soon</span>
+      <button class="btn btn-comms" id="commsBtn" onclick="sendComms()" disabled>
+        📡 Send Comms
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer actions -->
+  <div class="footer-actions">
+    <button class="btn btn-ghost" onclick="resetForm()">↺ Reset</button>
+    <div class="spacer"></div>
+    <button class="btn btn-submit" id="submitBtn" onclick="submitIncident()">
+      ✓ Submit Incident Report
+    </button>
+  </div>
+
+</div>
+
+<!-- Comms Modal -->
+<div class="modal-overlay" id="commsModal">
+  <div class="modal">
+    <h2>📡 Send Communications</h2>
+    <p>This will trigger the notification protocol for all linked institutions. This feature is reserved for future implementation.<br><br>Incident ID: <strong id="modalIncidentId">—</strong></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+      <button class="btn btn-comms" disabled>Send (Pending)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://mtatzzrbapftzwuxrcko.supabase.co';
+const SUPABASE_KEY = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10YXR6enJiYXBmdHp3dXhyY2tvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTg5NTksImV4cCI6MjA4OTc3NDk1OX0.qPUvwuA-bPhMm33QUT3VKE0H-Bv5zeBDSeSmqt4pCSU';
+
+// --- State ---
+let selectedAgent = null;
+let analysisResults = { authorised: [], risk: [], unknown: [] };
+let submittedIncidentId = null;
+let searchTimeout = null;
+
+// --- Date default ---
+document.getElementById('incidentDate').value = new Date().toISOString().split('T')[0];
+
+// --- Live preview update ---
+function updatePreview() {
+  document.getElementById('sum-agent').textContent = selectedAgent ? selectedAgent.agency_name : '—';
+  document.getElementById('sum-type').textContent = document.getElementById('reportType').value || '—';
+  document.getElementById('sum-cat').textContent = document.getElementById('category').value || '—';
+  const sw = document.getElementById('severityWeight').value;
+  document.getElementById('sum-sev').textContent = sw ? `${sw}` : '—';
+  document.getElementById('sum-date').textContent = document.getElementById('incidentDate').value || '—';
+  document.getElementById('sum-auth').textContent = analysisResults.authorised.length || '—';
+  document.getElementById('sum-risk').textContent = analysisResults.risk.length || '—';
+}
+
+['reportType','category','sourceType','severityWeight','incidentDate'].forEach(id => {
+  document.getElementById(id).addEventListener('change', updatePreview);
+});
+
+// --- Agent search ---
+const agentSearchInput = document.getElementById('agentSearch');
+const suggestionsEl = document.getElementById('suggestions');
+
+agentSearchInput.addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  const q = agentSearchInput.value.trim();
+  if (q.length < 2) { closeSuggestions(); return; }
+  searchTimeout = setTimeout(() => fetchAgentSuggestions(q), 280);
+});
+
+agentSearchInput.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSuggestions();
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.suggestions-wrap')) closeSuggestions();
+});
+
+async function fetchAgentSuggestions(q) {
+  const url = `${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country&limit=8&order=agency_name`;
+  try {
+    const res = await supabaseFetch(url);
+    const data = await res.json();
+    renderSuggestions(data);
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function renderSuggestions(items) {
+  if (!items || items.length === 0) { closeSuggestions(); return; }
+  suggestionsEl.innerHTML = items.map(a => `
+    <div class="suggestion-item" onclick="selectAgent(${JSON.stringify(a).replace(/"/g,'&quot;')})">
+      <div class="suggestion-name">${a.agency_name}</div>
+      <div class="suggestion-meta">${a.jurisdiction || ''} ${a.country ? '· ' + a.country : ''} · ${a.risk_tier || 'Unknown'} tier</div>
+    </div>
+  `).join('');
+  suggestionsEl.classList.add('open');
+}
+
+function closeSuggestions() {
+  suggestionsEl.classList.remove('open');
+  suggestionsEl.innerHTML = '';
+}
+
+function selectAgent(agent) {
+  selectedAgent = agent;
+  agentSearchInput.value = agent.agency_name;
+  closeSuggestions();
+  showAgentCard(agent);
+  document.getElementById('analyseBtn').disabled = false;
+  updatePreview();
+}
+
+async function lookupAgent() {
+  const q = agentSearchInput.value.trim();
+  if (!q) return;
+  setStatus('agentStatus', 'info', '⟳ Looking up agent…');
+  const url = `${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score&limit=6`;
+  try {
+    const res = await supabaseFetch(url);
+    const data = await res.json();
+    if (data.length === 0) {
+      setStatus('agentStatus', 'error', '✗ No agent found matching that name.');
+      hideAgentCard();
+    } else if (data.length === 1) {
+      selectAgent(data[0]);
+      clearStatus('agentStatus');
+    } else {
+      renderSuggestions(data);
+      setStatus('agentStatus', 'info', `${data.length} matches found — please select from the list.`);
+    }
+  } catch(e) {
+    setStatus('agentStatus', 'error', '✗ Lookup failed: ' + e.message);
+  }
+}
+
+function showAgentCard(agent) {
+  const card = document.getElementById('agentCard');
+  document.getElementById('agentCardName').textContent = agent.agency_name;
+  document.getElementById('agentCardMeta').textContent = [agent.jurisdiction, agent.country].filter(Boolean).join(' · ') + (agent.risk_score != null ? ` · Score: ${agent.risk_score}` : '');
+  document.getElementById('agentCardTier').textContent = agent.risk_tier || 'Unknown';
+  card.classList.add('visible');
+}
+
+function hideAgentCard() {
+  document.getElementById('agentCard').classList.remove('visible');
+  selectedAgent = null;
+}
+
+// --- Institution analysis ---
+async function analyseInstitutions() {
+  if (!selectedAgent) { setStatus('instStatus', 'error', '✗ Please select an agent first.'); return; }
+  const raw = document.getElementById('institutionsList').value.trim();
+  if (!raw) { setStatus('instStatus', 'error', '✗ Please enter at least one institution.'); return; }
+
+  const names = raw.split('\n').map(s => s.trim()).filter(Boolean);
+  const btn = document.getElementById('analyseBtn');
+  btn.disabled = true;
+  document.getElementById('analyseBtnIcon').textContent = '⟳';
+  setStatus('instStatus', 'info', `⟳ Analysing ${names.length} institution(s)…`);
+
+  analysisResults = { authorised: [], risk: [], unknown: [] };
+  const tags = [];
+
+  for (const name of names) {
+    // Find institution
+    const instUrl = `${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(name)}*&select=id,name&limit=1`;
+    const instRes = await supabaseFetch(instUrl);
+    const instData = await instRes.json();
+
+    if (!instData || instData.length === 0) {
+      analysisResults.unknown.push(name);
+      tags.push({ name, status: 'unknown', label: name });
+      continue;
+    }
+
+    const institution = instData[0];
+
+    // Check if agent is authorised for this institution
+    // Check agent_institution_links (agent → institution, is_active)
+    const linkUrl = `${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=eq.${selectedAgent.id}&institution_id=eq.${institution.id}&is_active=eq.true&select=agent_id&limit=1`;
+    const linkRes = await supabaseFetch(linkUrl);
+    const linkData = await linkRes.json();
+
+    const isAuthorised = linkData && linkData.length > 0;
+    if (isAuthorised) {
+      analysisResults.authorised.push({ name, institutionId: institution.id, institutionName: institution.name });
+      tags.push({ name: institution.name, status: 'authorised', label: institution.name });
+    } else {
+      analysisResults.risk.push({ name, institutionId: institution.id, institutionName: institution.name });
+      tags.push({ name: institution.name, status: 'risk', label: institution.name });
+    }
+  }
+
+  // Render tags
+  const tagsEl = document.getElementById('instTags');
+  tagsEl.innerHTML = tags.map(t => `
+    <span class="inst-tag ${t.status}">
+      <span class="dot ${t.status === 'authorised' ? 'green' : t.status === 'risk' ? 'red' : 'grey'}"></span>
+      ${t.label}
+    </span>
+  `).join('');
+  document.getElementById('instResults').style.display = 'block';
+
+  const summary = `✓ ${analysisResults.authorised.length} authorised · ${analysisResults.risk.length} risk radar · ${analysisResults.unknown.length} not found`;
+  setStatus('instStatus', 'success', summary);
+  btn.disabled = false;
+  document.getElementById('analyseBtnIcon').textContent = '⚡';
+  updatePreview();
+}
+
+// --- Submit ---
+async function submitIncident() {
+  if (!selectedAgent) { setStatus('submitStatus', 'error', '✗ Please select an agent.'); return; }
+  const reportType = document.getElementById('reportType').value;
+  const category = document.getElementById('category').value;
+  const sourceType = document.getElementById('sourceType').value;
+  const severityWeight = document.getElementById('severityWeight').value;
+  const incidentDate = document.getElementById('incidentDate').value;
+  const description = document.getElementById('description').value.trim();
+
+  if (!reportType || !category || !severityWeight || !incidentDate || !description) {
+    setStatus('submitStatus', 'error', '✗ Please complete all required fields (report type, category, severity, date, description).');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Submitting…';
+  setStatus('submitStatus', 'info', '⟳ Creating incident record…');
+
+  try {
+    // Insert incident
+    const incidentPayload = {
+      agent_id: selectedAgent.id,
+      incident_date: incidentDate,
+      category,
+      severity_weight: parseInt(severityWeight),
+      description,
+      source_type: sourceType || null,
+      report_type: reportType || null,
+      source_url: document.getElementById('sourceUrl').value.trim() || null,
+    };
+
+    const incRes = await supabaseFetch(`${SUPABASE_URL}/rest/v1/incidents`, {
+      method: 'POST',
+      headers: { 'Prefer': 'return=representation', 'Content-Type': 'application/json' },
+      body: JSON.stringify(incidentPayload)
+    });
+
+    if (!incRes.ok) {
+      const err = await incRes.json();
+      throw new Error(err.message || incRes.statusText);
+    }
+
+    const incidentData = await incRes.json();
+    const incidentId = incidentData[0].id;
+    submittedIncidentId = incidentId;
+
+    // Insert institution links
+    const allLinked = [...analysisResults.authorised, ...analysisResults.risk];
+    if (allLinked.length > 0) {
+      const links = allLinked.map(inst => ({
+        incident_id: incidentId,
+        institution_id: inst.institutionId,
+      }));
+      const linkRes = await supabaseFetch(`${SUPABASE_URL}/rest/v1/incident_institution_links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify(links)
+      });
+      if (!linkRes.ok) {
+        const err = await linkRes.json();
+        throw new Error('Incident created but institution links failed: ' + (err.message || linkRes.statusText));
+      }
+    }
+
+    setStatus('submitStatus', 'success', `✓ Incident created · ID: ${incidentId} · ${allLinked.length} institution(s) linked.`);
+    document.getElementById('commsBtn').disabled = false;
+    document.getElementById('modalIncidentId').textContent = incidentId;
+    btn.innerHTML = '✓ Submitted';
+    btn.style.background = 'var(--success)';
+
+  } catch(e) {
+    setStatus('submitStatus', 'error', '✗ ' + e.message);
+    btn.disabled = false;
+    btn.innerHTML = '✓ Submit Incident Report';
+  }
+}
+
+// --- Comms ---
+function sendComms() {
+  document.getElementById('commsModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('commsModal').classList.remove('open');
+}
+
+// --- Reset ---
+function resetForm() {
+  if (!confirm('Reset the form? All unsaved data will be lost.')) return;
+  selectedAgent = null;
+  analysisResults = { authorised: [], risk: [], unknown: [] };
+  submittedIncidentId = null;
+  document.getElementById('agentSearch').value = '';
+  hideAgentCard();
+  clearStatus('agentStatus');
+  ['reportType','category','sourceType','severityWeight'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('incidentDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('description').value = '';
+  document.getElementById('sourceUrl').value = '';
+  document.getElementById('institutionsList').value = '';
+  document.getElementById('instResults').style.display = 'none';
+  clearStatus('instStatus');
+  clearStatus('submitStatus');
+  document.getElementById('analyseBtn').disabled = true;
+  document.getElementById('commsBtn').disabled = true;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = false;
+  btn.innerHTML = '✓ Submit Incident Report';
+  btn.style.background = '';
+  updatePreview();
+}
+
+// --- Helpers ---
+function supabaseFetch(url, options = {}) {
+  return fetch(url, {
+    ...options,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      ...(options.headers || {}),
+    }
+  });
+}
+
+function setStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = `status-bar ${type}`;
+  el.textContent = msg;
+}
+
+function clearStatus(id) {
+  const el = document.getElementById(id);
+  el.className = 'status-bar';
+  el.textContent = '';
+}
+
+updatePreview();
+</script>
+</body>
+</html>
