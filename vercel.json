@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/auth.js": {
+      "runtime": "edge"
+    }
+  }
+}
