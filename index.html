@@ -19,101 +19,32 @@
     }
 
     .page { max-width: 780px; margin: 0 auto; }
-
     .page-header { margin-bottom: 32px; }
-
-    .breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: #9ca3af;
-      margin-bottom: 12px;
-    }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9ca3af; margin-bottom: 12px; }
     .breadcrumb span { color: #3b82f6; }
-
-    .page-header h1 {
-      font-size: 22px;
-      font-weight: 600;
-      color: #1a1d23;
-      letter-spacing: -0.3px;
-    }
-
+    .page-header h1 { font-size: 22px; font-weight: 600; color: #1a1d23; letter-spacing: -0.3px; }
     .page-header p { color: #6b7280; font-size: 13px; margin-top: 4px; }
 
-    .card {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 16px;
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #f3f4f6;
-    }
-
-    .step-badge {
-      width: 24px; height: 24px;
-      border-radius: 50%;
-      background: #eff6ff;
-      color: #3b82f6;
-      font-size: 11px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
+    .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; }
+    .step-badge { width: 24px; height: 24px; border-radius: 50%; background: #eff6ff; color: #3b82f6; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .card-header h2 { font-size: 14px; font-weight: 600; color: #1a1d23; }
 
     .field { display: flex; flex-direction: column; gap: 5px; }
-
     .field label { font-size: 12px; font-weight: 500; color: #374151; }
-
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      padding: 9px 12px;
-      background: #ffffff;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #1a1d23;
-      font-family: inherit;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      outline: none;
-      -webkit-appearance: none;
-      appearance: none;
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 9px 12px; background: #ffffff; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 13px; color: #1a1d23; font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s; outline: none;
+      -webkit-appearance: none; appearance: none;
     }
-
     .field select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 4.5L11 1' stroke='%239ca3af' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 11px center;
-      padding-right: 32px;
-      cursor: pointer;
+      background-repeat: no-repeat; background-position: right 11px center; padding-right: 32px; cursor: pointer;
     }
-
     .field select option { background: #fff; color: #1a1d23; }
-
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-    }
-
-    .field input::placeholder,
-    .field textarea::placeholder { color: #9ca3af; }
-
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .field input::placeholder, .field textarea::placeholder { color: #9ca3af; }
     .field textarea { resize: vertical; line-height: 1.6; }
 
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -122,121 +53,32 @@
 
     .agent-search-wrap { display: flex; gap: 8px; align-items: flex-end; }
     .agent-search-wrap .field { flex: 1; }
-
-    .btn-lookup {
-      padding: 0 16px;
-      height: 38px;
-      background: #f9fafb;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #374151;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s;
-      font-family: inherit;
-      display: flex;
-      align-items: center;
-    }
-
+    .btn-lookup { padding: 0 16px; height: 38px; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; white-space: nowrap; transition: all 0.15s; font-family: inherit; display: flex; align-items: center; }
     .btn-lookup:hover { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
 
     .suggestions-outer { position: relative; }
-
-    .suggestions-drop {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0; right: 0;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      z-index: 200;
-      overflow: hidden;
-      display: none;
-    }
-
+    .suggestions-drop { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); z-index: 200; overflow: hidden; display: none; }
     .suggestions-drop.open { display: block; }
-
-    .suggestion-item {
-      padding: 10px 14px;
-      cursor: pointer;
-      border-bottom: 1px solid #f3f4f6;
-      transition: background 0.1s;
-    }
-
+    .suggestion-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f3f4f6; transition: background 0.1s; }
     .suggestion-item:last-child { border-bottom: none; }
     .suggestion-item:hover { background: #f9fafb; }
-
     .sug-name { font-size: 13px; font-weight: 500; color: #1a1d23; }
     .sug-meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
 
-    .agent-resolved {
-      display: none;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 9px;
-      margin-top: 10px;
-    }
-
+    .agent-resolved { display: none; align-items: center; gap: 12px; padding: 12px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9px; margin-top: 10px; }
     .agent-resolved.visible { display: flex; }
-
-    .agent-avatar {
-      width: 36px; height: 36px;
-      border-radius: 8px;
-      background: #dcfce7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      flex-shrink: 0;
-      color: #15803d;
-      font-weight: 600;
-    }
-
+    .agent-avatar { width: 36px; height: 36px; border-radius: 8px; background: #dcfce7; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; color: #15803d; font-weight: 600; }
     .agent-resolved-name { font-weight: 600; font-size: 13px; color: #15803d; }
     .agent-resolved-meta { font-size: 11px; color: #4ade80; margin-top: 2px; }
+    .tier-pill { margin-left: auto; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; white-space: nowrap; }
 
-    .tier-pill {
-      margin-left: auto;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 500;
-      background: #dcfce7;
-      color: #15803d;
-      border: 1px solid #bbf7d0;
-      white-space: nowrap;
-    }
-
-    .status {
-      font-size: 12px;
-      padding: 9px 12px;
-      border-radius: 7px;
-      margin-top: 10px;
-      display: none;
-    }
-
+    .status { font-size: 12px; padding: 9px 12px; border-radius: 7px; margin-top: 10px; display: none; }
     .status.info { display: block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
     .status.success { display: block; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
     .status.error { display: block; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
     .inst-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-
-    .inst-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 500;
-    }
-
+    .inst-tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
     .inst-tag.auth { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
     .inst-tag.risk { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
     .inst-tag.unknown { background: #f9fafb; border: 1px solid #e5e7eb; color: #6b7280; }
@@ -246,47 +88,15 @@
     .dot.red { background: #ef4444; }
     .dot.grey { background: #9ca3af; }
 
-    .legend {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      font-size: 11px;
-      color: #6b7280;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid #f3f4f6;
-    }
-
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 11px; color: #6b7280; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; }
     .legend-item { display: flex; align-items: center; gap: 5px; }
 
-    .btn-analyse {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 12px;
-      padding: 8px 14px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 500;
-      color: #374151;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.15s;
-    }
-
+    .btn-analyse { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 8px 14px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 7px; font-size: 12px; font-weight: 500; color: #374151; cursor: pointer; font-family: inherit; transition: all 0.15s; }
     .btn-analyse:hover:not(:disabled) { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
     .btn-analyse:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-    .summary-item {
-      background: #f9fafb;
-      border-radius: 8px;
-      padding: 10px 12px;
-    }
-
+    .summary-item { background: #f9fafb; border-radius: 8px; padding: 10px 12px; }
     .summary-label { font-size: 11px; color: #9ca3af; margin-bottom: 3px; }
     .summary-val { font-size: 13px; font-weight: 500; color: #1a1d23; }
 
@@ -302,93 +112,49 @@
       gap: 16px;
       margin-bottom: 16px;
     }
-
     .comms-banner h3 { font-size: 14px; font-weight: 600; color: #1a1d23; }
     .comms-banner p { font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .comms-banner.flagged { border-left-color: #22c55e; background: #f0fdf4; border-color: #bbf7d0; }
+    .comms-banner.flagged h3 { color: #15803d; }
+    .comms-banner.flagged p { color: #4ade80; }
 
-    .badge-soon {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 20px;
-      background: #f3e8ff;
-      color: #7c3aed;
-      border: 1px solid #e9d5ff;
-      white-space: nowrap;
-    }
-
-    .btn {
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      border: none;
-      transition: all 0.15s;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-    }
-
+    .btn { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; border: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 7px; }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
     .btn-secondary { background: #f9fafb; color: #374151; border: 1px solid #e5e7eb; }
     .btn-secondary:hover:not(:disabled) { background: #f3f4f6; }
-
     .btn-comms { background: #7c3aed; color: #fff; }
     .btn-comms:hover:not(:disabled) { background: #6d28d9; }
-
+    .btn-comms-done { background: #15803d; color: #fff; }
     .btn-primary { background: #1d4ed8; color: #fff; padding: 11px 24px; font-size: 14px; }
     .btn-primary:hover:not(:disabled) { background: #1e40af; }
-
     .btn-success { background: #15803d; color: #fff; padding: 11px 24px; font-size: 14px; }
 
-    .footer-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 8px;
-    }
+    .footer-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; }
 
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.3);
-      z-index: 999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 999; display: none; align-items: center; justify-content: center; }
     .modal-backdrop.open { display: flex; }
-
-    .modal-box {
-      background: #fff;
-      border-radius: 14px;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-      padding: 28px;
-      max-width: 440px;
-      width: 90%;
-    }
-
+    .modal-box { background: #fff; border-radius: 14px; border: 1px solid #e5e7eb; box-shadow: 0 20px 60px rgba(0,0,0,0.15); padding: 28px; max-width: 520px; width: 90%; }
     .modal-box h2 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-    .modal-box p { font-size: 13px; color: #6b7280; line-height: 1.6; margin-bottom: 20px; }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-box p { font-size: 13px; color: #6b7280; line-height: 1.6; margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 
-    .spinner {
-      width: 13px; height: 13px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      display: inline-block;
+    .summary-preview {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 13px;
+      color: #374151;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      min-height: 80px;
+      white-space: pre-wrap;
     }
+    .summary-preview.loading { color: #9ca3af; font-style: italic; }
+    .summary-label-sm { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin-bottom: 6px; }
 
+    .spinner { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+    .spinner-purple { border-color: rgba(124,58,237,0.2); border-top-color: #7c3aed; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 580px) {
@@ -398,144 +164,24 @@
       .comms-banner { flex-direction: column; align-items: flex-start; }
     }
 
-    /* Auth screen */
-    #auth-screen {
-      position: fixed;
-      inset: 0;
-      background: #f0ede8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      padding: 20px;
-    }
-
+    #auth-screen { position: fixed; inset: 0; background: #f0ede8; display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
     #auth-screen.hidden { display: none; }
-
-    .auth-card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 36px 40px 40px;
-      width: 100%;
-      max-width: 480px;
-      text-align: left;
-    }
-
-    .auth-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-
-    .auth-brand-icon {
-      width: 44px;
-      height: 44px;
-      background: #eff6ff;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-
-    .auth-brand-name {
-      font-size: 15px;
-      font-weight: 600;
-      color: #1a1d23;
-      line-height: 1.2;
-    }
-
-    .auth-brand-sub {
-      font-size: 12px;
-      color: #6b7280;
-      margin-top: 2px;
-    }
-
-    .auth-card h1 {
-      font-size: 26px;
-      font-weight: 700;
-      color: #1a1d23;
-      margin-bottom: 6px;
-      letter-spacing: -0.3px;
-    }
-
-    .auth-card > p {
-      font-size: 14px;
-      color: #6b7280;
-      margin-bottom: 28px;
-    }
-
-    .auth-field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 14px;
-    }
-
-    .auth-field label {
-      font-size: 11px;
-      font-weight: 600;
-      color: #374151;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .auth-field input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      font-size: 14px;
-      font-family: inherit;
-      color: #1a1d23;
-      outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      background: #fff;
-    }
-
+    .auth-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 36px 40px 40px; width: 100%; max-width: 480px; text-align: left; }
+    .auth-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .auth-brand-icon { width: 44px; height: 44px; background: #eff6ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .auth-brand-name { font-size: 15px; font-weight: 600; color: #1a1d23; line-height: 1.2; }
+    .auth-brand-sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .auth-card h1 { font-size: 26px; font-weight: 700; color: #1a1d23; margin-bottom: 6px; letter-spacing: -0.3px; }
+    .auth-card > p { font-size: 14px; color: #6b7280; margin-bottom: 28px; }
+    .auth-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .auth-field label { font-size: 11px; font-weight: 600; color: #374151; letter-spacing: 0.08em; text-transform: uppercase; }
+    .auth-field input { width: 100%; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; font-family: inherit; color: #1a1d23; outline: none; transition: border-color 0.15s, box-shadow 0.15s; background: #fff; }
     .auth-field input::placeholder { color: #9ca3af; }
-
-    .auth-field input:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-    }
-
-    .auth-submit {
-      width: 100%;
-      padding: 14px;
-      background: #8b9ab0;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 4px;
-    }
-
+    .auth-field input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .auth-submit { width: 100%; padding: 14px; background: #8b9ab0; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; }
     .auth-submit:hover:not(:disabled) { background: #6b7a8d; }
     .auth-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .auth-error {
-      font-size: 12px;
-      color: #b91c1c;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 7px;
-      padding: 8px 12px;
-      margin-top: 12px;
-      display: none;
-    }
-
+    .auth-error { font-size: 12px; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; border-radius: 7px; padding: 8px 12px; margin-top: 12px; display: none; }
     .auth-error.visible { display: block; }
   </style>
 </head>
@@ -732,15 +378,14 @@
     <div class="status" id="submitStatus"></div>
   </div>
 
-  <!-- Comms -->
-  <div class="comms-banner">
+  <!-- Comms banner -->
+  <div class="comms-banner" id="commsBanner">
     <div>
-      <h3>Communications protocol</h3>
-      <p>Trigger notification workflow for affected institutions once the report is submitted.</p>
+      <h3>Email notification protocol</h3>
+      <p id="commsBannerText">Flag this incident for inclusion in the weekly non-client email digest once the report is submitted.</p>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-      <span class="badge-soon">Coming soon</span>
-      <button class="btn btn-comms" id="commsBtn" onclick="openCommsModal()" disabled>Send comms</button>
+      <button class="btn btn-comms" id="commsBtn" onclick="openCommsModal()" disabled>Add to email protocol</button>
     </div>
   </div>
 
@@ -749,18 +394,27 @@
     <button class="btn btn-primary" id="submitBtn" onclick="submitIncident()">Submit report</button>
   </div>
 
-</div>
-
 </div><!-- end main-content -->
 
-<!-- Modal -->
+<!-- Email protocol modal -->
 <div class="modal-backdrop" id="commsModal">
   <div class="modal-box">
-    <h2>Send communications</h2>
-    <p>This will trigger the notification protocol for all linked institutions. This feature is reserved for future implementation.<br><br>Incident ID: <strong id="modalIncidentId">—</strong></p>
+    <h2>Add to email notification protocol</h2>
+    <p>AgentBee will generate a de-identified summary of this incident for inclusion in the weekly non-client email digest. Review and edit the summary below before confirming.</p>
+
+    <div class="summary-label-sm">De-identified summary</div>
+    <div class="summary-preview loading" id="summaryPreview">Generating summary…</div>
+
+    <div class="field">
+      <label for="summaryEdit">Edit summary if needed</label>
+      <textarea id="summaryEdit" rows="4" placeholder="Summary will appear here…" style="font-size:13px;line-height:1.6;"></textarea>
+    </div>
+
     <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeCommsModal()">Close</button>
-      <button class="btn btn-comms" disabled>Send (pending)</button>
+      <button class="btn btn-secondary" onclick="closeCommsModal()">Cancel</button>
+      <button class="btn btn-comms" id="confirmCommsBtn" onclick="confirmEmailProtocol()" disabled>
+        Confirm &amp; flag for email
+      </button>
     </div>
   </div>
 </div>
@@ -939,7 +593,6 @@ async function submitIncident() {
 
     setStatus('submitStatus', 'success', `Report submitted — ID: ${incidentId} · ${allLinked.length} institution(s) linked.`);
     document.getElementById('commsBtn').disabled = false;
-    document.getElementById('modalIncidentId').textContent = incidentId;
     btn.className = 'btn btn-success';
     btn.innerHTML = '✓ Submitted';
   } catch(e) {
@@ -949,8 +602,102 @@ async function submitIncident() {
   }
 }
 
-function openCommsModal() { document.getElementById('commsModal').classList.add('open'); }
-function closeCommsModal() { document.getElementById('commsModal').classList.remove('open'); }
+// ── Email protocol modal ───────────────────────────────────────
+async function openCommsModal() {
+  document.getElementById('commsModal').classList.add('open');
+  document.getElementById('summaryPreview').className = 'summary-preview loading';
+  document.getElementById('summaryPreview').textContent = 'Generating de-identified summary…';
+  document.getElementById('summaryEdit').value = '';
+  document.getElementById('confirmCommsBtn').disabled = true;
+
+  const description = document.getElementById('description').value.trim();
+  const category    = document.getElementById('category').value;
+  const severity    = document.getElementById('severityWeight').value;
+  const reportType  = document.getElementById('reportType').value;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `You are helping prepare a de-identified incident summary for a weekly email digest sent to non-client educational institutions. The email informs them about incidents in the international education agent sector that may be relevant to their risk management.
+
+Please rewrite the following incident description in a de-identified way:
+- Remove all agent names, company names, and any identifying details
+- Preserve the nature, category, and severity of the incident
+- Write in plain, professional language suitable for a compliance/risk email
+- Keep it to 2-3 sentences maximum
+- Do not use phrases like "an agent" — instead use the sector context e.g. "an education agent operating in [region if mentioned]"
+
+Incident details:
+- Category: ${category}
+- Report type: ${reportType}
+- Severity: ${severity}/100
+- Description: ${description}
+
+Respond with only the de-identified summary text, no preamble or explanation.`
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const summary = data.content?.[0]?.text || '';
+
+    document.getElementById('summaryPreview').className = 'summary-preview';
+    document.getElementById('summaryPreview').textContent = summary;
+    document.getElementById('summaryEdit').value = summary;
+    document.getElementById('confirmCommsBtn').disabled = false;
+  } catch(e) {
+    document.getElementById('summaryPreview').className = 'summary-preview';
+    document.getElementById('summaryPreview').textContent = 'Could not generate summary automatically. Please write one in the field below.';
+    document.getElementById('confirmCommsBtn').disabled = false;
+  }
+}
+
+function closeCommsModal() {
+  document.getElementById('commsModal').classList.remove('open');
+}
+
+async function confirmEmailProtocol() {
+  if (!submittedIncidentId) return;
+  const summary = document.getElementById('summaryEdit').value.trim();
+  if (!summary) { alert('Please provide a summary before confirming.'); return; }
+
+  const btn = document.getElementById('confirmCommsBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner spinner-purple"></span> Saving…';
+
+  try {
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/incidents?id=eq.${submittedIncidentId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ include_in_email: true, email_summary: summary })
+    });
+
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.statusText); }
+
+    closeCommsModal();
+
+    // Update banner to flagged state
+    const banner = document.getElementById('commsBanner');
+    banner.classList.add('flagged');
+    banner.querySelector('h3').textContent = '✓ Added to email notification protocol';
+    banner.querySelector('p').textContent = 'This incident will be included in the next weekly non-client email digest.';
+    const commsBtn = document.getElementById('commsBtn');
+    commsBtn.className = 'btn btn-comms-done';
+    commsBtn.textContent = '✓ Flagged for email';
+    commsBtn.disabled = true;
+
+  } catch(e) {
+    alert('Failed to save: ' + e.message);
+    btn.disabled = false;
+    btn.innerHTML = 'Confirm &amp; flag for email';
+  }
+}
 
 function resetForm() {
   if (!confirm('Reset the form?')) return;
@@ -970,6 +717,12 @@ function resetForm() {
   clearStatus('submitStatus');
   document.getElementById('analyseBtn').disabled = true;
   document.getElementById('commsBtn').disabled = true;
+  document.getElementById('commsBtn').className = 'btn btn-comms';
+  document.getElementById('commsBtn').textContent = 'Add to email protocol';
+  const banner = document.getElementById('commsBanner');
+  banner.classList.remove('flagged');
+  banner.querySelector('h3').textContent = 'Email notification protocol';
+  banner.querySelector('p').textContent = 'Flag this incident for inclusion in the weekly non-client email digest once the report is submitted.';
   const btn = document.getElementById('submitBtn');
   btn.disabled = false;
   btn.className = 'btn btn-primary';
@@ -996,7 +749,7 @@ function clearStatus(id) {
 
 updatePreview();
 
-// --- Auth ---
+// Auth
 (function() {
   if (sessionStorage.getItem('ab-admin-auth') === 'true') {
     document.getElementById('auth-screen').classList.add('hidden');
