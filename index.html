@@ -616,36 +616,14 @@ async function openCommsModal() {
   const reportType  = document.getElementById('reportType').value;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('/api/summarise', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: `You are helping prepare a de-identified incident summary for a weekly email digest sent to non-client educational institutions. The email informs them about incidents in the international education agent sector that may be relevant to their risk management.
-
-Please rewrite the following incident description in a de-identified way:
-- Remove all agent names, company names, and any identifying details
-- Preserve the nature, category, and severity of the incident
-- Write in plain, professional language suitable for a compliance/risk email
-- Keep it to 2-3 sentences maximum
-- Do not use phrases like "an agent" — instead use the sector context e.g. "an education agent operating in [region if mentioned]"
-
-Incident details:
-- Category: ${category}
-- Report type: ${reportType}
-- Severity: ${severity}/100
-- Description: ${description}
-
-Respond with only the de-identified summary text, no preamble or explanation.`
-        }]
-      })
+      body: JSON.stringify({ description, category, severity, reportType })
     });
 
     const data = await response.json();
-    const summary = data.content?.[0]?.text || '';
+    const summary = data.summary || '';
 
     document.getElementById('summaryPreview').className = 'summary-preview';
     document.getElementById('summaryPreview').textContent = summary;
