@@ -19,32 +19,101 @@
     }
 
     .page { max-width: 780px; margin: 0 auto; }
+
     .page-header { margin-bottom: 32px; }
-    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9ca3af; margin-bottom: 12px; }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 12px;
+    }
     .breadcrumb span { color: #3b82f6; }
-    .page-header h1 { font-size: 22px; font-weight: 600; color: #1a1d23; letter-spacing: -0.3px; }
+
+    .page-header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1a1d23;
+      letter-spacing: -0.3px;
+    }
+
     .page-header p { color: #6b7280; font-size: 13px; margin-top: 4px; }
 
-    .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
-    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; }
-    .step-badge { width: 24px; height: 24px; border-radius: 50%; background: #eff6ff; color: #3b82f6; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .step-badge {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: #eff6ff;
+      color: #3b82f6;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
     .card-header h2 { font-size: 14px; font-weight: 600; color: #1a1d23; }
 
     .field { display: flex; flex-direction: column; gap: 5px; }
+
     .field label { font-size: 12px; font-weight: 500; color: #374151; }
-    .field input, .field select, .field textarea {
-      width: 100%; padding: 9px 12px; background: #ffffff; border: 1px solid #d1d5db;
-      border-radius: 8px; font-size: 13px; color: #1a1d23; font-family: inherit;
-      transition: border-color 0.15s, box-shadow 0.15s; outline: none;
-      -webkit-appearance: none; appearance: none;
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 9px 12px;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #1a1d23;
+      font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
     }
+
     .field select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 4.5L11 1' stroke='%239ca3af' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 11px center; padding-right: 32px; cursor: pointer;
+      background-repeat: no-repeat;
+      background-position: right 11px center;
+      padding-right: 32px;
+      cursor: pointer;
     }
+
     .field select option { background: #fff; color: #1a1d23; }
-    .field input:focus, .field select:focus, .field textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-    .field input::placeholder, .field textarea::placeholder { color: #9ca3af; }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder { color: #9ca3af; }
+
     .field textarea { resize: vertical; line-height: 1.6; }
 
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -53,32 +122,121 @@
 
     .agent-search-wrap { display: flex; gap: 8px; align-items: flex-end; }
     .agent-search-wrap .field { flex: 1; }
-    .btn-lookup { padding: 0 16px; height: 38px; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; white-space: nowrap; transition: all 0.15s; font-family: inherit; display: flex; align-items: center; }
+
+    .btn-lookup {
+      padding: 0 16px;
+      height: 38px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+    }
+
     .btn-lookup:hover { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
 
     .suggestions-outer { position: relative; }
-    .suggestions-drop { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); z-index: 200; overflow: hidden; display: none; }
+
+    .suggestions-drop {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      z-index: 200;
+      overflow: hidden;
+      display: none;
+    }
+
     .suggestions-drop.open { display: block; }
-    .suggestion-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f3f4f6; transition: background 0.1s; }
+
+    .suggestion-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #f3f4f6;
+      transition: background 0.1s;
+    }
+
     .suggestion-item:last-child { border-bottom: none; }
     .suggestion-item:hover { background: #f9fafb; }
+
     .sug-name { font-size: 13px; font-weight: 500; color: #1a1d23; }
     .sug-meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
 
-    .agent-resolved { display: none; align-items: center; gap: 12px; padding: 12px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9px; margin-top: 10px; }
+    .agent-resolved {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 9px;
+      margin-top: 10px;
+    }
+
     .agent-resolved.visible { display: flex; }
-    .agent-avatar { width: 36px; height: 36px; border-radius: 8px; background: #dcfce7; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; color: #15803d; font-weight: 600; }
+
+    .agent-avatar {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      background: #dcfce7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+      color: #15803d;
+      font-weight: 600;
+    }
+
     .agent-resolved-name { font-weight: 600; font-size: 13px; color: #15803d; }
     .agent-resolved-meta { font-size: 11px; color: #4ade80; margin-top: 2px; }
-    .tier-pill { margin-left: auto; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; white-space: nowrap; }
 
-    .status { font-size: 12px; padding: 9px 12px; border-radius: 7px; margin-top: 10px; display: none; }
+    .tier-pill {
+      margin-left: auto;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      white-space: nowrap;
+    }
+
+    .status {
+      font-size: 12px;
+      padding: 9px 12px;
+      border-radius: 7px;
+      margin-top: 10px;
+      display: none;
+    }
+
     .status.info { display: block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
     .status.success { display: block; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
     .status.error { display: block; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
     .inst-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-    .inst-tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+
+    .inst-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
     .inst-tag.auth { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
     .inst-tag.risk { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
     .inst-tag.unknown { background: #f9fafb; border: 1px solid #e5e7eb; color: #6b7280; }
@@ -88,15 +246,47 @@
     .dot.red { background: #ef4444; }
     .dot.grey { background: #9ca3af; }
 
-    .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 11px; color: #6b7280; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; }
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #f3f4f6;
+    }
+
     .legend-item { display: flex; align-items: center; gap: 5px; }
 
-    .btn-analyse { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 8px 14px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 7px; font-size: 12px; font-weight: 500; color: #374151; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .btn-analyse {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 8px 14px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #374151;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
     .btn-analyse:hover:not(:disabled) { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
     .btn-analyse:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .summary-item { background: #f9fafb; border-radius: 8px; padding: 10px 12px; }
+
+    .summary-item {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
     .summary-label { font-size: 11px; color: #9ca3af; margin-bottom: 3px; }
     .summary-val { font-size: 13px; font-weight: 500; color: #1a1d23; }
 
@@ -112,49 +302,93 @@
       gap: 16px;
       margin-bottom: 16px;
     }
+
     .comms-banner h3 { font-size: 14px; font-weight: 600; color: #1a1d23; }
     .comms-banner p { font-size: 12px; color: #6b7280; margin-top: 2px; }
-    .comms-banner.flagged { border-left-color: #22c55e; background: #f0fdf4; border-color: #bbf7d0; }
-    .comms-banner.flagged h3 { color: #15803d; }
-    .comms-banner.flagged p { color: #4ade80; }
 
-    .btn { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; border: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 7px; }
+    .badge-soon {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: #f3e8ff;
+      color: #7c3aed;
+      border: 1px solid #e9d5ff;
+      white-space: nowrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
     .btn-secondary { background: #f9fafb; color: #374151; border: 1px solid #e5e7eb; }
     .btn-secondary:hover:not(:disabled) { background: #f3f4f6; }
+
     .btn-comms { background: #7c3aed; color: #fff; }
     .btn-comms:hover:not(:disabled) { background: #6d28d9; }
-    .btn-comms-done { background: #15803d; color: #fff; }
+
     .btn-primary { background: #1d4ed8; color: #fff; padding: 11px 24px; font-size: 14px; }
     .btn-primary:hover:not(:disabled) { background: #1e40af; }
+
     .btn-success { background: #15803d; color: #fff; padding: 11px 24px; font-size: 14px; }
 
-    .footer-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; }
-
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 999; display: none; align-items: center; justify-content: center; }
-    .modal-backdrop.open { display: flex; }
-    .modal-box { background: #fff; border-radius: 14px; border: 1px solid #e5e7eb; box-shadow: 0 20px 60px rgba(0,0,0,0.15); padding: 28px; max-width: 520px; width: 90%; }
-    .modal-box h2 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-    .modal-box p { font-size: 13px; color: #6b7280; line-height: 1.6; margin-bottom: 16px; }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-
-    .summary-preview {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 14px;
-      font-size: 13px;
-      color: #374151;
-      line-height: 1.6;
-      margin-bottom: 16px;
-      min-height: 80px;
-      white-space: pre-wrap;
+    .footer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
     }
-    .summary-preview.loading { color: #9ca3af; font-style: italic; }
-    .summary-label-sm { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin-bottom: 6px; }
 
-    .spinner { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
-    .spinner-purple { border-color: rgba(124,58,237,0.2); border-top-color: #7c3aed; }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      padding: 28px;
+      max-width: 440px;
+      width: 90%;
+    }
+
+    .modal-box h2 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .modal-box p { font-size: 13px; color: #6b7280; line-height: 1.6; margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    .spinner {
+      width: 13px; height: 13px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
+
     @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 580px) {
@@ -164,24 +398,369 @@
       .comms-banner { flex-direction: column; align-items: flex-start; }
     }
 
-    #auth-screen { position: fixed; inset: 0; background: #f0ede8; display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+    /* Missing data panel */
+    .missing-panel {
+      margin-top: 16px;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .missing-panel-header {
+      background: #fffbeb;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #92400e;
+      border-bottom: 1px solid #fde68a;
+    }
+
+    .missing-inst-row {
+      padding: 14px;
+      border-bottom: 1px solid #f3f4f6;
+      background: #fff;
+    }
+
+    .missing-inst-row:last-child { border-bottom: none; }
+
+    .missing-inst-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a1d23;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .missing-fields-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .missing-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .missing-field label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #9ca3af;
+    }
+
+    .missing-field input,
+    .missing-field select {
+      padding: 7px 10px;
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #1a1d23;
+      background: #fffbeb;
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .missing-field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 3.5L9 1' stroke='%239ca3af' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 26px;
+      cursor: pointer;
+    }
+
+    .missing-field input:focus,
+    .missing-field select:focus {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 2px rgba(245,158,11,0.15);
+    }
+
+    .missing-field input.filled,
+    .missing-field select.filled {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .btn-save-inst {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 10px;
+      padding: 6px 12px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #15803d;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .btn-save-inst:hover:not(:disabled) { background: #dcfce7; }
+    .btn-save-inst:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .save-inst-status {
+      font-size: 11px;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .save-inst-status.ok { display: block; color: #15803d; }
+    .save-inst-status.err { display: block; color: #b91c1c; }
+
+    /* Handoff card import */
+    .handoff-zone {
+      background: #fff;
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .handoff-zone.populated {
+      border-style: solid;
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .handoff-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .handoff-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .handoff-zone textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      color: #374151;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
+      line-height: 1.6;
+      min-height: 80px;
+    }
+
+    .handoff-zone textarea:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
+    }
+
+    .handoff-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-parse {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: #1d4ed8;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-parse:hover { background: #1e40af; }
+
+    .btn-clear-handoff {
+      padding: 8px 12px;
+      background: transparent;
+      color: #9ca3af;
+      border: 1px solid #e5e7eb;
+      border-radius: 7px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-clear-handoff:hover { color: #ef4444; border-color: #fca5a5; }
+
+    .parse-result {
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .parse-result.ok { display: block; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .parse-result.warn { display: block; background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+
+    #auth-screen {
+      position: fixed;
+      inset: 0;
+      background: #f0ede8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
     #auth-screen.hidden { display: none; }
-    .auth-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 36px 40px 40px; width: 100%; max-width: 480px; text-align: left; }
-    .auth-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-    .auth-brand-icon { width: 44px; height: 44px; background: #eff6ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .auth-brand-name { font-size: 15px; font-weight: 600; color: #1a1d23; line-height: 1.2; }
-    .auth-brand-sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
-    .auth-card h1 { font-size: 26px; font-weight: 700; color: #1a1d23; margin-bottom: 6px; letter-spacing: -0.3px; }
-    .auth-card > p { font-size: 14px; color: #6b7280; margin-bottom: 28px; }
-    .auth-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-    .auth-field label { font-size: 11px; font-weight: 600; color: #374151; letter-spacing: 0.08em; text-transform: uppercase; }
-    .auth-field input { width: 100%; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; font-family: inherit; color: #1a1d23; outline: none; transition: border-color 0.15s, box-shadow 0.15s; background: #fff; }
+
+    .auth-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 36px 40px 40px;
+      width: 100%;
+      max-width: 480px;
+      text-align: left;
+    }
+
+    .auth-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .auth-brand-icon {
+      width: 44px;
+      height: 44px;
+      background: #eff6ff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .auth-brand-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1d23;
+      line-height: 1.2;
+    }
+
+    .auth-brand-sub {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    .auth-card h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    .auth-card > p {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 28px;
+    }
+
+    .auth-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .auth-field label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #374151;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .auth-field input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1a1d23;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      background: #fff;
+    }
+
     .auth-field input::placeholder { color: #9ca3af; }
-    .auth-field input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-    .auth-submit { width: 100%; padding: 14px; background: #8b9ab0; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; }
+
+    .auth-field input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    .auth-submit {
+      width: 100%;
+      padding: 14px;
+      background: #8b9ab0;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
     .auth-submit:hover:not(:disabled) { background: #6b7a8d; }
     .auth-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-    .auth-error { font-size: 12px; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; border-radius: 7px; padding: 8px 12px; margin-top: 12px; display: none; }
+
+    .auth-error {
+      font-size: 12px;
+      color: #b91c1c;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 7px;
+      padding: 8px 12px;
+      margin-top: 12px;
+      display: none;
+    }
+
     .auth-error.visible { display: block; }
   </style>
 </head>
@@ -218,6 +797,22 @@
     </div>
     <h1>New Incident Report</h1>
     <p>Create a new incident or report and link it to affected institutions.</p>
+  </div>
+
+  <!-- 0. Handoff card import -->
+  <div class="handoff-zone" id="handoffZone">
+    <div class="handoff-header">
+      <div class="handoff-title">
+        📋 Import from handoff card
+        <span style="font-size:11px;font-weight:400;color:#9ca3af;">— paste the card from the report generation widget to pre-populate all fields</span>
+      </div>
+    </div>
+    <textarea id="handoffInput" rows="5" placeholder="Paste your INCIDENT WIDGET HANDOFF card here…"></textarea>
+    <div class="handoff-actions">
+      <button class="btn-parse" onclick="parseHandoff()">⚡ Import & populate fields</button>
+      <button class="btn-clear-handoff" onclick="clearHandoff()">Clear</button>
+    </div>
+    <div class="parse-result" id="parseResult"></div>
   </div>
 
   <!-- 1. Agent -->
@@ -317,7 +912,11 @@
       <label>Incident description</label>
       <textarea id="description" rows="5" placeholder="Describe the incident in detail…"></textarea>
     </div>
-  </div>
+    <div style="height:14px;"></div>
+    <div class="field" style="background:#f8faff;border:1px solid #dbeafe;border-radius:9px;padding:14px;">
+      <label style="color:#1d4ed8;">De-identified summary <span style="font-weight:400;color:#9ca3af;">— sent to non-client institutions (Cold, Warm, Former Client etc.)</span></label>
+      <textarea id="deidentifiedSummary" rows="4" placeholder="Write a summary that does not identify the agent — this will be shared with institutions that are not current clients…" style="margin-top:6px;background:#fff;border-color:#bfdbfe;"></textarea>
+    </div>
 
   <!-- 3. Institutions -->
   <div class="card">
@@ -340,6 +939,7 @@
         <div class="legend-item"><span class="dot grey"></span> Institution not found</div>
       </div>
     </div>
+    <div id="missingDataPanel" style="display:none;"></div>
     <div class="status" id="instStatus"></div>
   </div>
 
@@ -378,14 +978,15 @@
     <div class="status" id="submitStatus"></div>
   </div>
 
-  <!-- Comms banner -->
-  <div class="comms-banner" id="commsBanner">
+  <!-- Comms -->
+  <div class="comms-banner">
     <div>
-      <h3>Email notification protocol</h3>
-      <p id="commsBannerText">Flag this incident for inclusion in the weekly non-client email digest once the report is submitted.</p>
+      <h3>Communications protocol</h3>
+      <p>Trigger notification workflow for affected institutions once the report is submitted.</p>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-      <button class="btn btn-comms" id="commsBtn" onclick="openCommsModal()" disabled>Add to email protocol</button>
+      <span class="badge-soon">Coming soon</span>
+      <button class="btn btn-comms" id="commsBtn" onclick="openCommsModal()" disabled>Send comms</button>
     </div>
   </div>
 
@@ -394,27 +995,18 @@
     <button class="btn btn-primary" id="submitBtn" onclick="submitIncident()">Submit report</button>
   </div>
 
+</div>
+
 </div><!-- end main-content -->
 
-<!-- Email protocol modal -->
+<!-- Modal -->
 <div class="modal-backdrop" id="commsModal">
   <div class="modal-box">
-    <h2>Add to email notification protocol</h2>
-    <p>AgentBee will generate a de-identified summary of this incident for inclusion in the weekly non-client email digest. Review and edit the summary below before confirming.</p>
-
-    <div class="summary-label-sm">De-identified summary</div>
-    <div class="summary-preview loading" id="summaryPreview">Generating summary…</div>
-
-    <div class="field">
-      <label for="summaryEdit">Edit summary if needed</label>
-      <textarea id="summaryEdit" rows="4" placeholder="Summary will appear here…" style="font-size:13px;line-height:1.6;"></textarea>
-    </div>
-
+    <h2>Send communications</h2>
+    <p>This will trigger the notification protocol for all linked institutions. This feature is reserved for future implementation.<br><br>Incident ID: <strong id="modalIncidentId">—</strong></p>
     <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeCommsModal()">Cancel</button>
-      <button class="btn btn-comms" id="confirmCommsBtn" onclick="confirmEmailProtocol()" disabled>
-        Confirm &amp; flag for email
-      </button>
+      <button class="btn btn-secondary" onclick="closeCommsModal()">Close</button>
+      <button class="btn btn-comms" disabled>Send (pending)</button>
     </div>
   </div>
 </div>
@@ -429,6 +1021,192 @@ let submittedIncidentId = null;
 let searchTimeout = null;
 
 document.getElementById('incidentDate').value = new Date().toISOString().split('T')[0];
+
+// ── Handoff card parser ──────────────────────────────────────────
+
+const REPORT_TYPE_MAP = [
+  { keys: ['document fraud', 'fraud'], value: 'Incident Report' },
+  { keys: ['incident'], value: 'Incident Report' },
+  { keys: ['aggregator'], value: 'Aggregator Report' },
+  { keys: ['data analysis', 'analysis'], value: 'Data Analysis' },
+  { keys: ['incentiv'], value: 'Incentivisation' },
+  { keys: ['individual'], value: 'Individual Report' },
+  { keys: ['kudos'], value: 'Kudos' },
+  { keys: ['market intelligence', 'market'], value: 'Market Intelligence' },
+  { keys: ['privacy'], value: 'Privacy Flag' },
+];
+
+const CATEGORY_MAP = [
+  { keys: ['conduct', 'ethics', 'behaviour', 'misconduct'], value: 'Conduct & Ethics' },
+  { keys: ['privacy', 'data protection', 'gdpr'], value: 'Privacy' },
+  { keys: ['reputational', 'reputation', 'fraud', 'visa', 'document'], value: 'Reputational' },
+];
+
+const SOURCE_TYPE_MAP = [
+  { keys: ['agentbee report', 'agentbee'], value: 'agentbee_report' },
+  { keys: ['agentbee research', 'research'], value: 'agentbee_research' },
+  { keys: ['web', 'online', 'news', 'media', 'law enforcement', 'fir', 'police', 'embassy', 'government'], value: 'web_source' },
+];
+
+const SEVERITY_MAP = [
+  { keys: ['maximum', 'extreme'], value: '100' },
+  { keys: ['critical'], value: '90' },
+  { keys: ['severe'], value: '80' },
+  { keys: ['serious'], value: '70' },
+  { keys: ['significant'], value: '60' },
+  { keys: ['high'], value: '50' },
+  { keys: ['medium-high', 'medium high'], value: '40' },
+  { keys: ['medium'], value: '30' },
+  { keys: ['low-medium', 'low medium'], value: '20' },
+  { keys: ['low'], value: '10' },
+  { keys: ['minimal'], value: '5' },
+  { keys: ['informational', 'info'], value: '0' },
+];
+
+function bestMatch(text, map) {
+  const lower = text.toLowerCase();
+  for (const entry of map) {
+    if (entry.keys.some(k => lower.includes(k))) return entry.value;
+  }
+  return '';
+}
+
+function extractField(text, ...labels) {
+  for (const label of labels) {
+    const regex = new RegExp(`${label}\\s*[:\\-]\\s*(.+)`, 'im');
+    const m = text.match(regex);
+    if (m) return m[1].trim();
+  }
+  return '';
+}
+
+function parseHandoff() {
+  const raw = document.getElementById('handoffInput').value.trim();
+  if (!raw) {
+    showParseResult('warn', 'Please paste a handoff card first.');
+    return;
+  }
+
+  const populated = [];
+  const skipped = [];
+
+  // Agent name
+  const agentName = extractField(raw, 'Agent name', 'Agent');
+  if (agentName) {
+    document.getElementById('agentSearch').value = agentName;
+    populated.push('Agent name');
+    // Trigger auto-lookup
+    setTimeout(() => lookupAgent(), 300);
+  } else skipped.push('Agent name');
+
+  // Incident date — parse various formats
+  const dateRaw = extractField(raw, 'Incident date', 'Date');
+  if (dateRaw) {
+    const parsed = new Date(dateRaw);
+    if (!isNaN(parsed)) {
+      document.getElementById('incidentDate').value = parsed.toISOString().split('T')[0];
+      populated.push('Incident date');
+    } else skipped.push('Incident date (unrecognised format)');
+  } else skipped.push('Incident date');
+
+  // Report type — best match
+  const reportTypeRaw = extractField(raw, 'Report type', 'Report');
+  if (reportTypeRaw) {
+    const matched = bestMatch(reportTypeRaw, REPORT_TYPE_MAP);
+    if (matched) {
+      document.getElementById('reportType').value = matched;
+      populated.push(`Report type → ${matched}`);
+    } else skipped.push(`Report type (no match for "${reportTypeRaw}")`);
+  } else skipped.push('Report type');
+
+  // Category — best match
+  const categoryRaw = extractField(raw, 'Category');
+  if (categoryRaw) {
+    const matched = bestMatch(categoryRaw, CATEGORY_MAP);
+    if (matched) {
+      document.getElementById('category').value = matched;
+      populated.push(`Category → ${matched}`);
+    } else skipped.push(`Category (no match for "${categoryRaw}")`);
+  } else skipped.push('Category');
+
+  // Source type — best match
+  const sourceTypeRaw = extractField(raw, 'Source type', 'Source');
+  if (sourceTypeRaw) {
+    const matched = bestMatch(sourceTypeRaw, SOURCE_TYPE_MAP);
+    if (matched) {
+      document.getElementById('sourceType').value = matched;
+      populated.push(`Source type → ${matched}`);
+    } else skipped.push(`Source type (no match for "${sourceTypeRaw}")`);
+  }
+
+  // Severity weight — best match
+  const severityRaw = extractField(raw, 'Severity weight', 'Severity');
+  if (severityRaw) {
+    const matched = bestMatch(severityRaw, SEVERITY_MAP);
+    if (matched) {
+      document.getElementById('severityWeight').value = matched;
+      populated.push(`Severity → ${matched}`);
+    } else {
+      // Try direct numeric
+      const num = severityRaw.match(/\d+/);
+      if (num) {
+        document.getElementById('severityWeight').value = num[0];
+        populated.push(`Severity → ${num[0]}`);
+      } else skipped.push('Severity weight');
+    }
+  }
+
+  // Source URL
+  const urlRaw = extractField(raw, 'Source URL', 'URL', 'Link');
+  if (urlRaw && urlRaw.startsWith('http')) {
+    document.getElementById('sourceUrl').value = urlRaw;
+    populated.push('Source URL');
+  }
+
+  // Incident description — everything after "Incident description:" label
+  const descMatch = raw.match(/Incident description\s*[:\-]\s*\n([\s\S]+?)(?=\nInstitution names|\nDe-identified|\n─|$)/i);
+  if (descMatch) {
+    document.getElementById('description').value = descMatch[1].trim();
+    populated.push('Incident description');
+  }
+
+  // Institution names
+  const instMatch = raw.match(/Institution names[^\n]*\n([\s\S]+?)(?=\n─|$)/i);
+  if (instMatch) {
+    const instText = instMatch[1].trim();
+    const isNone = /^none/i.test(instText);
+    if (!isNone) {
+      document.getElementById('institutionsList').value = instText;
+      populated.push('Institution names');
+    } else {
+      populated.push('Institution names (none identified — left blank for manual entry)');
+    }
+  }
+
+  document.getElementById('handoffZone').classList.add('populated');
+  updatePreview();
+
+  const msg = `✓ Populated: ${populated.join(' · ')}` +
+    (skipped.length ? `\n⚠ Could not match: ${skipped.join(', ')}` : '');
+  showParseResult(skipped.length ? 'warn' : 'ok', msg);
+}
+
+function clearHandoff() {
+  document.getElementById('handoffInput').value = '';
+  document.getElementById('handoffZone').classList.remove('populated');
+  const pr = document.getElementById('parseResult');
+  pr.className = 'parse-result';
+  pr.textContent = '';
+}
+
+function showParseResult(type, msg) {
+  const el = document.getElementById('parseResult');
+  el.className = `parse-result ${type}`;
+  el.style.whiteSpace = 'pre-line';
+  el.textContent = msg;
+}
+
+// ── End handoff parser ───────────────────────────────────────────
 
 function updatePreview() {
   document.getElementById('sum-agent').textContent = selectedAgent ? selectedAgent.agency_name : '—';
@@ -515,17 +1293,30 @@ async function analyseInstitutions() {
   setStatus('instStatus', 'info', `Analysing ${names.length} institution(s)…`);
   analysisResults = { authorised: [], risk: [], unknown: [] };
 
+  const NON_CLIENT_STATUSES = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed', null];
+
   for (const name of names) {
-    const instRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(name)}*&select=id,name&limit=1`);
+    const instRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(name)}*&select=id,name,contact_email,salutation,status,is_client&limit=1`);
     const instData = await instRes.json();
     if (!instData || !instData.length) { analysisResults.unknown.push({ name }); continue; }
     const inst = instData[0];
+    const isNonClient = !inst.is_client || NON_CLIENT_STATUSES.includes(inst.status);
     const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=eq.${selectedAgent.id}&institution_id=eq.${inst.id}&is_active=eq.true&select=agent_id&limit=1`);
     const linkData = await linkRes.json();
+    const entry = {
+      name,
+      institutionId: inst.id,
+      institutionName: inst.name,
+      contact_email: inst.contact_email,
+      salutation: inst.salutation,
+      status: inst.status,
+      is_client: inst.is_client,
+      isNonClient,
+    };
     if (linkData && linkData.length) {
-      analysisResults.authorised.push({ name, institutionId: inst.id, institutionName: inst.name });
+      analysisResults.authorised.push(entry);
     } else {
-      analysisResults.risk.push({ name, institutionId: inst.id, institutionName: inst.name });
+      analysisResults.risk.push(entry);
     }
   }
 
@@ -535,10 +1326,109 @@ async function analyseInstitutions() {
     ...analysisResults.unknown.map(i => `<span class="inst-tag unknown"><span class="dot grey"></span>${i.name}</span>`),
   ].join('');
   document.getElementById('instResults').style.display = 'block';
-  setStatus('instStatus', 'success', `Done — ${analysisResults.authorised.length} authorised · ${analysisResults.risk.length} risk radar · ${analysisResults.unknown.length} not found.`);
+
+  // Build missing data panel
+  const allFound = [...analysisResults.authorised, ...analysisResults.risk];
+  const missing = allFound.filter(i => !i.contact_email || !i.salutation || !i.status);
+
+  const missingPanel = document.getElementById('missingDataPanel');
+  if (missing.length > 0) {
+    missingPanel.style.display = 'block';
+    missingPanel.innerHTML = `
+      <div class="missing-panel">
+        <div class="missing-panel-header">
+          ⚠️ ${missing.length} institution(s) have missing contact data — fill in before sending comms
+        </div>
+        ${missing.map(inst => `
+          <div class="missing-inst-row" id="missing-row-${inst.institutionId}">
+            <div class="missing-inst-name">
+              ${inst.institutionName}
+              <span class="inst-tag ${inst.isNonClient ? 'risk' : 'auth'}" style="font-size:10px;padding:2px 7px;">
+                ${inst.status || 'No status'}
+              </span>
+            </div>
+            <div class="missing-fields-grid">
+              <div class="missing-field">
+                <label>Contact email</label>
+                <input type="email" id="edit-email-${inst.institutionId}" value="${inst.contact_email || ''}"
+                  placeholder="email@institution.edu"
+                  class="${inst.contact_email ? 'filled' : ''}"
+                  oninput="markFilled(this)" />
+              </div>
+              <div class="missing-field">
+                <label>Salutation</label>
+                <input type="text" id="edit-sal-${inst.institutionId}" value="${inst.salutation || ''}"
+                  placeholder="Dear Risk Team"
+                  class="${inst.salutation ? 'filled' : ''}"
+                  oninput="markFilled(this)" />
+              </div>
+              <div class="missing-field">
+                <label>Status</label>
+                <select id="edit-status-${inst.institutionId}" onchange="markFilled(this)"
+                  class="${inst.status ? 'filled' : ''}">
+                  <option value="">Select…</option>
+                  <option ${inst.status==='Client'?'selected':''}>Client</option>
+                  <option ${inst.status==='Cold'?'selected':''}>Cold</option>
+                  <option ${inst.status==='Warm'?'selected':''}>Warm</option>
+                  <option ${inst.status==='Former Client'?'selected':''}>Former Client</option>
+                  <option ${inst.status==='Trial Over'?'selected':''}>Trial Over</option>
+                  <option ${inst.status==='Unsubscribed'?'selected':''}>Unsubscribed</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn-save-inst" onclick="saveInstitutionData('${inst.institutionId}')">
+              Save changes
+            </button>
+            <div class="save-inst-status" id="save-status-${inst.institutionId}"></div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    missingPanel.style.display = 'none';
+    missingPanel.innerHTML = '';
+  }
+
+  setStatus('instStatus', 'success', `Done — ${analysisResults.authorised.length} authorised · ${analysisResults.risk.length} risk radar · ${analysisResults.unknown.length} not found.${missing.length ? ` · ⚠️ ${missing.length} missing contact data.` : ''}`);
   btn.disabled = false;
   document.getElementById('analyseBtnIcon').textContent = '⚡';
   updatePreview();
+}
+
+function markFilled(el) {
+  el.classList.toggle('filled', el.value.trim() !== '');
+}
+
+async function saveInstitutionData(institutionId) {
+  const email = document.getElementById(`edit-email-${institutionId}`).value.trim();
+  const salutation = document.getElementById(`edit-sal-${institutionId}`).value.trim();
+  const status = document.getElementById(`edit-status-${institutionId}`).value;
+  const statusEl = document.getElementById(`save-status-${institutionId}`);
+
+  const payload = {};
+  if (email) payload.contact_email = email;
+  if (salutation) payload.salutation = salutation;
+  if (status) payload.status = status;
+
+  if (!Object.keys(payload).length) {
+    statusEl.className = 'save-inst-status err';
+    statusEl.textContent = 'Nothing to save.';
+    return;
+  }
+
+  try {
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?id=eq.${institutionId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.statusText); }
+    statusEl.className = 'save-inst-status ok';
+    statusEl.textContent = '✓ Saved successfully.';
+  } catch(e) {
+    statusEl.className = 'save-inst-status err';
+    statusEl.textContent = '✗ ' + e.message;
+  }
 }
 
 async function submitIncident() {
@@ -593,6 +1483,7 @@ async function submitIncident() {
 
     setStatus('submitStatus', 'success', `Report submitted — ID: ${incidentId} · ${allLinked.length} institution(s) linked.`);
     document.getElementById('commsBtn').disabled = false;
+    document.getElementById('modalIncidentId').textContent = incidentId;
     btn.className = 'btn btn-success';
     btn.innerHTML = '✓ Submitted';
   } catch(e) {
@@ -602,80 +1493,8 @@ async function submitIncident() {
   }
 }
 
-// ── Email protocol modal ───────────────────────────────────────
-async function openCommsModal() {
-  document.getElementById('commsModal').classList.add('open');
-  document.getElementById('summaryPreview').className = 'summary-preview loading';
-  document.getElementById('summaryPreview').textContent = 'Generating de-identified summary…';
-  document.getElementById('summaryEdit').value = '';
-  document.getElementById('confirmCommsBtn').disabled = true;
-
-  const description = document.getElementById('description').value.trim();
-  const category    = document.getElementById('category').value;
-  const severity    = document.getElementById('severityWeight').value;
-  const reportType  = document.getElementById('reportType').value;
-
-  try {
-    const response = await fetch('/api/summarise', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description, category, severity, reportType })
-    });
-
-    const data = await response.json();
-    const summary = data.summary || '';
-
-    document.getElementById('summaryPreview').className = 'summary-preview';
-    document.getElementById('summaryPreview').textContent = summary;
-    document.getElementById('summaryEdit').value = summary;
-    document.getElementById('confirmCommsBtn').disabled = false;
-  } catch(e) {
-    document.getElementById('summaryPreview').className = 'summary-preview';
-    document.getElementById('summaryPreview').textContent = 'Could not generate summary automatically. Please write one in the field below.';
-    document.getElementById('confirmCommsBtn').disabled = false;
-  }
-}
-
-function closeCommsModal() {
-  document.getElementById('commsModal').classList.remove('open');
-}
-
-async function confirmEmailProtocol() {
-  if (!submittedIncidentId) return;
-  const summary = document.getElementById('summaryEdit').value.trim();
-  if (!summary) { alert('Please provide a summary before confirming.'); return; }
-
-  const btn = document.getElementById('confirmCommsBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner spinner-purple"></span> Saving…';
-
-  try {
-    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/incidents?id=eq.${submittedIncidentId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ include_in_email: true, email_summary: summary })
-    });
-
-    if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.statusText); }
-
-    closeCommsModal();
-
-    // Update banner to flagged state
-    const banner = document.getElementById('commsBanner');
-    banner.classList.add('flagged');
-    banner.querySelector('h3').textContent = '✓ Added to email notification protocol';
-    banner.querySelector('p').textContent = 'This incident will be included in the next weekly non-client email digest.';
-    const commsBtn = document.getElementById('commsBtn');
-    commsBtn.className = 'btn btn-comms-done';
-    commsBtn.textContent = '✓ Flagged for email';
-    commsBtn.disabled = true;
-
-  } catch(e) {
-    alert('Failed to save: ' + e.message);
-    btn.disabled = false;
-    btn.innerHTML = 'Confirm &amp; flag for email';
-  }
-}
+function openCommsModal() { document.getElementById('commsModal').classList.add('open'); }
+function closeCommsModal() { document.getElementById('commsModal').classList.remove('open'); }
 
 function resetForm() {
   if (!confirm('Reset the form?')) return;
@@ -688,19 +1507,16 @@ function resetForm() {
   ['reportType','category','sourceType','severityWeight'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('incidentDate').value = new Date().toISOString().split('T')[0];
   document.getElementById('description').value = '';
+  document.getElementById('deidentifiedSummary').value = '';
   document.getElementById('sourceUrl').value = '';
   document.getElementById('institutionsList').value = '';
   document.getElementById('instResults').style.display = 'none';
+  document.getElementById('missingDataPanel').style.display = 'none';
+  document.getElementById('missingDataPanel').innerHTML = '';
   clearStatus('instStatus');
   clearStatus('submitStatus');
   document.getElementById('analyseBtn').disabled = true;
   document.getElementById('commsBtn').disabled = true;
-  document.getElementById('commsBtn').className = 'btn btn-comms';
-  document.getElementById('commsBtn').textContent = 'Add to email protocol';
-  const banner = document.getElementById('commsBanner');
-  banner.classList.remove('flagged');
-  banner.querySelector('h3').textContent = 'Email notification protocol';
-  banner.querySelector('p').textContent = 'Flag this incident for inclusion in the weekly non-client email digest once the report is submitted.';
   const btn = document.getElementById('submitBtn');
   btn.disabled = false;
   btn.className = 'btn btn-primary';
@@ -727,7 +1543,7 @@ function clearStatus(id) {
 
 updatePreview();
 
-// Auth
+// --- Auth ---
 (function() {
   if (sessionStorage.getItem('ab-admin-auth') === 'true') {
     document.getElementById('auth-screen').classList.add('hidden');
