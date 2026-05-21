@@ -905,7 +905,7 @@
       </div>
     </div>
     <div class="field field-row">
-      <label>Source URL <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+      <label>Source document URL <span style="font-weight:400;color:#9ca3af;">(optional — link to the evidence, article, or filing that this report is based on)</span></label>
       <input type="url" id="sourceUrl" placeholder="https://…" />
     </div>
     <div class="field">
@@ -978,15 +978,14 @@
     <div class="status" id="submitStatus"></div>
   </div>
 
-  <!-- Comms -->
-  <div class="comms-banner">
+  <!-- Email protocol -->
+  <div class="comms-banner" id="emailProtocolBanner">
     <div>
-      <h3>Communications protocol</h3>
-      <p>Trigger notification workflow for affected institutions once the report is submitted.</p>
+      <h3>📧 Add to email protocol</h3>
+      <p>Generate a de-identified summary and queue this incident for the next Monday digest sent to Warm &amp; Cold institutions.</p>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-      <span class="badge-soon">Coming soon</span>
-      <button class="btn btn-comms" id="commsBtn" onclick="openCommsModal()" disabled>Send comms</button>
+      <button class="btn btn-comms" id="commsBtn" onclick="openEmailProtocol()" disabled>Add to email protocol</button>
     </div>
   </div>
 
@@ -999,15 +998,47 @@
 
 </div><!-- end main-content -->
 
-<!-- Modal -->
-<div class="modal-backdrop" id="commsModal">
-  <div class="modal-box">
-    <h2>Send communications</h2>
-    <p>This will trigger the notification protocol for all linked institutions. This feature is reserved for future implementation.<br><br>Incident ID: <strong id="modalIncidentId">—</strong></p>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeCommsModal()">Close</button>
-      <button class="btn btn-comms" disabled>Send (pending)</button>
+<!-- Email protocol modal -->
+<div class="modal-backdrop" id="emailModal">
+  <div class="modal-box" style="max-width:560px;">
+
+    <!-- Step 1: generating -->
+    <div id="emailStep1">
+      <h2>📧 Email protocol</h2>
+      <p style="margin-bottom:16px;">Generating a de-identified summary using Claude. This will be reviewed before saving.</p>
+      <div style="display:flex;align-items:center;gap:10px;color:#6b7280;font-size:13px;">
+        <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:#6b7280;"></span>
+        Calling Claude API…
+      </div>
     </div>
+
+    <!-- Step 2: review -->
+    <div id="emailStep2" style="display:none;">
+      <h2 style="margin-bottom:6px;">Review de-identified summary</h2>
+      <p style="margin-bottom:14px;">This summary will be sent to <strong>Warm and Cold</strong> institutions in the next Monday digest. Edit as needed before confirming.</p>
+      <div class="field" style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#374151;">De-identified summary</label>
+        <textarea id="emailSummaryText" rows="6" style="width:100%;margin-top:6px;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit;color:#1a1d23;resize:vertical;outline:none;line-height:1.6;" placeholder="Summary will appear here…"></textarea>
+      </div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:12px;color:#92400e;margin-bottom:16px;">
+        ⚠️ This summary will be queued for the next Monday 8am digest. Maximum 7 incidents per send — any remainder carries to the following week.
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeEmailModal()">Cancel</button>
+        <button class="btn" style="background:#7c3aed;color:#fff;" onclick="regenerateSummary()">↺ Regenerate</button>
+        <button class="btn btn-primary" id="confirmEmailBtn" onclick="confirmEmailProtocol()">✓ Confirm &amp; queue</button>
+      </div>
+      <div class="status" id="emailConfirmStatus" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- Step 3: confirmed -->
+    <div id="emailStep3" style="display:none;text-align:center;padding:8px 0;">
+      <div style="font-size:36px;margin-bottom:12px;">✅</div>
+      <h2 style="margin-bottom:8px;">Queued for Monday digest</h2>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:20px;">This incident has been flagged with <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">include_in_email = true</code> and the de-identified summary saved. It will be picked up by the clever-task Edge Function on the next Monday at 8am Sydney time.</p>
+      <button class="btn btn-secondary" onclick="closeEmailModal()">Close</button>
+    </div>
+
   </div>
 </div>
 
@@ -1493,8 +1524,119 @@ async function submitIncident() {
   }
 }
 
-function openCommsModal() { document.getElementById('commsModal').classList.add('open'); }
-function closeCommsModal() { document.getElementById('commsModal').classList.remove('open'); }
+// ── Email protocol ───────────────────────────────────────────────
+
+function openEmailModal() {
+  document.getElementById('emailModal').classList.add('open');
+}
+
+function closeEmailModal() {
+  document.getElementById('emailModal').classList.remove('open');
+  // Reset steps
+  document.getElementById('emailStep1').style.display = 'block';
+  document.getElementById('emailStep2').style.display = 'none';
+  document.getElementById('emailStep3').style.display = 'none';
+  const cs = document.getElementById('emailConfirmStatus');
+  cs.className = 'status'; cs.textContent = '';
+}
+
+async function openEmailProtocol() {
+  openEmailModal();
+  await generateSummary();
+}
+
+async function generateSummary() {
+  document.getElementById('emailStep1').style.display = 'block';
+  document.getElementById('emailStep2').style.display = 'none';
+  document.getElementById('emailStep3').style.display = 'none';
+
+  const description = document.getElementById('description').value.trim();
+  const category = document.getElementById('category').value;
+  const severity = document.getElementById('severityWeight').value;
+  const reportType = document.getElementById('reportType').value;
+
+  try {
+    const res = await fetch('/api/summarise', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description, category, severity, reportType }),
+    });
+
+    if (!res.ok) {
+      const e = await res.json();
+      throw new Error(e.error || res.statusText);
+    }
+
+    const data = await res.json();
+    document.getElementById('emailSummaryText').value = data.summary || '';
+    document.getElementById('emailStep1').style.display = 'none';
+    document.getElementById('emailStep2').style.display = 'block';
+  } catch(e) {
+    document.getElementById('emailStep1').innerHTML = `
+      <h2>📧 Email protocol</h2>
+      <div class="status error" style="display:block;margin-top:12px;">✗ Failed to generate summary: ${e.message}</div>
+      <div class="modal-actions" style="margin-top:16px;">
+        <button class="btn btn-secondary" onclick="closeEmailModal()">Close</button>
+        <button class="btn btn-primary" onclick="generateSummary()">Retry</button>
+      </div>`;
+  }
+}
+
+async function regenerateSummary() {
+  document.getElementById('emailStep2').style.display = 'none';
+  document.getElementById('emailStep1').style.display = 'block';
+  // Reset step1 HTML in case it was overwritten by error
+  document.getElementById('emailStep1').innerHTML = `
+    <h2>📧 Email protocol</h2>
+    <p style="margin-bottom:16px;">Generating a de-identified summary using Claude. This will be reviewed before saving.</p>
+    <div style="display:flex;align-items:center;gap:10px;color:#6b7280;font-size:13px;">
+      <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:#6b7280;"></span>
+      Calling Claude API…
+    </div>`;
+  await generateSummary();
+}
+
+async function confirmEmailProtocol() {
+  const summaryText = document.getElementById('emailSummaryText').value.trim();
+  if (!summaryText) {
+    setStatus('emailConfirmStatus', 'error', 'Please enter a summary before confirming.');
+    return;
+  }
+  if (!submittedIncidentId) {
+    setStatus('emailConfirmStatus', 'error', 'No incident ID found — please submit the report first.');
+    return;
+  }
+
+  const btn = document.getElementById('confirmEmailBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving…';
+  setStatus('emailConfirmStatus', 'info', 'Updating incident record…');
+
+  try {
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/incidents?id=eq.${submittedIncidentId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ include_in_email: true, email_summary: summaryText }),
+    });
+
+    if (!res.ok) {
+      const e = await res.json();
+      throw new Error(e.message || res.statusText);
+    }
+
+    document.getElementById('emailStep2').style.display = 'none';
+    document.getElementById('emailStep3').style.display = 'block';
+    document.getElementById('commsBtn').disabled = true;
+    document.getElementById('commsBtn').textContent = '✓ Queued for digest';
+
+  } catch(e) {
+    setStatus('emailConfirmStatus', 'error', '✗ ' + e.message);
+    btn.disabled = false;
+    btn.innerHTML = '✓ Confirm & queue';
+  }
+}
+
+// ── End email protocol ───────────────────────────────────────────
 
 function resetForm() {
   if (!confirm('Reset the form?')) return;
