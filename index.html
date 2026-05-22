@@ -891,14 +891,23 @@ async function submitAuth() {
   btnText.textContent = 'Continue';
 }
 
-// Check if already authenticated
+// Check if already authenticated — restore key immediately, no DOMContentLoaded needed
 (function() {
   if (sessionStorage.getItem('ab-admin-auth') === 'true') {
-    window.addEventListener('DOMContentLoaded', function() {
-      window._supabaseKey = sessionStorage.getItem('ab-supabase-key') || '';
-      document.getElementById('auth-screen').classList.add('hidden');
-      document.getElementById('main-content').style.display = 'block';
-    });
+    window._supabaseKey = sessionStorage.getItem('ab-supabase-key') || '';
+    // Hide auth screen and show main content as soon as DOM is ready
+    function restoreSession() {
+      const authScreen = document.getElementById('auth-screen');
+      const mainContent = document.getElementById('main-content');
+      if (authScreen && mainContent) {
+        authScreen.classList.add('hidden');
+        mainContent.style.display = 'block';
+      } else {
+        // DOM not ready yet, retry
+        setTimeout(restoreSession, 10);
+      }
+    }
+    restoreSession();
   }
 })();
 </script>
@@ -2057,6 +2066,7 @@ function resetForm() {
 
 function sbFetch(url, opts = {}) {
   const key = window._supabaseKey || sessionStorage.getItem('ab-supabase-key') || '';
+  if (!key) console.warn('sbFetch: Supabase key not set — API call will fail with 401');
   return fetch(url, { ...opts, headers: { 'apikey': key, 'Authorization': `Bearer ${key}`, ...(opts.headers || {}) } });
 }
 
