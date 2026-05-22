@@ -645,6 +645,66 @@
     .btn-generate-summary:hover:not(:disabled) { background: #1e40af; }
     .btn-generate-summary:disabled { opacity: 0.4; cursor: not-allowed; }
 
+    /* Add new agent panel */
+    .new-agent-panel {
+      display: none;
+      margin-top: 12px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .new-agent-panel.visible { display: block; }
+
+    .new-agent-panel h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .new-agent-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .new-agent-grid .field input,
+    .new-agent-grid .field select {
+      background: #fff;
+      border-color: #fde68a;
+    }
+
+    .new-agent-grid .field input:focus,
+    .new-agent-grid .field select:focus {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+    }
+
+    .btn-create-agent {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: #d97706;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-create-agent:hover:not(:disabled) { background: #b45309; }
+    .btn-create-agent:disabled { opacity: 0.4; cursor: not-allowed; }
+
     #auth-screen {
       position: fixed;
       inset: 0;
@@ -915,6 +975,37 @@ async function submitAuth() {
       <div class="tier-pill" id="agentCardTier"></div>
     </div>
     <div class="status" id="agentStatus"></div>
+
+    <!-- Add new agent panel -->
+    <div class="new-agent-panel" id="newAgentPanel">
+      <h4>➕ Add new agent to AgentBee</h4>
+      <div class="new-agent-grid">
+        <div class="field">
+          <label>Agency name *</label>
+          <input type="text" id="newAgentName" placeholder="Full agency name" />
+        </div>
+        <div class="field">
+          <label>Country</label>
+          <input type="text" id="newAgentCountry" placeholder="e.g. India" />
+        </div>
+        <div class="field">
+          <label>Jurisdiction / State</label>
+          <input type="text" id="newAgentJurisdiction" placeholder="e.g. Chandigarh" />
+        </div>
+        <div class="field">
+          <label>Risk tier</label>
+          <select id="newAgentRiskTier">
+            <option value="">Select…</option>
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+            <option>Critical</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-create-agent" id="createAgentBtn">Create agent &amp; continue</button>
+      <div class="status" id="newAgentStatus" style="margin-top:10px;"></div>
+    </div>
   </div>
 
   <!-- 2. Classification -->
@@ -1427,14 +1518,62 @@ async function lookupAgent() {
   const q = agentInput.value.trim();
   if (!q) return;
   setStatus('agentStatus', 'info', 'Searching…');
+  document.getElementById('newAgentPanel').classList.remove('visible');
   try {
     const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score&limit=6`);
     const data = await res.json();
-    if (!data.length) { setStatus('agentStatus', 'error', 'No agent found matching that name.'); return; }
+    if (!data.length) {
+      setStatus('agentStatus', 'error', 'No agent found matching that name.');
+      // Pre-fill new agent form with the search term
+      document.getElementById('newAgentName').value = q;
+      document.getElementById('newAgentPanel').classList.add('visible');
+      return;
+    }
     if (data.length === 1) { selectAgent(data[0]); return; }
     renderSuggestions(data);
     setStatus('agentStatus', 'info', `${data.length} matches — please select one.`);
   } catch(e) { setStatus('agentStatus', 'error', 'Search failed: ' + e.message); }
+}
+
+async function createAgent() {
+  const name = document.getElementById('newAgentName').value.trim();
+  if (!name) { setStatus('newAgentStatus', 'error', 'Agency name is required.'); return; }
+
+  const btn = document.getElementById('createAgentBtn');
+  btn.disabled = true;
+  btn.textContent = 'Creating…';
+  setStatus('newAgentStatus', 'info', 'Creating agent record…');
+
+  const payload = {
+    agency_name: name,
+    country: document.getElementById('newAgentCountry').value.trim() || null,
+    jurisdiction: document.getElementById('newAgentJurisdiction').value.trim() || null,
+    risk_tier: document.getElementById('newAgentRiskTier').value || null,
+  };
+
+  try {
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.statusText); }
+    const data = await res.json();
+    const newAgent = data[0];
+
+    // Select the newly created agent
+    selectAgent(newAgent);
+    document.getElementById('newAgentPanel').classList.remove('visible');
+    clearStatus('newAgentStatus');
+    clearStatus('agentStatus');
+    setStatus('agentStatus', 'success', `✓ New agent "${name}" created and selected.`);
+
+  } catch(e) {
+    setStatus('newAgentStatus', 'error', '✗ ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Create agent & continue';
+  }
 }
 
 async function lookupAuthorisedClients(agentId) {
@@ -1896,6 +2035,7 @@ function resetForm() {
   submittedIncidentId = null;
   agentInput.value = '';
   document.getElementById('agentCard').classList.remove('visible');
+  document.getElementById('newAgentPanel').classList.remove('visible');
   document.getElementById('otherClientsPanel').style.display = 'none';
   document.getElementById('otherClientsTags').innerHTML = '';
   window._authorisedClientInstitutions = [];
@@ -1944,34 +2084,35 @@ function clearStatus(id) {
 updatePreview();
 
 // ── Wire up all button event listeners ──────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-  // Handoff
-  document.getElementById('parseHandoffBtn').addEventListener('click', parseHandoff);
-  document.getElementById('clearHandoffBtn').addEventListener('click', clearHandoff);
+// (script is at bottom of body so DOM is already ready — no DOMContentLoaded needed)
 
-  // Agent
-  document.getElementById('agentLookupBtn').addEventListener('click', lookupAgent);
+// Handoff
+document.getElementById('parseHandoffBtn').addEventListener('click', parseHandoff);
+document.getElementById('clearHandoffBtn').addEventListener('click', clearHandoff);
 
-  // Description → enable generate button
-  document.getElementById('description').addEventListener('input', onDescriptionInput);
+// Agent
+document.getElementById('agentLookupBtn').addEventListener('click', lookupAgent);
+document.getElementById('createAgentBtn').addEventListener('click', createAgent);
 
-  // Generate summary
-  document.getElementById('generateSummaryBtn').addEventListener('click', generateInlineSummary);
+// Description → enable generate button
+document.getElementById('description').addEventListener('input', onDescriptionInput);
 
-  // Analyse institutions
-  document.getElementById('analyseBtn').addEventListener('click', analyseInstitutions);
+// Generate summary
+document.getElementById('generateSummaryBtn').addEventListener('click', generateInlineSummary);
 
-  // Email protocol
-  document.getElementById('commsBtn').addEventListener('click', openEmailProtocol);
-  document.getElementById('cancelEmailBtn').addEventListener('click', closeEmailModal);
-  document.getElementById('regenerateBtn').addEventListener('click', regenerateSummary);
-  document.getElementById('confirmEmailBtn').addEventListener('click', confirmEmailProtocol);
-  document.getElementById('closeEmailBtn').addEventListener('click', closeEmailModal);
+// Analyse institutions
+document.getElementById('analyseBtn').addEventListener('click', analyseInstitutions);
 
-  // Footer
-  document.getElementById('resetFormBtn').addEventListener('click', resetForm);
-  document.getElementById('submitBtn').addEventListener('click', submitIncident);
-});
+// Email protocol
+document.getElementById('commsBtn').addEventListener('click', openEmailProtocol);
+document.getElementById('cancelEmailBtn').addEventListener('click', closeEmailModal);
+document.getElementById('regenerateBtn').addEventListener('click', regenerateSummary);
+document.getElementById('confirmEmailBtn').addEventListener('click', confirmEmailProtocol);
+document.getElementById('closeEmailBtn').addEventListener('click', closeEmailModal);
+
+// Footer
+document.getElementById('resetFormBtn').addEventListener('click', resetForm);
+document.getElementById('submitBtn').addEventListener('click', submitIncident);
 </script>
 </body>
 </html>
