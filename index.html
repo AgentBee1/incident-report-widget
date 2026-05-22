@@ -1089,7 +1089,7 @@ async function submitAuth() {
         <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:#3b82f6;width:12px;height:12px;border-width:2px;"></span>
         Generating with Claude…
       </div>
-      <textarea id="deidentifiedSummary" rows="4" placeholder="Click "Generate draft" after writing the incident description above — Claude will draft a de-identified version for you to review and edit…" style="width:100%;padding:10px 12px;background:#fff;border:1px solid #bfdbfe;border-radius:7px;font-size:13px;font-family:inherit;color:#1a1d23;resize:vertical;outline:none;line-height:1.6;transition:border-color 0.15s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#bfdbfe'"></textarea>
+      <textarea id="deidentifiedSummary" rows="4" placeholder="Click 'Generate draft' after writing the incident description — Claude will draft a de-identified version for you to review and edit…" style="width:100%;padding:10px 12px;background:#fff;border:1px solid #bfdbfe;border-radius:7px;font-size:13px;font-family:inherit;color:#1a1d23;resize:vertical;outline:none;line-height:1.6;transition:border-color 0.15s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#bfdbfe'"></textarea>
       <div id="summaryGenerateStatus" style="font-size:11px;margin-top:6px;color:#9ca3af;"></div>
     </div>
 
@@ -1392,6 +1392,7 @@ function parseHandoff() {
   if (descMatch) {
     document.getElementById('description').value = descMatch[1].trim();
     populated.push('Incident description');
+    onDescriptionInput(); // trigger button enable
   }
 
   // Institution names
@@ -1409,6 +1410,7 @@ function parseHandoff() {
 
   document.getElementById('handoffZone').classList.add('populated');
   updatePreview();
+  onDescriptionInput(); // ensure generate button state is correct
 
   const msg = `✓ Populated: ${populated.join(' · ')}` +
     (skipped.length ? `\n⚠ Could not match: ${skipped.join(', ')}` : '');
