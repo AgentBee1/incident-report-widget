@@ -1,43 +1,22 @@
-export const config = { runtime: 'edge' };
-
-export default async function handler(req) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { passphrase } = req.body;
+  const correct = process.env.ADMIN_PASSPHRASE;
+
+  if (!correct) {
+    return res.status(500).json({ error: 'Server misconfigured' });
+  }
+
+  if (passphrase === correct) {
+    return res.status(200).json({
+      ok: true,
+      token: 'ab-admin-' + Date.now(),
+      supabaseKey: process.env.SUPABASE_ANON_KEY,
     });
   }
 
-  try {
-    const { passphrase } = await req.json();
-    const correct = process.env.ADMIN_PASSPHRASE;
-
-    if (!correct) {
-      return new Response(JSON.stringify({ error: 'Server misconfigured' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (passphrase === correct) {
-      return new Response(JSON.stringify({
-        ok: true,
-        token: 'ab-admin-' + Date.now(),
-        supabaseKey: process.env.SUPABASE_ANON_KEY,
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    return new Response(JSON.stringify({ ok: false, error: 'Incorrect passphrase' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: 'Bad request' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  return res.status(401).json({ ok: false, error: 'Incorrect passphrase' });
 }
