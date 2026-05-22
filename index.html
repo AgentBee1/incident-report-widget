@@ -1378,6 +1378,9 @@ agentInput.addEventListener('input', () => {
 agentInput.addEventListener('keydown', e => { if (e.key === 'Escape') closeSuggestions(); });
 document.addEventListener('click', e => { if (!e.target.closest('.suggestions-outer')) closeSuggestions(); });
 
+// Store agents by index for CSP-safe selection
+let _suggestionAgents = [];
+
 async function fetchSuggestions(q) {
   try {
     const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score&limit=8&order=agency_name`);
@@ -1387,13 +1390,22 @@ async function fetchSuggestions(q) {
 
 function renderSuggestions(items) {
   if (!items || !items.length) { closeSuggestions(); return; }
-  suggestionsEl.innerHTML = items.map(a =>
-    `<div class="suggestion-item" onclick='selectAgent(${JSON.stringify(a).replace(/'/g,"&#39;")})'>
+  _suggestionAgents = items;
+  suggestionsEl.innerHTML = items.map((a, i) =>
+    `<div class="suggestion-item" data-agent-index="${i}">
       <div class="sug-name">${a.agency_name}</div>
       <div class="sug-meta">${[a.jurisdiction, a.country].filter(Boolean).join(' · ')}${a.risk_tier ? ' · ' + a.risk_tier + ' tier' : ''}</div>
     </div>`).join('');
   suggestionsEl.classList.add('open');
 }
+
+// Event delegation on suggestions container
+suggestionsEl.addEventListener('click', function(e) {
+  const item = e.target.closest('[data-agent-index]');
+  if (!item) return;
+  const idx = parseInt(item.getAttribute('data-agent-index'), 10);
+  if (_suggestionAgents[idx]) selectAgent(_suggestionAgents[idx]);
+});
 
 function closeSuggestions() { suggestionsEl.classList.remove('open'); suggestionsEl.innerHTML = ''; }
 
@@ -1479,6 +1491,7 @@ async function lookupAuthorisedClients(agentId) {
 }
 
 // ── Analyse institutions ─────────────────────────────────────────
+async function analyseInstitutions() {
   if (!selectedAgent) { setStatus('instStatus', 'error', 'Please select an agent first.'); return; }
   const raw = document.getElementById('institutionsList').value.trim();
   if (!raw) { setStatus('instStatus', 'error', 'Please enter at least one institution name.'); return; }
@@ -1550,19 +1563,20 @@ async function lookupAuthorisedClients(agentId) {
                 <input type="email" id="edit-email-${inst.institutionId}" value="${inst.contact_email || ''}"
                   placeholder="email@institution.edu"
                   class="${inst.contact_email ? 'filled' : ''}"
-                  oninput="markFilled(this)" />
+                  data-markfilled="true" />
               </div>
               <div class="missing-field">
                 <label>Salutation</label>
                 <input type="text" id="edit-sal-${inst.institutionId}" value="${inst.salutation || ''}"
                   placeholder="Dear Risk Team"
                   class="${inst.salutation ? 'filled' : ''}"
-                  oninput="markFilled(this)" />
+                  data-markfilled="true" />
               </div>
               <div class="missing-field">
                 <label>Status</label>
-                <select id="edit-status-${inst.institutionId}" onchange="markFilled(this)"
-                  class="${inst.status ? 'filled' : ''}">
+                <select id="edit-status-${inst.institutionId}"
+                  class="${inst.status ? 'filled' : ''}"
+                  data-markfilled="true">
                   <option value="">Select…</option>
                   <option ${inst.status==='Client'?'selected':''}>Client</option>
                   <option ${inst.status==='Cold'?'selected':''}>Cold</option>
@@ -1573,7 +1587,7 @@ async function lookupAuthorisedClients(agentId) {
                 </select>
               </div>
             </div>
-            <button class="btn-save-inst" onclick="saveInstitutionData('${inst.institutionId}')">
+            <button class="btn-save-inst" data-institution-id="${inst.institutionId}">
               Save changes
             </button>
             <div class="save-inst-status" id="save-status-${inst.institutionId}"></div>
@@ -1595,6 +1609,20 @@ async function lookupAuthorisedClients(agentId) {
 function markFilled(el) {
   el.classList.toggle('filled', el.value.trim() !== '');
 }
+
+// Event delegation for dynamically generated missing panel buttons
+document.addEventListener('click', function(e) {
+  const saveBtn = e.target.closest('[data-institution-id]');
+  if (saveBtn) saveInstitutionData(saveBtn.getAttribute('data-institution-id'));
+});
+
+document.addEventListener('input', function(e) {
+  if (e.target.getAttribute('data-markfilled')) markFilled(e.target);
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.getAttribute('data-markfilled')) markFilled(e.target);
+});
 
 async function saveInstitutionData(institutionId) {
   const email = document.getElementById(`edit-email-${institutionId}`).value.trim();
