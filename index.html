@@ -886,8 +886,8 @@ async function submitAuth() {
     </div>
     <textarea id="handoffInput" rows="5" placeholder="Paste your INCIDENT WIDGET HANDOFF card here…"></textarea>
     <div class="handoff-actions">
-      <button class="btn-parse" onclick="parseHandoff()">⚡ Import & populate fields</button>
-      <button class="btn-clear-handoff" onclick="clearHandoff()">Clear</button>
+      <button class="btn-parse" id="parseHandoffBtn">⚡ Import & populate fields</button>
+      <button class="btn-clear-handoff" id="clearHandoffBtn">Clear</button>
     </div>
     <div class="parse-result" id="parseResult"></div>
   </div>
@@ -904,7 +904,7 @@ async function submitAuth() {
         <input type="text" id="agentSearch" placeholder="Search by agency name…" autocomplete="off" />
         <div class="suggestions-drop" id="suggestions"></div>
       </div>
-      <button class="btn-lookup" onclick="lookupAgent()">Search</button>
+      <button class="btn-lookup" id="agentLookupBtn">Search</button>
     </div>
     <div class="agent-resolved" id="agentCard">
       <div class="agent-avatar">✓</div>
@@ -991,7 +991,7 @@ async function submitAuth() {
     </div>
     <div class="field">
       <label>Incident description</label>
-      <textarea id="description" rows="5" placeholder="Describe the incident in detail…" oninput="onDescriptionInput()"></textarea>
+      <textarea id="description" rows="5" placeholder="Describe the incident in detail…"></textarea>
     </div>
     <div style="height:14px;"></div>
     <div style="background:#f0f7ff;border:1px solid #bfdbfe;border-radius:9px;padding:14px;">
@@ -1000,7 +1000,7 @@ async function submitAuth() {
           <div style="font-size:12px;font-weight:600;color:#1d4ed8;">De-identified summary</div>
           <div style="font-size:11px;color:#9ca3af;margin-top:2px;">Sent to non-client institutions (Cold, Warm, Former Client etc.) — Claude will draft this for you</div>
         </div>
-        <button class="btn-generate-summary" id="generateSummaryBtn" onclick="generateInlineSummary()" disabled>
+        <button class="btn-generate-summary" id="generateSummaryBtn" disabled>
           ✨ Generate draft
         </button>
       </div>
@@ -1040,7 +1040,7 @@ async function submitAuth() {
       <label>Additional institution names to analyse <span style="font-weight:400;color:#9ca3af;">— one per line</span></label>
       <textarea id="institutionsList" rows="6" placeholder="University of Melbourne&#10;Monash University&#10;RMIT University&#10;…"></textarea>
     </div>
-    <button class="btn-analyse" id="analyseBtn" onclick="analyseInstitutions()" disabled>
+    <button class="btn-analyse" id="analyseBtn" disabled>
       <span id="analyseBtnIcon">⚡</span> Analyse authorisation status
     </button>
     <div id="instResults" style="display:none;">
@@ -1097,13 +1097,13 @@ async function submitAuth() {
       <p>Generate a de-identified summary and queue this incident for the next Monday digest sent to Warm &amp; Cold institutions.</p>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-      <button class="btn btn-comms" id="commsBtn" onclick="openEmailProtocol()" disabled>Add to email protocol</button>
+      <button class="btn btn-comms" id="commsBtn" disabled>Add to email protocol</button>
     </div>
   </div>
 
   <div class="footer-bar">
-    <button class="btn btn-secondary" onclick="resetForm()">Reset form</button>
-    <button class="btn btn-primary" id="submitBtn" onclick="submitIncident()">Submit report</button>
+    <button class="btn btn-secondary" id="resetFormBtn">Reset form</button>
+    <button class="btn btn-primary" id="submitBtn">Submit report</button>
   </div>
 
 </div>
@@ -1136,9 +1136,9 @@ async function submitAuth() {
         ⚠️ This summary will be queued for the next Monday 8am digest. Maximum 7 incidents per send — any remainder carries to the following week.
       </div>
       <div class="modal-actions">
-        <button class="btn btn-secondary" onclick="closeEmailModal()">Cancel</button>
-        <button class="btn" style="background:#7c3aed;color:#fff;" onclick="regenerateSummary()">↺ Regenerate</button>
-        <button class="btn btn-primary" id="confirmEmailBtn" onclick="confirmEmailProtocol()">✓ Confirm &amp; queue</button>
+        <button class="btn btn-secondary" id="cancelEmailBtn">Cancel</button>
+        <button class="btn" style="background:#7c3aed;color:#fff;" id="regenerateBtn">↺ Regenerate</button>
+        <button class="btn btn-primary" id="confirmEmailBtn">✓ Confirm &amp; queue</button>
       </div>
       <div class="status" id="emailConfirmStatus" style="margin-top:12px;"></div>
     </div>
@@ -1148,7 +1148,7 @@ async function submitAuth() {
       <div style="font-size:36px;margin-bottom:12px;">✅</div>
       <h2 style="margin-bottom:8px;">Queued for Monday digest</h2>
       <p style="font-size:13px;color:#6b7280;margin-bottom:20px;">This incident has been flagged with <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">include_in_email = true</code> and the de-identified summary saved. It will be picked up by the clever-task Edge Function on the next Monday at 8am Sydney time.</p>
-      <button class="btn btn-secondary" onclick="closeEmailModal()">Close</button>
+      <button class="btn btn-secondary" id="closeEmailBtn">Close</button>
     </div>
 
   </div>
@@ -1914,6 +1914,36 @@ function clearStatus(id) {
 }
 
 updatePreview();
+
+// ── Wire up all button event listeners ──────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // Handoff
+  document.getElementById('parseHandoffBtn').addEventListener('click', parseHandoff);
+  document.getElementById('clearHandoffBtn').addEventListener('click', clearHandoff);
+
+  // Agent
+  document.getElementById('agentLookupBtn').addEventListener('click', lookupAgent);
+
+  // Description → enable generate button
+  document.getElementById('description').addEventListener('input', onDescriptionInput);
+
+  // Generate summary
+  document.getElementById('generateSummaryBtn').addEventListener('click', generateInlineSummary);
+
+  // Analyse institutions
+  document.getElementById('analyseBtn').addEventListener('click', analyseInstitutions);
+
+  // Email protocol
+  document.getElementById('commsBtn').addEventListener('click', openEmailProtocol);
+  document.getElementById('cancelEmailBtn').addEventListener('click', closeEmailModal);
+  document.getElementById('regenerateBtn').addEventListener('click', regenerateSummary);
+  document.getElementById('confirmEmailBtn').addEventListener('click', confirmEmailProtocol);
+  document.getElementById('closeEmailBtn').addEventListener('click', closeEmailModal);
+
+  // Footer
+  document.getElementById('resetFormBtn').addEventListener('click', resetForm);
+  document.getElementById('submitBtn').addEventListener('click', submitIncident);
+});
 </script>
 </body>
 </html>
