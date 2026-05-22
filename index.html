@@ -1072,12 +1072,8 @@ async function submitAuth() {
       </div>
     </div>
     <div class="field field-row">
-      <label>Source document URL <span style="font-weight:400;color:#9ca3af;">(optional — link to the evidence, article, or filing that this report is based on)</span></label>
-      <input type="url" id="sourceUrl" placeholder="https://…" />
-    </div>
-    <div class="field field-row">
-      <label>Circle.so published report URL <span style="font-weight:400;color:#9ca3af;">(optional — link to the published report on AgentBee)</span></label>
-      <input type="url" id="circleUrl" placeholder="https://agentbee.circle.so/…" />
+      <label>Circle.so report URL <span style="font-weight:400;color:#9ca3af;">(optional — link to the published report on AgentBee)</span></label>
+      <input type="url" id="sourceUrl" placeholder="https://agentbee.circle.so/…" />
     </div>
     <div class="field">
       <label>Incident description</label>
@@ -1827,7 +1823,6 @@ async function submitIncident() {
         source_type: document.getElementById('sourceType').value || null,
         report_type: vals.reportType || null,
         source_url: document.getElementById('sourceUrl').value.trim() || null,
-        circle_url: document.getElementById('circleUrl').value.trim() || null,
       })
     });
 
@@ -2045,7 +2040,6 @@ function resetForm() {
   document.getElementById('description').value = '';
   document.getElementById('deidentifiedSummary').value = '';
   document.getElementById('sourceUrl').value = '';
-  document.getElementById('circleUrl').value = '';
   document.getElementById('summaryGenerateStatus').textContent = '';
   document.getElementById('generateSummaryBtn').disabled = true;
   document.getElementById('generateSummaryBtn').innerHTML = '✨ Generate draft';
