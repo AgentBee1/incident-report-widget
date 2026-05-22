@@ -992,16 +992,6 @@ async function submitAuth() {
           <label>Jurisdiction / State</label>
           <input type="text" id="newAgentJurisdiction" placeholder="e.g. Chandigarh" />
         </div>
-        <div class="field">
-          <label>Risk tier</label>
-          <select id="newAgentRiskTier">
-            <option value="">Select…</option>
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-            <option>Critical</option>
-          </select>
-        </div>
       </div>
       <button class="btn-create-agent" id="createAgentBtn">Create agent &amp; continue</button>
       <div class="status" id="newAgentStatus" style="margin-top:10px;"></div>
@@ -1548,7 +1538,6 @@ async function createAgent() {
     agency_name: name,
     country: document.getElementById('newAgentCountry').value.trim() || null,
     jurisdiction: document.getElementById('newAgentJurisdiction').value.trim() || null,
-    risk_tier: document.getElementById('newAgentRiskTier').value || null,
   };
 
   try {
