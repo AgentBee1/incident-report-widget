@@ -963,8 +963,25 @@
       <div class="step-badge">3</div>
       <h2>Institution linkage</h2>
     </div>
+
+    <!-- Other authorised clients panel — populated when agent is selected -->
+    <div id="otherClientsPanel" style="display:none;margin-bottom:18px;">
+      <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span>🏛️</span> Agent is an authorised agent of these AgentBee client institutions
+        <span id="otherClientsBadge" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:20px;font-size:10px;font-weight:600;padding:2px 8px;"></span>
+      </div>
+      <div id="otherClientsTags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      <div style="font-size:11px;color:#6b7280;margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6;">
+        These institutions will see this incident in their <strong>Your Agents</strong> widget. They are not listed below unless you add them manually.
+      </div>
+    </div>
+    <div id="otherClientsLoading" style="display:none;font-size:12px;color:#9ca3af;margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+      <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:#9ca3af;width:11px;height:11px;border-width:2px;"></span>
+      Looking up authorised client institutions…
+    </div>
+
     <div class="field field-row">
-      <label>Institution names <span style="font-weight:400;color:#9ca3af;">— one per line</span></label>
+      <label>Additional institution names to analyse <span style="font-weight:400;color:#9ca3af;">— one per line</span></label>
       <textarea id="institutionsList" rows="6" placeholder="University of Melbourne&#10;Monash University&#10;RMIT University&#10;…"></textarea>
     </div>
     <button class="btn-analyse" id="analyseBtn" onclick="analyseInstitutions()" disabled>
@@ -1335,6 +1352,7 @@ function selectAgent(agent) {
   clearStatus('agentStatus');
   document.getElementById('analyseBtn').disabled = false;
   updatePreview();
+  lookupAuthorisedClients(agent.id);
 }
 
 async function lookupAgent() {
@@ -1351,7 +1369,60 @@ async function lookupAgent() {
   } catch(e) { setStatus('agentStatus', 'error', 'Search failed: ' + e.message); }
 }
 
-async function analyseInstitutions() {
+async function lookupAuthorisedClients(agentId) {
+  const panel = document.getElementById('otherClientsPanel');
+  const loading = document.getElementById('otherClientsLoading');
+  const tagsEl = document.getElementById('otherClientsTags');
+  const badge = document.getElementById('otherClientsBadge');
+
+  panel.style.display = 'none';
+  loading.style.display = 'flex';
+
+  try {
+    // Get all active institution links for this agent
+    const linksRes = await sbFetch(
+      `${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=eq.${agentId}&is_active=eq.true&select=institution_id`
+    );
+    const links = await linksRes.json();
+
+    if (!links || !links.length) {
+      loading.style.display = 'none';
+      return;
+    }
+
+    // Fetch institution details for all linked institutions
+    const ids = links.map(l => l.institution_id).join(',');
+    const instRes = await sbFetch(
+      `${SUPABASE_URL}/rest/v1/institutions?id=in.(${ids})&select=id,name,status,is_client&order=name`
+    );
+    const institutions = await instRes.json();
+
+    // Only show client institutions
+    const clients = institutions.filter(i => i.is_client || i.status === 'Client');
+
+    loading.style.display = 'none';
+
+    if (!clients.length) return;
+
+    tagsEl.innerHTML = clients.map(i => `
+      <span class="inst-tag auth" title="Status: ${i.status || 'Client'}">
+        <span class="dot green"></span>${i.name}
+      </span>
+    `).join('');
+
+    badge.textContent = `${clients.length} client${clients.length !== 1 ? 's' : ''}`;
+    panel.style.display = 'block';
+
+    // Store for use in submit / analysis
+    window._authorisedClientInstitutions = clients;
+
+  } catch(e) {
+    loading.style.display = 'none';
+    console.error('Client lookup failed:', e);
+  }
+}
+
+// ── Analyse institutions ─────────────────────────────────────────
   if (!selectedAgent) { setStatus('instStatus', 'error', 'Please select an agent first.'); return; }
   const raw = document.getElementById('institutionsList').value.trim();
   if (!raw) { setStatus('instStatus', 'error', 'Please enter at least one institution name.'); return; }
@@ -1741,6 +1812,9 @@ function resetForm() {
   submittedIncidentId = null;
   agentInput.value = '';
   document.getElementById('agentCard').classList.remove('visible');
+  document.getElementById('otherClientsPanel').style.display = 'none';
+  document.getElementById('otherClientsTags').innerHTML = '';
+  window._authorisedClientInstitutions = [];
   clearStatus('agentStatus');
   ['reportType','category','sourceType','severityWeight'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('incidentDate').value = new Date().toISOString().split('T')[0];
