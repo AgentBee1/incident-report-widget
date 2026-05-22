@@ -1,62 +1,81 @@
-export default async function handler(req, res) {
+export const config = { runtime: 'edge' };
+
+export default async function handler(req) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { description, category, severity, reportType } = req.body;
-
-  if (!description) {
-    return res.status(400).json({ error: 'Description is required' });
-  }
-
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'API key not configured' });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type':      'application/json',
-        'x-api-key':         apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model:      'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{
-          role:    'user',
-          content: `You are helping prepare a de-identified incident summary for a weekly email digest sent to non-client educational institutions. The email informs them about incidents in the international education agent sector that may be relevant to their risk management.
+    const { description, category, severity, reportType } = await req.json();
 
-Please rewrite the following incident description in a de-identified way:
-- Remove all agent names, company names, and any identifying details
-- Preserve the nature, category, and severity of the incident
-- Write in plain, professional language suitable for a compliance/risk email
-- Keep it to 2-3 sentences maximum
-- Do not use phrases like "an agent" — instead use the sector context e.g. "an education agent operating in [region if mentioned]"
+    if (!description) {
+      return new Response(JSON.stringify({ error: 'Missing description' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    if (!anthropicKey) {
+      return new Response(JSON.stringify({ error: 'Server misconfigured' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const prompt = `You are writing a de-identified incident summary for AgentBee, an education agent due diligence platform. This summary will be sent to universities and institutions that are not yet clients (warm and cold leads) as part of a weekly digest email.
+
+The summary must:
+- Be 2–4 sentences
+- NOT identify the agent, agency name, or any specific individuals by name
+- NOT include specific locations, FIR numbers, case numbers, police station names, or other identifying details
+- NOT mention specific countries or cities
+- Describe the nature and seriousness of the incident in general terms
+- Be written in plain, professional English suitable for a university risk team
+- Convey the category and severity of the incident without revealing source details
 
 Incident details:
 - Category: ${category || 'Not specified'}
 - Report type: ${reportType || 'Not specified'}
-- Severity: ${severity || 'Not specified'}/100
+- Severity: ${severity || 'Not specified'} / 100
 - Description: ${description}
 
-Respond with only the de-identified summary text, no preamble or explanation.`
-        }]
-      })
+Write only the de-identified summary — no preamble, no labels, no explanation.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }],
+      }),
     });
 
     if (!response.ok) {
       const err = await response.json();
-      return res.status(500).json({ error: err.error?.message || 'Claude API error' });
+      throw new Error(err.error?.message || response.statusText);
     }
 
-    const data = await response.json();
-    const summary = data.content?.[0]?.text || '';
-    return res.status(200).json({ summary });
+    const result = await response.json();
+    const summary = result.content?.[0]?.text?.trim() || '';
+
+    return new Response(JSON.stringify({ summary }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
 
   } catch (e) {
-    return res.status(500).json({ error: e.message });
+    return new Response(JSON.stringify({ error: e.message || 'Unknown error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
