@@ -624,6 +624,27 @@
     .parse-result.ok { display: block; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
     .parse-result.warn { display: block; background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
 
+    .btn-generate-summary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: #1d4ed8;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .btn-generate-summary:hover:not(:disabled) { background: #1e40af; }
+    .btn-generate-summary:disabled { opacity: 0.4; cursor: not-allowed; }
+
     #auth-screen {
       position: fixed;
       inset: 0;
@@ -908,15 +929,33 @@
       <label>Source document URL <span style="font-weight:400;color:#9ca3af;">(optional — link to the evidence, article, or filing that this report is based on)</span></label>
       <input type="url" id="sourceUrl" placeholder="https://…" />
     </div>
+    <div class="field field-row">
+      <label>Circle.so published report URL <span style="font-weight:400;color:#9ca3af;">(optional — link to the published report on AgentBee)</span></label>
+      <input type="url" id="circleUrl" placeholder="https://agentbee.circle.so/…" />
+    </div>
     <div class="field">
       <label>Incident description</label>
-      <textarea id="description" rows="5" placeholder="Describe the incident in detail…"></textarea>
+      <textarea id="description" rows="5" placeholder="Describe the incident in detail…" oninput="onDescriptionInput()"></textarea>
     </div>
     <div style="height:14px;"></div>
-    <div class="field" style="background:#f8faff;border:1px solid #dbeafe;border-radius:9px;padding:14px;">
-      <label style="color:#1d4ed8;">De-identified summary <span style="font-weight:400;color:#9ca3af;">— sent to non-client institutions (Cold, Warm, Former Client etc.)</span></label>
-      <textarea id="deidentifiedSummary" rows="4" placeholder="Write a summary that does not identify the agent — this will be shared with institutions that are not current clients…" style="margin-top:6px;background:#fff;border-color:#bfdbfe;"></textarea>
+    <div style="background:#f0f7ff;border:1px solid #bfdbfe;border-radius:9px;padding:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:#1d4ed8;">De-identified summary</div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:2px;">Sent to non-client institutions (Cold, Warm, Former Client etc.) — Claude will draft this for you</div>
+        </div>
+        <button class="btn-generate-summary" id="generateSummaryBtn" onclick="generateInlineSummary()" disabled>
+          ✨ Generate draft
+        </button>
+      </div>
+      <div id="summaryGenerating" style="display:none;align-items:center;gap:8px;font-size:12px;color:#6b7280;margin-bottom:8px;">
+        <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:#3b82f6;width:12px;height:12px;border-width:2px;"></span>
+        Generating with Claude…
+      </div>
+      <textarea id="deidentifiedSummary" rows="4" placeholder="Click "Generate draft" after writing the incident description above — Claude will draft a de-identified version for you to review and edit…" style="width:100%;padding:10px 12px;background:#fff;border:1px solid #bfdbfe;border-radius:7px;font-size:13px;font-family:inherit;color:#1a1d23;resize:vertical;outline:none;line-height:1.6;transition:border-color 0.15s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#bfdbfe'"></textarea>
+      <div id="summaryGenerateStatus" style="font-size:11px;margin-top:6px;color:#9ca3af;"></div>
     </div>
+
 
   <!-- 3. Institutions -->
   <div class="card">
@@ -1494,6 +1533,7 @@ async function submitIncident() {
         source_type: document.getElementById('sourceType').value || null,
         report_type: vals.reportType || null,
         source_url: document.getElementById('sourceUrl').value.trim() || null,
+        circle_url: document.getElementById('circleUrl').value.trim() || null,
       })
     });
 
@@ -1514,7 +1554,6 @@ async function submitIncident() {
 
     setStatus('submitStatus', 'success', `Report submitted — ID: ${incidentId} · ${allLinked.length} institution(s) linked.`);
     document.getElementById('commsBtn').disabled = false;
-    document.getElementById('modalIncidentId').textContent = incidentId;
     btn.className = 'btn btn-success';
     btn.innerHTML = '✓ Submitted';
   } catch(e) {
@@ -1522,6 +1561,55 @@ async function submitIncident() {
     btn.disabled = false;
     btn.innerHTML = 'Submit report';
   }
+}
+
+function onDescriptionInput() {
+  const hasDescription = document.getElementById('description').value.trim().length > 20;
+  document.getElementById('generateSummaryBtn').disabled = !hasDescription;
+}
+
+async function generateInlineSummary() {
+  const description = document.getElementById('description').value.trim();
+  const category = document.getElementById('category').value;
+  const severity = document.getElementById('severityWeight').value;
+  const reportType = document.getElementById('reportType').value;
+
+  if (!description) {
+    document.getElementById('summaryGenerateStatus').textContent = 'Please write an incident description first.';
+    document.getElementById('summaryGenerateStatus').style.color = '#b91c1c';
+    return;
+  }
+
+  const btn = document.getElementById('generateSummaryBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+  document.getElementById('summaryGenerating').style.display = 'flex';
+  document.getElementById('summaryGenerateStatus').textContent = '';
+
+  try {
+    const res = await fetch('/api/summarise', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description, category, severity, reportType }),
+    });
+
+    if (!res.ok) {
+      const e = await res.json();
+      throw new Error(e.error || res.statusText);
+    }
+
+    const data = await res.json();
+    document.getElementById('deidentifiedSummary').value = data.summary || '';
+    document.getElementById('summaryGenerateStatus').textContent = '✓ Draft generated — please review and edit before submitting.';
+    document.getElementById('summaryGenerateStatus').style.color = '#15803d';
+  } catch(e) {
+    document.getElementById('summaryGenerateStatus').textContent = '✗ Generation failed: ' + e.message;
+    document.getElementById('summaryGenerateStatus').style.color = '#b91c1c';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '↺ Regenerate';
+  document.getElementById('summaryGenerating').style.display = 'none';
 }
 
 // ── Email protocol ───────────────────────────────────────────────
@@ -1542,7 +1630,15 @@ function closeEmailModal() {
 
 async function openEmailProtocol() {
   openEmailModal();
-  await generateSummary();
+  // Pre-fill from inline field if already drafted
+  const existing = document.getElementById('deidentifiedSummary').value.trim();
+  if (existing) {
+    document.getElementById('emailSummaryText').value = existing;
+    document.getElementById('emailStep1').style.display = 'none';
+    document.getElementById('emailStep2').style.display = 'block';
+  } else {
+    await generateSummary();
+  }
 }
 
 async function generateSummary() {
@@ -1651,6 +1747,10 @@ function resetForm() {
   document.getElementById('description').value = '';
   document.getElementById('deidentifiedSummary').value = '';
   document.getElementById('sourceUrl').value = '';
+  document.getElementById('circleUrl').value = '';
+  document.getElementById('summaryGenerateStatus').textContent = '';
+  document.getElementById('generateSummaryBtn').disabled = true;
+  document.getElementById('generateSummaryBtn').innerHTML = '✨ Generate draft';
   document.getElementById('institutionsList').value = '';
   document.getElementById('instResults').style.display = 'none';
   document.getElementById('missingDataPanel').style.display = 'none';
