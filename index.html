@@ -1813,29 +1813,40 @@ async function lookupAuthorisedClients(agentId) {
   loading.style.display = 'flex';
 
   try {
-    // Get all active institution links for this agent
-    const linksRes = await sbFetch(
-      `${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=eq.${agentId}&is_active=eq.true&select=institution_id`
-    );
-    const links = await linksRes.json();
-
-    if (!links || !links.length) {
-      loading.style.display = 'none';
-      return;
+    // Collect all agent IDs in the chain: selected + all parents
+    const agentIds = [agentId];
+    let currentId = selectedAgent.parent_agent_id;
+    for (let i = 0; i < 3 && currentId; i++) {
+      agentIds.push(currentId);
+      const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${currentId}&select=id,parent_agent_id&limit=1`);
+      const data = await res.json();
+      if (!data.length) break;
+      currentId = data[0].parent_agent_id;
     }
 
-    // Fetch institution details for all linked institutions
-    const ids = links.map(l => l.institution_id).join(',');
+    // Get all institution links across the entire chain
+    const allLinks = [];
+    for (const id of agentIds) {
+      const linksRes = await sbFetch(
+        `${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=eq.${id}&is_active=eq.true&select=institution_id`
+      );
+      const links = await linksRes.json();
+      allLinks.push(...(links || []));
+    }
+
+    if (!allLinks.length) { loading.style.display = 'none'; return; }
+
+    // Deduplicate institution IDs
+    const uniqueIds = [...new Set(allLinks.map(l => l.institution_id))];
+    const ids = uniqueIds.join(',');
+
     const instRes = await sbFetch(
       `${SUPABASE_URL}/rest/v1/institutions?id=in.(${ids})&select=id,name,status,is_client&order=name`
     );
     const institutions = await instRes.json();
-
-    // Only show client institutions
     const clients = institutions.filter(i => i.is_client || i.status === 'Client');
 
     loading.style.display = 'none';
-
     if (!clients.length) return;
 
     tagsEl.innerHTML = clients.map(i => `
@@ -1846,8 +1857,6 @@ async function lookupAuthorisedClients(agentId) {
 
     badge.textContent = `${clients.length} client${clients.length !== 1 ? 's' : ''}`;
     panel.style.display = 'block';
-
-    // Store for use in submit / analysis
     window._authorisedClientInstitutions = clients;
 
   } catch(e) {
