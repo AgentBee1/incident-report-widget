@@ -1880,14 +1880,32 @@ async function analyseInstitutions() {
 
   const NON_CLIENT_STATUSES = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed', null];
 
+  // Build full agent ID chain (selected + all parents) for authorisation check
+  const agentIdChain = [selectedAgent.id];
+  let chainId = selectedAgent.parent_agent_id;
+  for (let i = 0; i < 3 && chainId; i++) {
+    agentIdChain.push(chainId);
+    const r = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${chainId}&select=id,parent_agent_id&limit=1`);
+    const d = await r.json();
+    if (!d.length) break;
+    chainId = d[0].parent_agent_id;
+  }
+
   for (const name of names) {
     const instRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(name)}*&select=id,name,contact_email,salutation,status,is_client&limit=1`);
     const instData = await instRes.json();
     if (!instData || !instData.length) { analysisResults.unknown.push({ name }); continue; }
     const inst = instData[0];
     const isNonClient = !inst.is_client || NON_CLIENT_STATUSES.includes(inst.status);
-    const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=eq.${selectedAgent.id}&institution_id=eq.${inst.id}&is_active=eq.true&select=agent_id&limit=1`);
-    const linkData = await linkRes.json();
+
+    // Check authorisation across full parent chain
+    let isAuthorised = false;
+    for (const aid of agentIdChain) {
+      const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=eq.${aid}&institution_id=eq.${inst.id}&is_active=eq.true&select=agent_id&limit=1`);
+      const linkData = await linkRes.json();
+      if (linkData && linkData.length) { isAuthorised = true; break; }
+    }
+
     const entry = {
       name,
       institutionId: inst.id,
@@ -1898,7 +1916,7 @@ async function analyseInstitutions() {
       is_client: inst.is_client,
       isNonClient,
     };
-    if (linkData && linkData.length) {
+    if (isAuthorised) {
       analysisResults.authorised.push(entry);
     } else {
       analysisResults.risk.push(entry);
