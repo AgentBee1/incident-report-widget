@@ -977,9 +977,10 @@ async function submitAuth() {
     </div>
     <div class="agent-resolved" id="agentCard">
       <div class="agent-avatar">✓</div>
-      <div>
+      <div style="flex:1;">
         <div class="agent-resolved-name" id="agentCardName"></div>
         <div class="agent-resolved-meta" id="agentCardMeta"></div>
+        <div id="agentHierarchy" style="margin-top:4px;font-size:11px;color:#4ade80;display:none;"></div>
       </div>
       <div class="tier-pill" id="agentCardTier"></div>
     </div>
@@ -998,10 +999,25 @@ async function submitAuth() {
           <input type="text" id="newAgentCountry" placeholder="e.g. India" />
         </div>
         <div class="field">
-          <label>Jurisdiction / State</label>
-          <input type="text" id="newAgentJurisdiction" placeholder="e.g. Chandigarh" />
+          <label>Jurisdiction / State / City</label>
+          <input type="text" id="newAgentJurisdiction" placeholder="e.g. Lahore" />
         </div>
       </div>
+
+      <!-- Parent agent (canonical) search -->
+      <div class="field" style="margin-bottom:12px;">
+        <label>Parent agent (canonical brand) <span style="font-weight:400;color:#9ca3af;">— optional, link to global or country-level record</span></label>
+        <div style="display:flex;gap:8px;align-items:flex-start;position:relative;">
+          <input type="text" id="parentAgentSearch" placeholder="Search for parent agent…" autocomplete="off"
+            style="background:#fff;border-color:#fde68a;flex:1;" />
+          <div id="parentSuggestions" style="position:absolute;top:100%;left:0;right:40px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:200;overflow:hidden;display:none;margin-top:4px;"></div>
+        </div>
+        <div id="parentAgentCard" style="display:none;margin-top:8px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#15803d;display:flex;align-items:center;justify-content:space-between;">
+          <span id="parentAgentCardName" style="font-weight:600;"></span>
+          <button onclick="clearParentAgent()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;">✕ Remove</button>
+        </div>
+      </div>
+
       <button class="btn-create-agent" id="createAgentBtn">Create agent &amp; continue</button>
       <div class="status" id="newAgentStatus" style="margin-top:10px;"></div>
     </div>
@@ -1509,6 +1525,7 @@ function selectAgent(agent) {
   document.getElementById('analyseBtn').disabled = false;
   updatePreview();
   lookupAuthorisedClients(agent.id);
+  showAgentHierarchy(agent);
 }
 
 async function lookupAgent() {
@@ -1545,6 +1562,7 @@ async function createAgent() {
     agency_name: name,
     country: document.getElementById('newAgentCountry').value.trim() || null,
     jurisdiction: document.getElementById('newAgentJurisdiction').value.trim() || null,
+    parent_agent_id: _parentAgent ? _parentAgent.id : null,
   };
 
   try {
@@ -1901,7 +1919,84 @@ async function generateInlineSummary() {
   document.getElementById('summaryGenerating').style.display = 'none';
 }
 
-// ── Email protocol ───────────────────────────────────────────────
+// ── Parent agent search (for new agent form) ─────────────────────
+let _parentAgent = null;
+let _parentSearchTimeout = null;
+
+function initParentAgentSearch() {
+  const input = document.getElementById('parentAgentSearch');
+  const suggestions = document.getElementById('parentSuggestions');
+  if (!input) return;
+
+  input.addEventListener('input', () => {
+    clearTimeout(_parentSearchTimeout);
+    const q = input.value.trim();
+    if (q.length < 2) { suggestions.style.display = 'none'; return; }
+    _parentSearchTimeout = setTimeout(async () => {
+      const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,country,jurisdiction&limit=6&order=agency_name`);
+      const data = await res.json();
+      if (!data.length) { suggestions.style.display = 'none'; return; }
+      suggestions.innerHTML = data.map((a, i) =>
+        `<div class="suggestion-item" data-parent-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:13px;">
+          <div style="font-weight:500;">${a.agency_name}</div>
+          <div style="font-size:11px;color:#9ca3af;">${[a.jurisdiction, a.country].filter(Boolean).join(' · ')}</div>
+        </div>`).join('');
+      suggestions._agents = data;
+      suggestions.style.display = 'block';
+    }, 280);
+  });
+
+  suggestions.addEventListener('click', e => {
+    const item = e.target.closest('[data-parent-index]');
+    if (!item) return;
+    const idx = parseInt(item.getAttribute('data-parent-index'), 10);
+    const agent = suggestions._agents[idx];
+    if (!agent) return;
+    _parentAgent = agent;
+    input.value = agent.agency_name;
+    suggestions.style.display = 'none';
+    const card = document.getElementById('parentAgentCard');
+    document.getElementById('parentAgentCardName').textContent = `↑ Parent: ${agent.agency_name}`;
+    card.style.display = 'flex';
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#parentAgentSearch') && !e.target.closest('#parentSuggestions')) {
+      suggestions.style.display = 'none';
+    }
+  });
+}
+
+function clearParentAgent() {
+  _parentAgent = null;
+  document.getElementById('parentAgentSearch').value = '';
+  document.getElementById('parentAgentCard').style.display = 'none';
+}
+
+// Build and display agent hierarchy
+async function showAgentHierarchy(agent) {
+  const hierarchyEl = document.getElementById('agentHierarchy');
+  if (!agent.parent_agent_id) { hierarchyEl.style.display = 'none'; return; }
+
+  const chain = [];
+  let currentId = agent.parent_agent_id;
+
+  // Walk up the chain (max 3 levels)
+  for (let i = 0; i < 3 && currentId; i++) {
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${currentId}&select=id,agency_name,parent_agent_id&limit=1`);
+    const data = await res.json();
+    if (!data.length) break;
+    chain.push(data[0].agency_name);
+    currentId = data[0].parent_agent_id;
+  }
+
+  if (chain.length) {
+    hierarchyEl.textContent = '↑ ' + chain.join(' → ');
+    hierarchyEl.style.display = 'block';
+  }
+}
+
+// ── End parent agent search ───────────────────────────────────────
 
 function openEmailModal() {
   document.getElementById('emailModal').classList.add('open');
@@ -2043,7 +2138,9 @@ function resetForm() {
   submittedIncidentId = null;
   agentInput.value = '';
   document.getElementById('agentCard').classList.remove('visible');
+  document.getElementById('agentHierarchy').style.display = 'none';
   document.getElementById('newAgentPanel').classList.remove('visible');
+  clearParentAgent();
   document.getElementById('otherClientsPanel').style.display = 'none';
   document.getElementById('otherClientsTags').innerHTML = '';
   window._authorisedClientInstitutions = [];
@@ -2121,6 +2218,9 @@ document.getElementById('closeEmailBtn').addEventListener('click', closeEmailMod
 // Footer
 document.getElementById('resetFormBtn').addEventListener('click', resetForm);
 document.getElementById('submitBtn').addEventListener('click', submitIncident);
+
+// Parent agent search
+initParentAgentSearch();
 </script>
 </body>
 </html>
