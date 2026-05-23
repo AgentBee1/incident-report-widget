@@ -1533,19 +1533,49 @@ async function lookupAgent() {
   if (!q) return;
   setStatus('agentStatus', 'info', 'Searching…');
   document.getElementById('newAgentPanel').classList.remove('visible');
+  closeSuggestions();
   try {
-    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score&limit=6`);
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,parent_agent_id&limit=8&order=agency_name`);
     const data = await res.json();
     if (!data.length) {
       setStatus('agentStatus', 'error', 'No agent found matching that name.');
-      // Pre-fill new agent form with the search term
       document.getElementById('newAgentName').value = q;
       document.getElementById('newAgentPanel').classList.add('visible');
       return;
     }
-    if (data.length === 1) { selectAgent(data[0]); return; }
-    renderSuggestions(data);
-    setStatus('agentStatus', 'info', `${data.length} matches — please select one.`);
+    if (data.length === 1) {
+      selectAgent(data[0]);
+      clearStatus('agentStatus');
+      return;
+    }
+    // Show inline match list
+    _suggestionAgents = data;
+    const matchHtml = data.map((a, i) => `
+      <div data-agent-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;transition:background 0.1s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background=''">
+        <div style="font-size:13px;font-weight:500;color:#1a1d23;">${a.agency_name}</div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:2px;">${[a.jurisdiction, a.country].filter(Boolean).join(' · ')}${a.risk_tier ? ' · ' + a.risk_tier + ' tier' : ''}</div>
+      </div>`).join('');
+    setStatus('agentStatus', 'info', `${data.length} matches found — select one below:`);
+    // Insert inline match list after status
+    let matchList = document.getElementById('agentMatchList');
+    if (!matchList) {
+      matchList = document.createElement('div');
+      matchList.id = 'agentMatchList';
+      matchList.style.cssText = 'border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-top:8px;';
+      document.getElementById('agentStatus').after(matchList);
+    }
+    matchList.innerHTML = matchHtml;
+    matchList.style.display = 'block';
+    matchList.addEventListener('click', function(e) {
+      const item = e.target.closest('[data-agent-index]');
+      if (!item) return;
+      const idx = parseInt(item.getAttribute('data-agent-index'), 10);
+      if (_suggestionAgents[idx]) {
+        selectAgent(_suggestionAgents[idx]);
+        clearStatus('agentStatus');
+        matchList.style.display = 'none';
+      }
+    });
   } catch(e) { setStatus('agentStatus', 'error', 'Search failed: ' + e.message); }
 }
 
@@ -2137,6 +2167,8 @@ function resetForm() {
   analysisResults = { authorised: [], risk: [], unknown: [] };
   submittedIncidentId = null;
   agentInput.value = '';
+  const matchList = document.getElementById('agentMatchList');
+  if (matchList) matchList.style.display = 'none';
   document.getElementById('agentCard').classList.remove('visible');
   document.getElementById('agentHierarchy').style.display = 'none';
   document.getElementById('newAgentPanel').classList.remove('visible');
