@@ -1824,15 +1824,13 @@ async function lookupAuthorisedClients(agentId) {
     const familyData = await familyRes.json();
     (familyData || []).forEach(a => agentIds.add(a.id));
 
-    // Get all authorised institution links across the entire family
-    const allLinks = [];
-    for (const id of agentIds) {
-      const linksRes = await sbFetch(
-        `${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=eq.${id}&link_type=eq.authorised&select=institution_id`
-      );
-      const links = await linksRes.json();
-      allLinks.push(...(links || []));
-    }
+    const idList = [...agentIds].join(',');
+
+    // Get all authorised institution links in a single query
+    const allLinksRes = await sbFetch(
+      `${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${idList})&link_type=eq.authorised&select=institution_id`
+    );
+    const allLinks = await allLinksRes.json();
 
     if (!allLinks.length) { loading.style.display = 'none'; return; }
 
@@ -1880,8 +1878,7 @@ async function analyseInstitutions() {
 
   const NON_CLIENT_STATUSES = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed', null];
 
-  // Build full agent family (matches Your Agents widget logic):
-  // selected agent + its canonical + all agents sharing that canonical
+  // Build full agent family (matches Your Agents widget logic)
   const canonicalId = selectedAgent.canonical_agent_id || selectedAgent.id;
   const agentIdChain = new Set([selectedAgent.id, canonicalId]);
 
@@ -1892,6 +1889,8 @@ async function analyseInstitutions() {
   const familyData = await familyRes.json();
   (familyData || []).forEach(a => agentIdChain.add(a.id));
 
+  const familyIdList = [...agentIdChain].join(',');
+
 
   for (const name of names) {
     const instRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(name)}*&select=id,name,contact_email,salutation,status,is_client&limit=1`);
@@ -1900,13 +1899,11 @@ async function analyseInstitutions() {
     const inst = instData[0];
     const isNonClient = !inst.is_client || NON_CLIENT_STATUSES.includes(inst.status);
 
-    // Check authorisation across full agent chain using link_type=authorised (matches Your Agents widget)
+    // Check authorisation using single IN query across full family
     let isAuthorised = false;
-    for (const aid of agentIdChain) {
-      const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=eq.${aid}&institution_id=eq.${inst.id}&link_type=eq.authorised&select=agent_id&limit=1`);
-      const linkData = await linkRes.json();
-      if (linkData && linkData.length) { isAuthorised = true; break; }
-    }
+    const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${familyIdList})&institution_id=eq.${inst.id}&link_type=eq.authorised&select=agent_id&limit=1`);
+    const linkData = await linkRes.json();
+    if (linkData && linkData.length) isAuthorised = true;
 
     const entry = {
       name,
