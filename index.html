@@ -1824,11 +1824,11 @@ async function lookupAuthorisedClients(agentId) {
       currentId = data[0].parent_agent_id;
     }
 
-    // Get all institution links across the entire chain
+    // Get all institution links across the entire chain using institution_agent_links
     const allLinks = [];
     for (const id of agentIds) {
       const linksRes = await sbFetch(
-        `${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=eq.${id}&is_active=eq.true&select=institution_id`
+        `${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=eq.${id}&select=institution_id`
       );
       const links = await linksRes.json();
       allLinks.push(...(links || []));
@@ -1898,10 +1898,10 @@ async function analyseInstitutions() {
     const inst = instData[0];
     const isNonClient = !inst.is_client || NON_CLIENT_STATUSES.includes(inst.status);
 
-    // Check authorisation across full parent chain
+    // Check authorisation across full parent chain using institution_agent_links
     let isAuthorised = false;
     for (const aid of agentIdChain) {
-      const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=eq.${aid}&institution_id=eq.${inst.id}&is_active=eq.true&select=agent_id&limit=1`);
+      const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=eq.${aid}&institution_id=eq.${inst.id}&select=agent_id&limit=1`);
       const linkData = await linkRes.json();
       if (linkData && linkData.length) { isAuthorised = true; break; }
     }
