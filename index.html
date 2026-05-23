@@ -1983,16 +1983,18 @@ async function submitIncident() {
     submittedIncidentId = incidentId;
 
     const allLinked = [...analysisResults.authorised, ...analysisResults.risk];
-    if (allLinked.length) {
+    // Deduplicate by institution_id to avoid unique constraint violations
+    const uniqueLinks = [...new Map(allLinked.map(i => [i.institutionId, i])).values()];
+    if (uniqueLinks.length) {
       const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_institution_links`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify(allLinked.map(i => ({ incident_id: incidentId, institution_id: i.institutionId })))
+        body: JSON.stringify(uniqueLinks.map(i => ({ incident_id: incidentId, institution_id: i.institutionId })))
       });
       if (!linkRes.ok) { const e = await linkRes.json(); throw new Error('Incident created but links failed: ' + (e.message || linkRes.statusText)); }
     }
 
-    setStatus('submitStatus', 'success', `Report submitted — ID: ${incidentId} · ${allLinked.length} institution(s) linked.`);
+    setStatus('submitStatus', 'success', `Report submitted — ID: ${incidentId} · ${uniqueLinks.length} institution(s) linked.`);
     document.getElementById('commsBtn').disabled = false;
     btn.className = 'btn btn-success';
     btn.innerHTML = '✓ Submitted';
