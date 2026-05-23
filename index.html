@@ -985,14 +985,19 @@ async function submitAuth() {
         Is this report about a specific branch or office?
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-        <div class="field">
+        <div class="field" style="position:relative;">
           <label>Country office <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
           <input type="text" id="branchCountry" placeholder="e.g. Pakistan" autocomplete="off" />
+          <div id="branchCountrySuggestions" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:200;overflow:hidden;display:none;margin-top:2px;"></div>
         </div>
-        <div class="field">
+        <div class="field" style="position:relative;">
           <label>City / office <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
           <input type="text" id="branchCity" placeholder="e.g. Lahore" autocomplete="off" />
+          <div id="branchCitySuggestions" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:200;overflow:hidden;display:none;margin-top:2px;"></div>
         </div>
+      </div>
+      <div id="branchMatchCard" style="display:none;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#15803d;margin-bottom:10px;">
+        ✓ Existing branch found: <strong id="branchMatchName"></strong> — will be selected automatically
       </div>
       <div style="display:flex;gap:8px;">
         <button class="btn-analyse" id="applyBranchBtn" style="margin-top:0;">Apply branch</button>
@@ -1541,19 +1546,20 @@ let _canonicalAgent = null;
 
 function selectAgent(agent) {
   _canonicalAgent = agent;
-  // Hide match list if visible
+  _selectedBranchAgent = null;
   const matchList = document.getElementById('agentMatchList');
   if (matchList) matchList.style.display = 'none';
   closeSuggestions();
   clearStatus('agentStatus');
-  // Reset branch fields
   document.getElementById('branchCountry').value = '';
   document.getElementById('branchCity').value = '';
+  document.getElementById('branchMatchCard').style.display = 'none';
   clearStatus('branchStatus');
-  // Show branch panel
   document.getElementById('branchPanel').style.display = 'block';
   document.getElementById('agentCard').classList.remove('visible');
   document.getElementById('agentHierarchy').style.display = 'none';
+  // Load existing children for live search
+  loadBranchChildren();
 }
 
 function resolveAgent(agent) {
@@ -1570,30 +1576,28 @@ function resolveAgent(agent) {
 }
 
 async function applyBranch() {
+  // If user selected an existing branch from suggestions, use it directly
+  if (_selectedBranchAgent) {
+    resolveAgent(_selectedBranchAgent);
+    return;
+  }
+
   const country = document.getElementById('branchCountry').value.trim();
   const city = document.getElementById('branchCity').value.trim();
 
   if (!country && !city) {
-    // No branch specified — use canonical
     resolveAgent(_canonicalAgent);
     return;
   }
 
   setStatus('branchStatus', 'info', 'Looking for matching branch…');
 
-  // Build search name: "Canonical Country" or "Canonical City" or "Canonical Country City"
   const suffix = [country, city].filter(Boolean).join(' ');
   const searchName = `${_canonicalAgent.agency_name} ${suffix}`;
 
   try {
-    // Look for existing child agent matching this combination
-    const res = await sbFetch(
-      `${SUPABASE_URL}/rest/v1/agents?parent_agent_id=eq.${_canonicalAgent.id}&select=id,agency_name,country,jurisdiction,risk_tier,risk_score,parent_agent_id&limit=10`
-    );
-    const children = await res.json();
-
-    // Try to match country and city against existing children
-    const match = children.find(c => {
+    // Try to match against already-loaded children
+    const match = _branchChildren.find(c => {
       const cCountry = (c.country || '').toLowerCase();
       const cJuris = (c.jurisdiction || '').toLowerCase();
       const countryMatch = !country || cCountry.includes(country.toLowerCase());
@@ -1605,7 +1609,6 @@ async function applyBranch() {
       clearStatus('branchStatus');
       resolveAgent(match);
     } else {
-      // No existing branch — create one
       setStatus('branchStatus', 'info', `No existing branch found — creating "${searchName}"…`);
       const createRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agents`, {
         method: 'POST',
@@ -1629,6 +1632,83 @@ async function applyBranch() {
 
 function skipBranch() {
   resolveAgent(_canonicalAgent);
+}
+
+// Live child agent search for branch fields
+let _branchChildren = [];
+let _selectedBranchAgent = null;
+let _branchSearchTimeout = null;
+
+async function loadBranchChildren() {
+  if (!_canonicalAgent) return;
+  const res = await sbFetch(
+    `${SUPABASE_URL}/rest/v1/agents?parent_agent_id=eq.${_canonicalAgent.id}&select=id,agency_name,country,jurisdiction,risk_tier,risk_score,parent_agent_id&order=agency_name`
+  );
+  _branchChildren = await res.json() || [];
+}
+
+function filterBranchSuggestions(field, query) {
+  const lower = query.toLowerCase();
+  const suggestionsEl = document.getElementById(field === 'country' ? 'branchCountrySuggestions' : 'branchCitySuggestions');
+
+  const matches = _branchChildren.filter(c => {
+    if (field === 'country') return (c.country || '').toLowerCase().includes(lower);
+    if (field === 'city') return (c.jurisdiction || '').toLowerCase().includes(lower);
+    return false;
+  });
+
+  if (!matches.length || !query) { suggestionsEl.style.display = 'none'; return; }
+
+  suggestionsEl.innerHTML = matches.map((c, i) =>
+    `<div class="suggestion-item" data-branch-index="${i}" data-branch-field="${field}"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:13px;">
+      <div style="font-weight:500;color:#1a1d23;">${c.agency_name}</div>
+      <div style="font-size:11px;color:#9ca3af;">${[c.jurisdiction, c.country].filter(Boolean).join(' · ')}</div>
+    </div>`
+  ).join('');
+  suggestionsEl._matches = matches;
+  suggestionsEl.style.display = 'block';
+}
+
+function initBranchSearch() {
+  ['branchCountry', 'branchCity'].forEach(fieldId => {
+    const field = fieldId === 'branchCountry' ? 'country' : 'city';
+    const input = document.getElementById(fieldId);
+    const sugEl = document.getElementById(field === 'country' ? 'branchCountrySuggestions' : 'branchCitySuggestions');
+
+    input.addEventListener('input', () => {
+      clearTimeout(_branchSearchTimeout);
+      _selectedBranchAgent = null;
+      document.getElementById('branchMatchCard').style.display = 'none';
+      const q = input.value.trim();
+      if (q.length < 1) { sugEl.style.display = 'none'; return; }
+      _branchSearchTimeout = setTimeout(() => filterBranchSuggestions(field, q), 200);
+    });
+
+    sugEl.addEventListener('click', e => {
+      const item = e.target.closest('[data-branch-index]');
+      if (!item) return;
+      const idx = parseInt(item.getAttribute('data-branch-index'), 10);
+      const agent = sugEl._matches[idx];
+      if (!agent) return;
+      _selectedBranchAgent = agent;
+      // Fill both fields from the selected child
+      document.getElementById('branchCountry').value = agent.country || '';
+      document.getElementById('branchCity').value = agent.jurisdiction || '';
+      document.getElementById('branchCountrySuggestions').style.display = 'none';
+      document.getElementById('branchCitySuggestions').style.display = 'none';
+      // Show match card
+      document.getElementById('branchMatchName').textContent = agent.agency_name;
+      document.getElementById('branchMatchCard').style.display = 'block';
+    });
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#branchCountry') && !e.target.closest('#branchCountrySuggestions'))
+      document.getElementById('branchCountrySuggestions').style.display = 'none';
+    if (!e.target.closest('#branchCity') && !e.target.closest('#branchCitySuggestions'))
+      document.getElementById('branchCitySuggestions').style.display = 'none';
+  });
 }
 
 async function lookupAgent() {
@@ -2363,6 +2443,9 @@ document.getElementById('submitBtn').addEventListener('click', submitIncident);
 
 // Parent agent search
 initParentAgentSearch();
+
+// Branch field live search
+initBranchSearch();
 </script>
 </body>
 </html>
