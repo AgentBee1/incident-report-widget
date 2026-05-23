@@ -1515,7 +1515,7 @@ let _suggestionAgents = [];
 
 async function fetchSuggestions(q) {
   try {
-    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score&limit=8&order=agency_name`);
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id,canonical_agent_id&limit=8&order=agency_name`);
     renderSuggestions(await res.json());
   } catch(e) {}
 }
@@ -1617,7 +1617,7 @@ async function applyBranch() {
           agency_name: searchName,
           country: country || _canonicalAgent.country || null,
           jurisdiction: city || null,
-          parent_agent_id: _canonicalAgent.id,
+          canonical_agent_id: _canonicalAgent.id,
         }),
       });
       if (!createRes.ok) { const e = await createRes.json(); throw new Error(e.message || createRes.statusText); }
@@ -1642,7 +1642,7 @@ let _branchSearchTimeout = null;
 async function loadBranchChildren() {
   if (!_canonicalAgent) return;
   const res = await sbFetch(
-    `${SUPABASE_URL}/rest/v1/agents?parent_agent_id=eq.${_canonicalAgent.id}&select=id,agency_name,country,jurisdiction,risk_tier,risk_score,parent_agent_id&order=agency_name`
+    `${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${_canonicalAgent.id}&select=id,agency_name,country,jurisdiction,risk_tier,risk_score,canonical_agent_id&order=agency_name`
   );
   _branchChildren = await res.json() || [];
 }
@@ -1718,7 +1718,7 @@ async function lookupAgent() {
   document.getElementById('newAgentPanel').classList.remove('visible');
   closeSuggestions();
   try {
-    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,parent_agent_id&limit=8&order=agency_name`);
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id,canonical_agent_id&limit=8&order=agency_name`);
     const data = await res.json();
     if (!data.length) {
       setStatus('agentStatus', 'error', 'No agent found matching that name.');
@@ -1775,7 +1775,7 @@ async function createAgent() {
     agency_name: name,
     country: document.getElementById('newAgentCountry').value.trim() || null,
     jurisdiction: document.getElementById('newAgentJurisdiction').value.trim() || null,
-    parent_agent_id: _parentAgent ? _parentAgent.id : null,
+    canonical_agent_id: _parentAgent ? _parentAgent.id : null,
   };
 
   try {
@@ -1813,22 +1813,24 @@ async function lookupAuthorisedClients(agentId) {
   loading.style.display = 'flex';
 
   try {
-    // Collect all agent IDs in the chain: selected + all parents
+    // Collect all agent IDs in the chain using canonical_agent_id (matches Your Agents widget)
     const agentIds = [agentId];
-    let currentId = selectedAgent.parent_agent_id;
+    if (selectedAgent.canonical_agent_id) agentIds.push(selectedAgent.canonical_agent_id);
+    let currentId = selectedAgent.canonical_agent_id;
     for (let i = 0; i < 3 && currentId; i++) {
-      agentIds.push(currentId);
-      const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${currentId}&select=id,parent_agent_id&limit=1`);
+      if (!agentIds.includes(currentId)) agentIds.push(currentId);
+      const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${currentId}&select=id,canonical_agent_id,canonical_agent_id&limit=1`);
       const data = await res.json();
       if (!data.length) break;
-      currentId = data[0].parent_agent_id;
+      if (data[0].canonical_agent_id && !agentIds.includes(data[0].canonical_agent_id)) agentIds.push(data[0].canonical_agent_id);
+      currentId = data[0].canonical_agent_id;
     }
 
-    // Get all institution links across the entire chain using institution_agent_links
+    // Get all authorised institution links across the entire chain
     const allLinks = [];
     for (const id of agentIds) {
       const linksRes = await sbFetch(
-        `${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=eq.${id}&select=institution_id`
+        `${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=eq.${id}&link_type=eq.authorised&select=institution_id`
       );
       const links = await linksRes.json();
       allLinks.push(...(links || []));
@@ -1880,15 +1882,18 @@ async function analyseInstitutions() {
 
   const NON_CLIENT_STATUSES = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed', null];
 
-  // Build full agent ID chain (selected + all parents) for authorisation check
+  // Build full agent ID chain using canonical_agent_id (same as Your Agents widget)
   const agentIdChain = [selectedAgent.id];
-  let chainId = selectedAgent.parent_agent_id;
+  if (selectedAgent.canonical_agent_id) agentIdChain.push(selectedAgent.canonical_agent_id);
+  // Also walk canonical_agent_id chain for newly created branch agents
+  let chainId = selectedAgent.canonical_agent_id;
   for (let i = 0; i < 3 && chainId; i++) {
-    agentIdChain.push(chainId);
-    const r = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${chainId}&select=id,parent_agent_id&limit=1`);
+    if (!agentIdChain.includes(chainId)) agentIdChain.push(chainId);
+    const r = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${chainId}&select=id,canonical_agent_id,canonical_agent_id&limit=1`);
     const d = await r.json();
     if (!d.length) break;
-    chainId = d[0].parent_agent_id;
+    if (d[0].canonical_agent_id && !agentIdChain.includes(d[0].canonical_agent_id)) agentIdChain.push(d[0].canonical_agent_id);
+    chainId = d[0].canonical_agent_id;
   }
 
   for (const name of names) {
@@ -1898,10 +1903,10 @@ async function analyseInstitutions() {
     const inst = instData[0];
     const isNonClient = !inst.is_client || NON_CLIENT_STATUSES.includes(inst.status);
 
-    // Check authorisation across full parent chain using institution_agent_links
+    // Check authorisation across full agent chain using link_type=authorised (matches Your Agents widget)
     let isAuthorised = false;
     for (const aid of agentIdChain) {
-      const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=eq.${aid}&institution_id=eq.${inst.id}&select=agent_id&limit=1`);
+      const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=eq.${aid}&institution_id=eq.${inst.id}&link_type=eq.authorised&select=agent_id&limit=1`);
       const linkData = await linkRes.json();
       if (linkData && linkData.length) { isAuthorised = true; break; }
     }
@@ -2218,18 +2223,18 @@ function clearParentAgent() {
 // Build and display agent hierarchy
 async function showAgentHierarchy(agent) {
   const hierarchyEl = document.getElementById('agentHierarchy');
-  if (!agent.parent_agent_id) { hierarchyEl.style.display = 'none'; return; }
+  if (!agent.canonical_agent_id) { hierarchyEl.style.display = 'none'; return; }
 
   const chain = [];
-  let currentId = agent.parent_agent_id;
+  let currentId = agent.canonical_agent_id;
 
   // Walk up the chain (max 3 levels)
   for (let i = 0; i < 3 && currentId; i++) {
-    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${currentId}&select=id,agency_name,parent_agent_id&limit=1`);
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${currentId}&select=id,agency_name,canonical_agent_id&limit=1`);
     const data = await res.json();
     if (!data.length) break;
     chain.push(data[0].agency_name);
-    currentId = data[0].parent_agent_id;
+    currentId = data[0].canonical_agent_id;
   }
 
   if (chain.length) {
