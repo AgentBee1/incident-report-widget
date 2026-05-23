@@ -1813,20 +1813,18 @@ async function lookupAuthorisedClients(agentId) {
   loading.style.display = 'flex';
 
   try {
-    // Collect all agent IDs in the chain using canonical_agent_id (matches Your Agents widget)
-    const agentIds = [agentId];
-    if (selectedAgent.canonical_agent_id) agentIds.push(selectedAgent.canonical_agent_id);
-    let currentId = selectedAgent.canonical_agent_id;
-    for (let i = 0; i < 3 && currentId; i++) {
-      if (!agentIds.includes(currentId)) agentIds.push(currentId);
-      const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${currentId}&select=id,canonical_agent_id,canonical_agent_id&limit=1`);
-      const data = await res.json();
-      if (!data.length) break;
-      if (data[0].canonical_agent_id && !agentIds.includes(data[0].canonical_agent_id)) agentIds.push(data[0].canonical_agent_id);
-      currentId = data[0].canonical_agent_id;
-    }
+    // Build full agent family (matches Your Agents widget logic)
+    const canonicalId = selectedAgent.canonical_agent_id || agentId;
+    const agentIds = new Set([agentId, canonicalId]);
 
-    // Get all authorised institution links across the entire chain
+    // Fetch all agents in the same canonical family
+    const familyRes = await sbFetch(
+      `${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${canonicalId}&select=id`
+    );
+    const familyData = await familyRes.json();
+    (familyData || []).forEach(a => agentIds.add(a.id));
+
+    // Get all authorised institution links across the entire family
     const allLinks = [];
     for (const id of agentIds) {
       const linksRes = await sbFetch(
@@ -1882,19 +1880,18 @@ async function analyseInstitutions() {
 
   const NON_CLIENT_STATUSES = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed', null];
 
-  // Build full agent ID chain using canonical_agent_id (same as Your Agents widget)
-  const agentIdChain = [selectedAgent.id];
-  if (selectedAgent.canonical_agent_id) agentIdChain.push(selectedAgent.canonical_agent_id);
-  // Also walk canonical_agent_id chain for newly created branch agents
-  let chainId = selectedAgent.canonical_agent_id;
-  for (let i = 0; i < 3 && chainId; i++) {
-    if (!agentIdChain.includes(chainId)) agentIdChain.push(chainId);
-    const r = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${chainId}&select=id,canonical_agent_id,canonical_agent_id&limit=1`);
-    const d = await r.json();
-    if (!d.length) break;
-    if (d[0].canonical_agent_id && !agentIdChain.includes(d[0].canonical_agent_id)) agentIdChain.push(d[0].canonical_agent_id);
-    chainId = d[0].canonical_agent_id;
-  }
+  // Build full agent family (matches Your Agents widget logic):
+  // selected agent + its canonical + all agents sharing that canonical
+  const canonicalId = selectedAgent.canonical_agent_id || selectedAgent.id;
+  const agentIdChain = new Set([selectedAgent.id, canonicalId]);
+
+  // Fetch all agents in the same canonical family
+  const familyRes = await sbFetch(
+    `${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${canonicalId}&select=id`
+  );
+  const familyData = await familyRes.json();
+  (familyData || []).forEach(a => agentIdChain.add(a.id));
+
 
   for (const name of names) {
     const instRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(name)}*&select=id,name,contact_email,salutation,status,is_client&limit=1`);
