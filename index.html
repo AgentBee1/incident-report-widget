@@ -967,6 +967,8 @@ async function submitAuth() {
       <div class="step-badge">1</div>
       <h2>Agent</h2>
     </div>
+
+    <!-- Step 1: Search -->
     <div class="agent-search-wrap">
       <div class="field suggestions-outer">
         <label>Agent name</label>
@@ -975,6 +977,31 @@ async function submitAuth() {
       </div>
       <button class="btn-lookup" id="agentLookupBtn">Search</button>
     </div>
+    <div class="status" id="agentStatus"></div>
+
+    <!-- Step 2: Branch refinement — shown after canonical selected -->
+    <div id="branchPanel" style="display:none;margin-top:14px;padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;">
+      <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:10px;">
+        Is this report about a specific branch or office?
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div class="field">
+          <label>Country office <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+          <input type="text" id="branchCountry" placeholder="e.g. Pakistan" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label>City / office <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+          <input type="text" id="branchCity" placeholder="e.g. Lahore" autocomplete="off" />
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-analyse" id="applyBranchBtn" style="margin-top:0;">Apply branch</button>
+        <button class="btn-analyse" id="skipBranchBtn" style="margin-top:0;color:#6b7280;">Use canonical only</button>
+      </div>
+      <div class="status" id="branchStatus" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- Agent resolved card -->
     <div class="agent-resolved" id="agentCard">
       <div class="agent-avatar">✓</div>
       <div style="flex:1;">
@@ -984,9 +1011,8 @@ async function submitAuth() {
       </div>
       <div class="tier-pill" id="agentCardTier"></div>
     </div>
-    <div class="status" id="agentStatus"></div>
 
-    <!-- Add new agent panel -->
+    <!-- Add new agent panel (only shown when nothing found at all) -->
     <div class="new-agent-panel" id="newAgentPanel">
       <h4>➕ Add new agent to AgentBee</h4>
       <div class="new-agent-grid">
@@ -999,25 +1025,22 @@ async function submitAuth() {
           <input type="text" id="newAgentCountry" placeholder="e.g. India" />
         </div>
         <div class="field">
-          <label>Jurisdiction / State / City</label>
+          <label>City / office</label>
           <input type="text" id="newAgentJurisdiction" placeholder="e.g. Lahore" />
         </div>
       </div>
-
-      <!-- Parent agent (canonical) search -->
       <div class="field" style="margin-bottom:12px;">
-        <label>Parent agent (canonical brand) <span style="font-weight:400;color:#9ca3af;">— optional, link to global or country-level record</span></label>
-        <div style="display:flex;gap:8px;align-items:flex-start;position:relative;">
+        <label>Parent agent (canonical brand) <span style="font-weight:400;color:#9ca3af;">— optional</span></label>
+        <div style="position:relative;">
           <input type="text" id="parentAgentSearch" placeholder="Search for parent agent…" autocomplete="off"
-            style="background:#fff;border-color:#fde68a;flex:1;" />
-          <div id="parentSuggestions" style="position:absolute;top:100%;left:0;right:40px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:200;overflow:hidden;display:none;margin-top:4px;"></div>
+            style="background:#fff;border-color:#fde68a;" />
+          <div id="parentSuggestions" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:200;overflow:hidden;display:none;margin-top:4px;"></div>
         </div>
-        <div id="parentAgentCard" style="display:none;margin-top:8px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#15803d;display:flex;align-items:center;justify-content:space-between;">
+        <div id="parentAgentCard" style="display:none;margin-top:8px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#15803d;align-items:center;justify-content:space-between;">
           <span id="parentAgentCardName" style="font-weight:600;"></span>
-          <button onclick="clearParentAgent()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;">✕ Remove</button>
+          <button id="clearParentBtn" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;">✕ Remove</button>
         </div>
       </div>
-
       <button class="btn-create-agent" id="createAgentBtn">Create agent &amp; continue</button>
       <div class="status" id="newAgentStatus" style="margin-top:10px;"></div>
     </div>
@@ -1513,19 +1536,99 @@ suggestionsEl.addEventListener('click', function(e) {
 
 function closeSuggestions() { suggestionsEl.classList.remove('open'); suggestionsEl.innerHTML = ''; }
 
+// Canonical agent selected — show branch panel
+let _canonicalAgent = null;
+
 function selectAgent(agent) {
-  selectedAgent = agent;
-  agentInput.value = agent.agency_name;
+  _canonicalAgent = agent;
+  // Hide match list if visible
+  const matchList = document.getElementById('agentMatchList');
+  if (matchList) matchList.style.display = 'none';
   closeSuggestions();
+  clearStatus('agentStatus');
+  // Reset branch fields
+  document.getElementById('branchCountry').value = '';
+  document.getElementById('branchCity').value = '';
+  clearStatus('branchStatus');
+  // Show branch panel
+  document.getElementById('branchPanel').style.display = 'block';
+  document.getElementById('agentCard').classList.remove('visible');
+  document.getElementById('agentHierarchy').style.display = 'none';
+}
+
+function resolveAgent(agent) {
+  selectedAgent = agent;
   document.getElementById('agentCardName').textContent = agent.agency_name;
   document.getElementById('agentCardMeta').textContent = [agent.jurisdiction, agent.country].filter(Boolean).join(' · ') + (agent.risk_score != null ? ' · Score: ' + agent.risk_score : '');
   document.getElementById('agentCardTier').textContent = agent.risk_tier || 'Unknown';
   document.getElementById('agentCard').classList.add('visible');
-  clearStatus('agentStatus');
+  document.getElementById('branchPanel').style.display = 'none';
   document.getElementById('analyseBtn').disabled = false;
   updatePreview();
   lookupAuthorisedClients(agent.id);
   showAgentHierarchy(agent);
+}
+
+async function applyBranch() {
+  const country = document.getElementById('branchCountry').value.trim();
+  const city = document.getElementById('branchCity').value.trim();
+
+  if (!country && !city) {
+    // No branch specified — use canonical
+    resolveAgent(_canonicalAgent);
+    return;
+  }
+
+  setStatus('branchStatus', 'info', 'Looking for matching branch…');
+
+  // Build search name: "Canonical Country" or "Canonical City" or "Canonical Country City"
+  const suffix = [country, city].filter(Boolean).join(' ');
+  const searchName = `${_canonicalAgent.agency_name} ${suffix}`;
+
+  try {
+    // Look for existing child agent matching this combination
+    const res = await sbFetch(
+      `${SUPABASE_URL}/rest/v1/agents?parent_agent_id=eq.${_canonicalAgent.id}&select=id,agency_name,country,jurisdiction,risk_tier,risk_score,parent_agent_id&limit=10`
+    );
+    const children = await res.json();
+
+    // Try to match country and city against existing children
+    const match = children.find(c => {
+      const cCountry = (c.country || '').toLowerCase();
+      const cJuris = (c.jurisdiction || '').toLowerCase();
+      const countryMatch = !country || cCountry.includes(country.toLowerCase());
+      const cityMatch = !city || cJuris.includes(city.toLowerCase());
+      return countryMatch && cityMatch;
+    });
+
+    if (match) {
+      clearStatus('branchStatus');
+      resolveAgent(match);
+    } else {
+      // No existing branch — create one
+      setStatus('branchStatus', 'info', `No existing branch found — creating "${searchName}"…`);
+      const createRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify({
+          agency_name: searchName,
+          country: country || _canonicalAgent.country || null,
+          jurisdiction: city || null,
+          parent_agent_id: _canonicalAgent.id,
+        }),
+      });
+      if (!createRes.ok) { const e = await createRes.json(); throw new Error(e.message || createRes.statusText); }
+      const newAgent = (await createRes.json())[0];
+      clearStatus('branchStatus');
+      resolveAgent(newAgent);
+    }
+  } catch(e) {
+    setStatus('branchStatus', 'error', '✗ ' + e.message);
+  }
+}
+
+function skipBranch() {
+  resolveAgent(_canonicalAgent);
 }
 
 async function lookupAgent() {
@@ -2167,8 +2270,10 @@ function resetForm() {
   analysisResults = { authorised: [], risk: [], unknown: [] };
   submittedIncidentId = null;
   agentInput.value = '';
+  _canonicalAgent = null;
   const matchList = document.getElementById('agentMatchList');
   if (matchList) matchList.style.display = 'none';
+  document.getElementById('branchPanel').style.display = 'none';
   document.getElementById('agentCard').classList.remove('visible');
   document.getElementById('agentHierarchy').style.display = 'none';
   document.getElementById('newAgentPanel').classList.remove('visible');
@@ -2230,6 +2335,9 @@ document.getElementById('clearHandoffBtn').addEventListener('click', clearHandof
 // Agent
 document.getElementById('agentLookupBtn').addEventListener('click', lookupAgent);
 document.getElementById('createAgentBtn').addEventListener('click', createAgent);
+document.getElementById('applyBranchBtn').addEventListener('click', applyBranch);
+document.getElementById('skipBranchBtn').addEventListener('click', skipBranch);
+document.getElementById('clearParentBtn').addEventListener('click', clearParentAgent);
 
 // Description → enable generate button
 document.getElementById('description').addEventListener('input', onDescriptionInput);
