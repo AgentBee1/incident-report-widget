@@ -1257,13 +1257,13 @@ async function submitAuth() {
     <!-- Step 2: review -->
     <div id="emailStep2" style="display:none;">
       <h2 style="margin-bottom:6px;">Review de-identified summary</h2>
-      <p style="margin-bottom:14px;">This summary will be sent to <strong>Warm and Cold</strong> institutions in the next Monday digest. Edit as needed before confirming.</p>
+      <p style="margin-bottom:14px;">This summary will be sent to <strong>Warm and Cold</strong> institutions in the next Monday digest. Linked <strong>client institutions</strong> will also receive a notification in their weekly client digest. Edit as needed before confirming.</p>
       <div class="field" style="margin-bottom:16px;">
         <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#374151;">De-identified summary</label>
         <textarea id="emailSummaryText" rows="6" style="width:100%;margin-top:6px;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit;color:#1a1d23;resize:vertical;outline:none;line-height:1.6;" placeholder="Summary will appear here…"></textarea>
       </div>
       <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:12px;color:#92400e;margin-bottom:16px;">
-        ⚠️ This summary will be queued for the next Monday 8am digest and sent only to <strong>linked Warm &amp; Cold institutions</strong> for this incident. Maximum 7 incidents per send — any remainder carries to the following week.
+        ⚠️ This summary will be queued for the next Monday 8am digest and sent only to <strong>linked Warm &amp; Cold institutions</strong> for this incident. Linked <strong>client institutions</strong> will receive a notification via their own weekly client digest automatically. Maximum 7 non-client incidents per send — any remainder carries to the following week.
       </div>
       <div class="modal-actions">
         <button class="btn btn-secondary" id="cancelEmailBtn">Cancel</button>
