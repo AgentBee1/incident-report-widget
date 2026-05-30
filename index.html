@@ -1438,6 +1438,11 @@ let analysisResults = { authorised: [], risk: [], unknown: [] };
 let submittedIncidentId = null;
 let searchTimeout = null;
 
+// Accreditation state
+let _allAccreditations = [];
+let _selectedAccredIds = new Set();
+let _accredLoaded = false;
+
 document.getElementById('incidentDate').value = new Date().toISOString().split('T')[0];
 
 // ── Handoff card parser ──────────────────────────────────────────
@@ -2597,9 +2602,6 @@ function clearStatus(id) {
 updatePreview();
 
 // ── Accreditations ───────────────────────────────────────────────
-let _allAccreditations = [];
-let _selectedAccredIds = new Set();
-let _accredLoaded = false;
 
 async function loadAccreditations() {
   if (_accredLoaded) return;
@@ -2677,24 +2679,20 @@ function initAccredDropdown() {
   trigger.addEventListener('click', function(e) {
     e.stopPropagation();
     const isOpen = dropdown.classList.contains('open');
-    if (isOpen) {
-      dropdown.classList.remove('open');
-      trigger.classList.remove('open');
-    } else {
-      dropdown.classList.add('open');
-      trigger.classList.add('open');
-      if (!_accredLoaded) loadAccreditations();
-    }
+    dropdown.classList.toggle('open', !isOpen);
+    trigger.classList.toggle('open', !isOpen);
+    if (!isOpen && !_accredLoaded) loadAccreditations();
   });
 
   dropdown.addEventListener('click', function(e) {
+    e.stopPropagation();
     const option = e.target.closest('[data-accred-id]');
     if (!option) return;
     toggleAccred(parseInt(option.getAttribute('data-accred-id'), 10));
   });
 
   document.addEventListener('click', function(e) {
-    if (!e.target.closest('.accred-dropdown-wrap')) {
+    if (!e.target.closest('#accredTrigger') && !e.target.closest('#accredDropdown')) {
       dropdown.classList.remove('open');
       trigger.classList.remove('open');
     }
