@@ -1302,7 +1302,7 @@ async function submitAuth() {
         These institutions will see this incident in their <strong>Your Agents</strong> widget. They are not listed below unless you add them manually.
       </div>
     </div>
-    <div id="otherClientsLoading" style="display:none;font-size:12px;color:#9ca3af;margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+    <div id="otherClientsLoading" style="display:none;font-size:12px;color:#9ca3af;margin-bottom:14px;align-items:center;gap:6px;">
       <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:#9ca3af;width:11px;height:11px;border-width:2px;"></span>
       Looking up authorised client institutions…
     </div>
@@ -2257,7 +2257,7 @@ async function submitIncident() {
       const accredRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_accreditation_links`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify([..._selectedAccredIds].map(accredId => ({ incident_id: incidentId, accreditation_id: accredId }))),
+        body: JSON.stringify([..._selectedAccredIds].map(accredId => ({ incident_id: incidentId, accreditation_id: parseInt(accredId, 10) }))),
       });
       if (!accredRes.ok) { const e = await accredRes.json(); throw new Error('Incident created but accreditation links failed: ' + (e.message || accredRes.statusText)); }
     }
@@ -2616,20 +2616,6 @@ async function loadAccreditations() {
   }
 }
 
-function renderAccredOptions() {
-  const dropdown = document.getElementById('accredDropdown');
-  if (!_allAccreditations.length) {
-    dropdown.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:#9ca3af;">No accreditations found.</div>';
-    return;
-  }
-  dropdown.innerHTML = _allAccreditations.map(a =>
-    `<div class="accred-option${_selectedAccredIds.has(a.id) ? ' selected' : ''}" data-accred-id="${a.id}">
-      <div class="accred-checkbox"></div>
-      <span>${a.name}</span>
-    </div>`
-  ).join('');
-}
-
 function updateAccredTriggerLabel() {
   const label = document.getElementById('accredTriggerLabel');
   if (_selectedAccredIds.size === 0) {
@@ -2643,7 +2629,7 @@ function updateAccredTriggerLabel() {
 
 function renderAccredTags() {
   const container = document.getElementById('accredSelectedTags');
-  const selected = _allAccreditations.filter(a => _selectedAccredIds.has(a.id));
+  const selected = _allAccreditations.filter(a => _selectedAccredIds.has(String(a.id)));
   container.innerHTML = selected.map(a =>
     `<span class="accred-tag">${a.name}
       <button class="accred-tag-remove" data-remove-accred="${a.id}" title="Remove">×</button>
@@ -2657,19 +2643,36 @@ function updateAccredPreview() {
   if (_selectedAccredIds.size === 0) {
     wrap.style.display = 'none';
   } else {
-    const names = _allAccreditations.filter(a => _selectedAccredIds.has(a.id)).map(a => a.name);
+    const names = _allAccreditations.filter(a => _selectedAccredIds.has(String(a.id))).map(a => a.name);
     val.textContent = names.join(', ');
     wrap.style.display = 'block';
   }
 }
 
 function toggleAccred(id) {
-  if (_selectedAccredIds.has(id)) _selectedAccredIds.delete(id);
-  else _selectedAccredIds.add(id);
+  const sid = String(id);
+  if (_selectedAccredIds.has(sid)) _selectedAccredIds.delete(sid);
+  else _selectedAccredIds.add(sid);
   renderAccredOptions();
   renderAccredTags();
   updateAccredTriggerLabel();
   updateAccredPreview();
+}
+
+function renderAccredOptions() {
+  const dropdown = document.getElementById('accredDropdown');
+  if (!_allAccreditations.length) {
+    dropdown.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:#9ca3af;">No accreditations found.</div>';
+    return;
+  }
+  dropdown.innerHTML = _allAccreditations.map(a => {
+    const sid = String(a.id);
+    const checked = _selectedAccredIds.has(sid);
+    return `<div class="accred-option${checked ? ' selected' : ''}" data-accred-id="${sid}">
+      <div class="accred-checkbox">${checked ? '<svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3l2.5 2.5L8 1" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}</div>
+      <span>${a.name}</span>
+    </div>`;
+  }).join('');
 }
 
 function initAccredDropdown() {
@@ -2688,7 +2691,7 @@ function initAccredDropdown() {
     e.stopPropagation();
     const option = e.target.closest('[data-accred-id]');
     if (!option) return;
-    toggleAccred(parseInt(option.getAttribute('data-accred-id'), 10));
+    toggleAccred(option.getAttribute('data-accred-id'));
   });
 
   document.addEventListener('click', function(e) {
@@ -2697,7 +2700,7 @@ function initAccredDropdown() {
       trigger.classList.remove('open');
     }
     const removeBtn = e.target.closest('[data-remove-accred]');
-    if (removeBtn) toggleAccred(parseInt(removeBtn.getAttribute('data-remove-accred'), 10));
+    if (removeBtn) toggleAccred(removeBtn.getAttribute('data-remove-accred'));
   });
 }
 
