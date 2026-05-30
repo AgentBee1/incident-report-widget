@@ -1693,6 +1693,7 @@ let _canonicalAgent = null;
 function selectAgent(agent) {
   _canonicalAgent = agent;
   _selectedBranchAgent = null;
+  agentInput.value = agent.agency_name;
   const matchList = document.getElementById('agentMatchList');
   if (matchList) matchList.style.display = 'none';
   closeSuggestions();
