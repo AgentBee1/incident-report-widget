@@ -705,6 +705,127 @@
     .btn-create-agent:hover:not(:disabled) { background: #b45309; }
     .btn-create-agent:disabled { opacity: 0.4; cursor: not-allowed; }
 
+    /* ── Accreditation multi-select ── */
+    .accred-dropdown-wrap { position: relative; }
+
+    .accred-trigger {
+      width: 100%;
+      padding: 9px 32px 9px 12px;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #1a1d23;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+
+    .accred-trigger:focus, .accred-trigger.open {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    .accred-trigger .placeholder { color: #9ca3af; }
+
+    .accred-trigger-chevron { flex-shrink: 0; color: #9ca3af; transition: transform 0.15s; }
+    .accred-trigger.open .accred-trigger-chevron { transform: rotate(180deg); }
+
+    .accred-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      z-index: 300;
+      display: none;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .accred-dropdown.open { display: block; }
+
+    .accred-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #f3f4f6;
+      transition: background 0.1s;
+      font-size: 13px;
+      color: #1a1d23;
+    }
+
+    .accred-option:last-child { border-bottom: none; }
+    .accred-option:hover { background: #f9fafb; }
+    .accred-option.selected { background: #eff6ff; }
+
+    .accred-checkbox {
+      width: 15px; height: 15px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      transition: all 0.12s;
+    }
+
+    .accred-option.selected .accred-checkbox {
+      background: #3b82f6;
+      border-color: #3b82f6;
+    }
+
+    .accred-option.selected .accred-checkbox::after {
+      content: '';
+      display: block;
+      width: 8px; height: 5px;
+      border-left: 1.5px solid #fff;
+      border-bottom: 1.5px solid #fff;
+      transform: rotate(-45deg) translate(1px, -1px);
+    }
+
+    .accred-loading {
+      padding: 12px 14px;
+      font-size: 12px;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .accred-selected-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+
+    .accred-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #1d4ed8;
+    }
+
+    .accred-tag-remove {
+      background: none; border: none; color: #93c5fd;
+      cursor: pointer; font-size: 13px; line-height: 1;
+      padding: 0; display: flex; align-items: center;
+    }
+
+    .accred-tag-remove:hover { color: #1d4ed8; }
+
     #auth-screen {
       position: fixed;
       inset: 0;
@@ -1115,6 +1236,26 @@ async function submitAuth() {
         </select>
       </div>
     </div>
+    <!-- Accreditation multi-select -->
+    <div class="field field-row">
+      <label>Accreditations <span style="font-weight:400;color:#9ca3af;">(optional — select all that apply)</span></label>
+      <div class="accred-dropdown-wrap">
+        <button type="button" class="accred-trigger" id="accredTrigger">
+          <span id="accredTriggerLabel" class="placeholder">Select accreditations…</span>
+          <svg class="accred-trigger-chevron" width="12" height="7" viewBox="0 0 12 7" fill="none">
+            <path d="M1 1l5 4.5L11 1" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="accred-dropdown" id="accredDropdown">
+          <div class="accred-loading" id="accredLoading">
+            <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:#9ca3af;width:11px;height:11px;border-width:2px;"></span>
+            Loading accreditations…
+          </div>
+        </div>
+      </div>
+      <div class="accred-selected-tags" id="accredSelectedTags"></div>
+    </div>
+
     <div class="field field-row">
       <label>Circle.so report URL <span style="font-weight:400;color:#9ca3af;">(optional — link to the published report on AgentBee)</span></label>
       <input type="url" id="sourceUrl" placeholder="https://agentbee.circle.so/…" />
@@ -1215,6 +1356,10 @@ async function submitAuth() {
       <div class="summary-item">
         <div class="summary-label">Institutions linked</div>
         <div class="summary-val" id="sum-inst">—</div>
+      </div>
+      <div class="summary-item" id="sum-accred-wrap" style="display:none;">
+        <div class="summary-label">Accreditations</div>
+        <div class="summary-val" id="sum-accred">—</div>
       </div>
     </div>
     <div class="status" id="submitStatus"></div>
@@ -1492,6 +1637,7 @@ function updatePreview() {
   document.getElementById('sum-date').textContent = document.getElementById('incidentDate').value || '—';
   const total = analysisResults.authorised.length + analysisResults.risk.length;
   document.getElementById('sum-inst').textContent = total ? `${total} (${analysisResults.authorised.length} auth · ${analysisResults.risk.length} risk)` : '—';
+  if (typeof updateAccredPreview === 'function') updateAccredPreview();
 }
 
 ['reportType','category','sourceType','severityWeight','incidentDate'].forEach(id =>
@@ -2100,7 +2246,18 @@ async function submitIncident() {
       if (!linkRes.ok) { const e = await linkRes.json(); throw new Error('Incident created but links failed: ' + (e.message || linkRes.statusText)); }
     }
 
-    setStatus('submitStatus', 'success', `Report submitted — ID: ${incidentId} · ${uniqueLinks.length} institution(s) linked.`);
+    // Link accreditations
+    if (_selectedAccredIds.size > 0) {
+      const accredRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_accreditation_links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify([..._selectedAccredIds].map(accredId => ({ incident_id: incidentId, accreditation_id: accredId }))),
+      });
+      if (!accredRes.ok) { const e = await accredRes.json(); throw new Error('Incident created but accreditation links failed: ' + (e.message || accredRes.statusText)); }
+    }
+
+    const accredNote = _selectedAccredIds.size > 0 ? ` · ${_selectedAccredIds.size} accreditation(s) linked.` : '';
+    setStatus('submitStatus', 'success', `Report submitted — ID: ${incidentId} · ${uniqueLinks.length} institution(s) linked.${accredNote}`);
     document.getElementById('commsBtn').disabled = false;
     btn.className = 'btn btn-success';
     btn.innerHTML = '✓ Submitted';
@@ -2410,6 +2567,11 @@ function resetForm() {
   btn.disabled = false;
   btn.className = 'btn btn-primary';
   btn.innerHTML = 'Submit report';
+  // Reset accreditations
+  _selectedAccredIds = new Set();
+  if (_accredLoaded) renderAccredOptions();
+  renderAccredTags();
+  updateAccredTriggerLabel();
   updatePreview();
 }
 
@@ -2432,6 +2594,115 @@ function clearStatus(id) {
 }
 
 updatePreview();
+
+// ── Accreditations ───────────────────────────────────────────────
+let _allAccreditations = [];
+let _selectedAccredIds = new Set();
+let _accredLoaded = false;
+
+async function loadAccreditations() {
+  if (_accredLoaded) return;
+  try {
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/accreditations?select=id,name&order=name`);
+    const data = await res.json();
+    _allAccreditations = data || [];
+    _accredLoaded = true;
+    renderAccredOptions();
+  } catch(e) {
+    document.getElementById('accredLoading').textContent = 'Failed to load accreditations.';
+  }
+}
+
+function renderAccredOptions() {
+  const dropdown = document.getElementById('accredDropdown');
+  if (!_allAccreditations.length) {
+    dropdown.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:#9ca3af;">No accreditations found.</div>';
+    return;
+  }
+  dropdown.innerHTML = _allAccreditations.map(a =>
+    `<div class="accred-option${_selectedAccredIds.has(a.id) ? ' selected' : ''}" data-accred-id="${a.id}">
+      <div class="accred-checkbox"></div>
+      <span>${a.name}</span>
+    </div>`
+  ).join('');
+}
+
+function updateAccredTriggerLabel() {
+  const label = document.getElementById('accredTriggerLabel');
+  if (_selectedAccredIds.size === 0) {
+    label.textContent = 'Select accreditations…';
+    label.className = 'placeholder';
+  } else {
+    label.textContent = `${_selectedAccredIds.size} selected`;
+    label.className = '';
+  }
+}
+
+function renderAccredTags() {
+  const container = document.getElementById('accredSelectedTags');
+  const selected = _allAccreditations.filter(a => _selectedAccredIds.has(a.id));
+  container.innerHTML = selected.map(a =>
+    `<span class="accred-tag">${a.name}
+      <button class="accred-tag-remove" data-remove-accred="${a.id}" title="Remove">×</button>
+    </span>`
+  ).join('');
+}
+
+function updateAccredPreview() {
+  const wrap = document.getElementById('sum-accred-wrap');
+  const val = document.getElementById('sum-accred');
+  if (_selectedAccredIds.size === 0) {
+    wrap.style.display = 'none';
+  } else {
+    const names = _allAccreditations.filter(a => _selectedAccredIds.has(a.id)).map(a => a.name);
+    val.textContent = names.join(', ');
+    wrap.style.display = 'block';
+  }
+}
+
+function toggleAccred(id) {
+  if (_selectedAccredIds.has(id)) _selectedAccredIds.delete(id);
+  else _selectedAccredIds.add(id);
+  renderAccredOptions();
+  renderAccredTags();
+  updateAccredTriggerLabel();
+  updateAccredPreview();
+}
+
+function initAccredDropdown() {
+  const trigger = document.getElementById('accredTrigger');
+  const dropdown = document.getElementById('accredDropdown');
+
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const isOpen = dropdown.classList.contains('open');
+    if (isOpen) {
+      dropdown.classList.remove('open');
+      trigger.classList.remove('open');
+    } else {
+      dropdown.classList.add('open');
+      trigger.classList.add('open');
+      if (!_accredLoaded) loadAccreditations();
+    }
+  });
+
+  dropdown.addEventListener('click', function(e) {
+    const option = e.target.closest('[data-accred-id]');
+    if (!option) return;
+    toggleAccred(parseInt(option.getAttribute('data-accred-id'), 10));
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.accred-dropdown-wrap')) {
+      dropdown.classList.remove('open');
+      trigger.classList.remove('open');
+    }
+    const removeBtn = e.target.closest('[data-remove-accred]');
+    if (removeBtn) toggleAccred(parseInt(removeBtn.getAttribute('data-remove-accred'), 10));
+  });
+}
+
+// ── End accreditations ───────────────────────────────────────────
 
 // ── Wire up all button event listeners ──────────────────────────
 // (script is at bottom of body so DOM is already ready — no DOMContentLoaded needed)
@@ -2472,6 +2743,8 @@ initParentAgentSearch();
 
 // Branch field live search
 initBranchSearch();
+
+initAccredDropdown();
 </script>
 </body>
 </html>
