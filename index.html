@@ -2257,7 +2257,7 @@ async function submitIncident() {
       const accredRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_accreditation_links`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify([..._selectedAccredIds].map(accredId => ({ incident_id: incidentId, accreditation_id: parseInt(accredId, 10) }))),
+        body: JSON.stringify([..._selectedAccredIds].map(accredId => ({ incident_id: incidentId, accreditation_id: accredId }))),
       });
       if (!accredRes.ok) { const e = await accredRes.json(); throw new Error('Incident created but accreditation links failed: ' + (e.message || accredRes.statusText)); }
     }
