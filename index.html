@@ -2240,9 +2240,19 @@ async function submitIncident() {
     const incidentId = incData[0].id;
     submittedIncidentId = incidentId;
 
+   // Include manually analysed institutions from Section 3
     const allLinked = [...analysisResults.authorised, ...analysisResults.risk];
-    // Deduplicate by institution_id to avoid unique constraint violations
-    const uniqueLinks = [...new Map(allLinked.map(i => [i.institutionId, i])).values()];
+
+    // Also include authorised client institutions auto-detected in the Section 3 panel
+    const autoClients = (window._authorisedClientInstitutions || []).map(i => ({
+      institutionId: i.id,
+      institutionName: i.name,
+    }));
+
+    // Merge and deduplicate by institution_id
+    const uniqueLinks = [...new Map(
+      [...allLinked, ...autoClients].map(i => [i.institutionId, i])
+    ).values()];
     if (uniqueLinks.length) {
       const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_institution_links`, {
         method: 'POST',
