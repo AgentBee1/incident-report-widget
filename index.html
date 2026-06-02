@@ -1301,6 +1301,28 @@ async function submitAuth() {
       <div style="font-size:11px;color:#6b7280;margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6;">
         These institutions will see this incident in their <strong>Your Agents</strong> widget. They are not listed below unless you add them manually.
       </div>
+      <div id="tickerPreview" style="margin-top:14px;background:#f8faff;border:1px solid #dbeafe;border-radius:10px;overflow:hidden;">
+        <div style="padding:9px 14px;background:#eff6ff;border-bottom:1px solid #dbeafe;font-size:11px;font-weight:600;color:#1d4ed8;display:flex;align-items:center;gap:6px;">
+          👁 Ticker entry preview — what each client will see
+        </div>
+        <div style="padding:14px 16px;">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div style="width:32px;height:32px;border-radius:8px;background:#fef2f2;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">⚠️</div>
+            <div style="flex:1;min-width:0;">
+              <div id="tickerTitle" style="font-size:13px;font-weight:600;color:#1a1d23;margin-bottom:4px;">New incident report — <em style="color:#9ca3af;font-style:italic;">(agent name)</em></div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                <span id="tickerSeverityBadge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;">No severity set</span>
+              </div>
+              <div id="tickerLinkLine" style="font-size:11px;color:#9ca3af;font-style:italic;">No source URL set — button will not appear in ticker</div>
+              <div id="tickerLinkPreview" style="display:none;margin-top:6px;">
+                <a id="tickerLinkAnchor" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:4px 10px;text-decoration:none;">
+                  Read report →
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="otherClientsLoading" style="display:none;font-size:12px;color:#9ca3af;margin-bottom:14px;align-items:center;gap:6px;">
       <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:#9ca3af;width:11px;height:11px;border-width:2px;"></span>
@@ -1648,6 +1670,9 @@ function updatePreview() {
 ['reportType','category','sourceType','severityWeight','incidentDate'].forEach(id =>
   document.getElementById(id).addEventListener('change', updatePreview));
 
+document.getElementById('severityWeight').addEventListener('change', updateTickerPreview);
+document.getElementById('sourceUrl').addEventListener('input', updateTickerPreview);
+
 const agentInput = document.getElementById('agentSearch');
 const suggestionsEl = document.getElementById('suggestions');
 
@@ -1723,6 +1748,7 @@ function resolveAgent(agent) {
   document.getElementById('branchPanel').style.display = 'none';
   document.getElementById('analyseBtn').disabled = false;
   updatePreview();
+  updateTickerPreview();
   lookupAuthorisedClients(agent.id);
   showAgentHierarchy(agent);
 }
@@ -2008,6 +2034,7 @@ async function lookupAuthorisedClients(agentId) {
     badge.textContent = `${clients.length} client${clients.length !== 1 ? 's' : ''}`;
     panel.style.display = 'block';
     window._authorisedClientInstitutions = clients;
+    updateTickerPreview();
 
   } catch(e) {
     loading.style.display = 'none';
@@ -2715,6 +2742,57 @@ function initAccredDropdown() {
 }
 
 // ── End accreditations ───────────────────────────────────────────
+
+// ── Ticker preview ───────────────────────────────────────────────
+function updateTickerPreview() {
+  const panel = document.getElementById('tickerPreview');
+  if (!panel || panel.closest('#otherClientsPanel').style.display === 'none') return;
+
+  // Title
+  const agentName = selectedAgent ? selectedAgent.agency_name : null;
+  const titleEl = document.getElementById('tickerTitle');
+  if (agentName) {
+    titleEl.textContent = 'New incident report — ' + agentName;
+    titleEl.style.color = '#1a1d23';
+  } else {
+    titleEl.innerHTML = 'New incident report — <em style="color:#9ca3af;font-style:italic;">(agent name)</em>';
+  }
+
+  // Severity badge
+  const sw = parseInt(document.getElementById('severityWeight').value, 10);
+  const badge = document.getElementById('tickerSeverityBadge');
+  if (!isNaN(sw)) {
+    if (sw >= 70) {
+      badge.textContent = 'High severity';
+      badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;';
+    } else if (sw >= 40) {
+      badge.textContent = 'Medium severity';
+      badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#fffbeb;color:#92400e;border:1px solid #fde68a;';
+    } else {
+      badge.textContent = 'Low severity';
+      badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;';
+    }
+  } else {
+    badge.textContent = 'No severity set';
+    badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;';
+  }
+
+  // Source URL
+  const url = document.getElementById('sourceUrl').value.trim();
+  const linkLine = document.getElementById('tickerLinkLine');
+  const linkPreview = document.getElementById('tickerLinkPreview');
+  const linkAnchor = document.getElementById('tickerLinkAnchor');
+  if (url && url.startsWith('http')) {
+    linkLine.style.display = 'none';
+    linkPreview.style.display = 'block';
+    linkAnchor.href = url;
+    linkAnchor.title = url;
+  } else {
+    linkLine.style.display = 'block';
+    linkPreview.style.display = 'none';
+  }
+}
+// ── End ticker preview ────────────────────────────────────────────
 
 // ── Wire up all button event listeners ──────────────────────────
 // (script is at bottom of body so DOM is already ready — no DOMContentLoaded needed)
