@@ -2143,7 +2143,18 @@ document.addEventListener('input', function(e) {
 });
 
 document.addEventListener('click', function(e) {
-  if (e.target.id === 'refreshMissingPanelBtn') renderMissingPanel();
+  if (e.target.id === 'refreshMissingPanelBtn') {
+    // Sync any saved field values back into analysisResults before re-rendering
+    [...analysisResults.authorised, ...analysisResults.risk].forEach(inst => {
+      const emailEl = document.getElementById('edit-email-' + inst.institutionId);
+      const salEl   = document.getElementById('edit-sal-'   + inst.institutionId);
+      const statEl  = document.getElementById('edit-status-'+ inst.institutionId);
+      if (emailEl) inst.contact_email = emailEl.value.trim() || null;
+      if (salEl)   inst.salutation    = salEl.value.trim()   || null;
+      if (statEl)  inst.status        = statEl.value         || null;
+    });
+    renderMissingPanel();
+  }
 });
 
 document.addEventListener('change', function(e) {
