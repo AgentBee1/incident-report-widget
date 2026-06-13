@@ -1347,6 +1347,16 @@ async function submitAuth() {
         <div class="legend-item"><span class="dot red"></span> Not authorised — Risk Radar widget</div>
         <div class="legend-item"><span class="dot grey"></span> Institution not found</div>
       </div>
+      <div style="margin-top:14px;position:relative;">
+        <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+          ＋ Add or correct institution
+        </div>
+        <input type="text" id="instManualSearch" placeholder="Search institutions to add…"
+          style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit;color:#1a1d23;outline:none;transition:border-color 0.15s;"
+          onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'" />
+        <div id="instManualDrop"
+          style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:200;overflow:hidden;margin-top:2px;max-height:200px;overflow-y:auto;"></div>
+      </div>
     </div>
     <div id="missingDataPanel" style="display:none;"></div>
     <div class="status" id="instStatus"></div>
@@ -2106,11 +2116,7 @@ async function analyseInstitutions() {
     }
   }
 
-  document.getElementById('instTags').innerHTML = [
-    ...analysisResults.authorised.map(i => `<span class="inst-tag auth"><span class="dot green"></span>${i.institutionName}</span>`),
-    ...analysisResults.risk.map(i => `<span class="inst-tag risk"><span class="dot red"></span>${i.institutionName}</span>`),
-    ...analysisResults.unknown.map(i => `<span class="inst-tag unknown"><span class="dot grey"></span>${i.name}</span>`),
-  ].join('');
+  renderInstTags();
   document.getElementById('instResults').style.display = 'block';
 
   // Build missing data panel
@@ -2749,6 +2755,139 @@ function initAccredDropdown() {
 
 // ── End accreditations ───────────────────────────────────────────
 
+// ── Institution tag rendering + manual add ───────────────────────
+
+function renderInstTags() {
+  const container = document.getElementById('instTags');
+  container.innerHTML = [
+    ...analysisResults.authorised.map((i, idx) =>
+      `<span class="inst-tag auth" style="padding-right:6px;">
+        <span class="dot green"></span>${i.institutionName}
+        <button data-remove-auth="${idx}" title="Remove" style="background:none;border:none;color:#86efac;cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 4px;display:inline-flex;align-items:center;">×</button>
+      </span>`),
+    ...analysisResults.risk.map((i, idx) =>
+      `<span class="inst-tag risk" style="padding-right:6px;">
+        <span class="dot red"></span>${i.institutionName}
+        <button data-remove-risk="${idx}" title="Remove" style="background:none;border:none;color:#fca5a5;cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 4px;display:inline-flex;align-items:center;">×</button>
+      </span>`),
+    ...analysisResults.unknown.map((i, idx) =>
+      `<span class="inst-tag unknown" style="padding-right:6px;">
+        <span class="dot grey"></span>${i.name}
+        <button data-remove-unknown="${idx}" title="Remove" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 4px;display:inline-flex;align-items:center;">×</button>
+      </span>`),
+  ].join('');
+
+  // Removal handlers
+  container.querySelectorAll('[data-remove-auth]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      analysisResults.authorised.splice(parseInt(btn.getAttribute('data-remove-auth')), 1);
+      renderInstTags(); updatePreview();
+    });
+  });
+  container.querySelectorAll('[data-remove-risk]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      analysisResults.risk.splice(parseInt(btn.getAttribute('data-remove-risk')), 1);
+      renderInstTags(); updatePreview();
+    });
+  });
+  container.querySelectorAll('[data-remove-unknown]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      analysisResults.unknown.splice(parseInt(btn.getAttribute('data-remove-unknown')), 1);
+      renderInstTags(); updatePreview();
+    });
+  });
+}
+
+// ── Manual institution add ────────────────────────────────────────
+let _instAddTimeout = null;
+
+function initInstManualAdd() {
+  const input = document.getElementById('instManualSearch');
+  const drop = document.getElementById('instManualDrop');
+  if (!input) return;
+
+  input.addEventListener('input', () => {
+    clearTimeout(_instAddTimeout);
+    const q = input.value.trim();
+    if (q.length < 2) { drop.style.display = 'none'; return; }
+    _instAddTimeout = setTimeout(async () => {
+      const res = await sbFetch(
+        `${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,contact_email,salutation,status,is_client&order=name&limit=10`
+      );
+      const data = await res.json();
+      if (!data || !data.length) { drop.style.display = 'none'; return; }
+      drop.innerHTML = data.map((inst, i) =>
+        `<div class="suggestion-item" data-inst-add-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:13px;">
+          <div style="font-weight:500;color:#1a1d23;">${inst.name}</div>
+          <div style="font-size:11px;color:#9ca3af;">${inst.status || 'Unknown status'}</div>
+        </div>`
+      ).join('');
+      drop._results = data;
+      drop.style.display = 'block';
+    }, 250);
+  });
+
+  drop.addEventListener('click', async e => {
+    const item = e.target.closest('[data-inst-add-index]');
+    if (!item) return;
+    const inst = drop._results[parseInt(item.getAttribute('data-inst-add-index'))];
+    if (!inst) return;
+
+    // Check if already in results
+    const alreadyIn = [
+      ...analysisResults.authorised,
+      ...analysisResults.risk,
+    ].some(i => i.institutionId === inst.id);
+    if (alreadyIn) { input.value = ''; drop.style.display = 'none'; return; }
+
+    // Check authorisation
+    const NON_CLIENT_STATUSES = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed', null];
+    const canonicalId = selectedAgent ? (selectedAgent.canonical_agent_id || selectedAgent.id) : null;
+    let isAuthorised = false;
+
+    if (canonicalId) {
+      const familyRes = await sbFetch(
+        `${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${canonicalId}&select=id`
+      );
+      const familyData = await familyRes.json();
+      const agentIds = new Set([selectedAgent.id, canonicalId]);
+      (familyData || []).forEach(a => agentIds.add(a.id));
+      const idList = [...agentIds].join(',');
+
+      const linkRes = await sbFetch(
+        `${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${idList})&institution_id=eq.${inst.id}&link_type=eq.authorised&select=agent_id&limit=1`
+      );
+      const linkData = await linkRes.json();
+      if (linkData && linkData.length) isAuthorised = true;
+    }
+
+    const entry = {
+      name: inst.name,
+      institutionId: inst.id,
+      institutionName: inst.name,
+      contact_email: inst.contact_email,
+      salutation: inst.salutation,
+      status: inst.status,
+      is_client: inst.is_client,
+      isNonClient: !inst.is_client || NON_CLIENT_STATUSES.includes(inst.status),
+    };
+
+    if (isAuthorised) analysisResults.authorised.push(entry);
+    else analysisResults.risk.push(entry);
+
+    renderInstTags();
+    updatePreview();
+    input.value = '';
+    drop.style.display = 'none';
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#instManualSearch') && !e.target.closest('#instManualDrop'))
+      drop.style.display = 'none';
+  });
+}
+// ── End institution manual add ────────────────────────────────────
+
 // ── Ticker preview ───────────────────────────────────────────────
 function updateTickerPreview() {
   const panel = document.getElementById('tickerPreview');
@@ -2841,6 +2980,7 @@ initParentAgentSearch();
 initBranchSearch();
 
 initAccredDropdown();
+initInstManualAdd();
 </script>
 </body>
 </html>
