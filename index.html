@@ -1154,6 +1154,10 @@ async function submitAuth() {
           <label>City / office</label>
           <input type="text" id="newAgentJurisdiction" placeholder="e.g. Lahore" />
         </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label>Website <span style="font-weight:400;color:#9ca3af;">— optional</span></label>
+          <input type="url" id="newAgentWebsite" placeholder="https://www.agencyname.com" style="background:#fff;border-color:#fde68a;" />
+        </div>
       </div>
       <div class="field" style="margin-bottom:12px;">
         <label>Parent agent (canonical brand) <span style="font-weight:400;color:#9ca3af;">— optional</span></label>
@@ -1954,6 +1958,7 @@ async function createAgent() {
     country: document.getElementById('newAgentCountry').value.trim() || null,
     jurisdiction: document.getElementById('newAgentJurisdiction').value.trim() || null,
     canonical_agent_id: _parentAgent ? _parentAgent.id : null,
+    website: document.getElementById('newAgentWebsite').value.trim() || null,
   };
 
   try {
@@ -2138,9 +2143,9 @@ async function analyseInstitutions() {
               </div>
               <div class="missing-field">
                 <label>Salutation</label>
-                <input type="text" id="edit-sal-${inst.institutionId}" value="${inst.salutation || ''}"
+                <input type="text" id="edit-sal-${inst.institutionId}" value="${inst.salutation || inst.institutionName + ' Team'}"
                   placeholder="Dear Risk Team"
-                  class="${inst.salutation ? 'filled' : ''}"
+                  class="filled"
                   data-markfilled="true" />
               </div>
               <div class="missing-field">
@@ -2595,6 +2600,7 @@ function resetForm() {
   document.getElementById('description').value = '';
   document.getElementById('deidentifiedSummary').value = '';
   document.getElementById('sourceUrl').value = '';
+  document.getElementById('newAgentWebsite').value = '';
   document.getElementById('summaryGenerateStatus').textContent = '';
   document.getElementById('generateSummaryBtn').disabled = true;
   document.getElementById('generateSummaryBtn').innerHTML = '✨ Generate draft';
