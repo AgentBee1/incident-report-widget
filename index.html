@@ -2120,67 +2120,7 @@ async function analyseInstitutions() {
   document.getElementById('instResults').style.display = 'block';
 
   // Build missing data panel
-  const allFound = [...analysisResults.authorised, ...analysisResults.risk];
-  const missing = allFound.filter(i => !i.contact_email || !i.salutation || !i.status);
-
-  const missingPanel = document.getElementById('missingDataPanel');
-  if (missing.length > 0) {
-    missingPanel.style.display = 'block';
-    missingPanel.innerHTML = `
-      <div class="missing-panel">
-        <div class="missing-panel-header">
-          ⚠️ ${missing.length} institution(s) have missing contact data — fill in before sending comms
-        </div>
-        ${missing.map(inst => `
-          <div class="missing-inst-row" id="missing-row-${inst.institutionId}">
-            <div class="missing-inst-name">
-              ${inst.institutionName}
-              <span class="inst-tag ${inst.isNonClient ? 'risk' : 'auth'}" style="font-size:10px;padding:2px 7px;">
-                ${inst.status || 'No status'}
-              </span>
-            </div>
-            <div class="missing-fields-grid">
-              <div class="missing-field">
-                <label>Contact email</label>
-                <input type="email" id="edit-email-${inst.institutionId}" value="${inst.contact_email || ''}"
-                  placeholder="email@institution.edu"
-                  class="${inst.contact_email ? 'filled' : ''}"
-                  data-markfilled="true" />
-              </div>
-              <div class="missing-field">
-                <label>Salutation</label>
-                <input type="text" id="edit-sal-${inst.institutionId}" value="${inst.salutation || inst.institutionName + ' Team'}"
-                  placeholder="Dear Risk Team"
-                  class="filled"
-                  data-markfilled="true" />
-              </div>
-              <div class="missing-field">
-                <label>Status</label>
-                <select id="edit-status-${inst.institutionId}"
-                  class="${inst.status ? 'filled' : ''}"
-                  data-markfilled="true">
-                  <option value="">Select…</option>
-                  <option ${inst.status==='Client'?'selected':''}>Client</option>
-                  <option ${inst.status==='Cold'?'selected':''}>Cold</option>
-                  <option ${inst.status==='Warm'?'selected':''}>Warm</option>
-                  <option ${inst.status==='Former Client'?'selected':''}>Former Client</option>
-                  <option ${inst.status==='Trial Over'?'selected':''}>Trial Over</option>
-                  <option ${inst.status==='Unsubscribed'?'selected':''}>Unsubscribed</option>
-                </select>
-              </div>
-            </div>
-            <button class="btn-save-inst" data-institution-id="${inst.institutionId}">
-              Save changes
-            </button>
-            <div class="save-inst-status" id="save-status-${inst.institutionId}"></div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  } else {
-    missingPanel.style.display = 'none';
-    missingPanel.innerHTML = '';
-  }
+  renderMissingPanel();
 
   setStatus('instStatus', 'success', `Done — ${analysisResults.authorised.length} authorised · ${analysisResults.risk.length} risk radar · ${analysisResults.unknown.length} not found.${missing.length ? ` · ⚠️ ${missing.length} missing contact data.` : ''}`);
   btn.disabled = false;
@@ -2200,6 +2140,10 @@ document.addEventListener('click', function(e) {
 
 document.addEventListener('input', function(e) {
   if (e.target.getAttribute('data-markfilled')) markFilled(e.target);
+});
+
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'refreshMissingPanelBtn') renderMissingPanel();
 });
 
 document.addEventListener('change', function(e) {
@@ -2798,6 +2742,73 @@ function renderInstTags() {
   });
 }
 
+// ── Missing data panel ───────────────────────────────────────────
+function renderMissingPanel() {
+  const allFound = [...analysisResults.authorised, ...analysisResults.risk];
+  const missing = allFound.filter(i => !i.contact_email || !i.salutation || !i.status);
+  const missingPanel = document.getElementById('missingDataPanel');
+
+  if (missing.length > 0) {
+    missingPanel.style.display = 'block';
+    missingPanel.innerHTML = `
+      <div class="missing-panel">
+        <div class="missing-panel-header" style="justify-content:space-between;">
+          <span>⚠️ ${missing.length} institution(s) have missing contact data — fill in before sending comms</span>
+          <button id="refreshMissingPanelBtn" style="background:none;border:1px solid #fde68a;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:500;color:#92400e;cursor:pointer;font-family:inherit;flex-shrink:0;">↺ Refresh</button>
+        </div>
+        ${missing.map(inst => `
+          <div class="missing-inst-row" id="missing-row-${inst.institutionId}">
+            <div class="missing-inst-name">
+              ${inst.institutionName}
+              <span class="inst-tag ${inst.isNonClient ? 'risk' : 'auth'}" style="font-size:10px;padding:2px 7px;">
+                ${inst.status || 'No status'}
+              </span>
+            </div>
+            <div class="missing-fields-grid">
+              <div class="missing-field">
+                <label>Contact email</label>
+                <input type="email" id="edit-email-${inst.institutionId}" value="${inst.contact_email || ''}"
+                  placeholder="email@institution.edu"
+                  class="${inst.contact_email ? 'filled' : ''}"
+                  data-markfilled="true" />
+              </div>
+              <div class="missing-field">
+                <label>Salutation</label>
+                <input type="text" id="edit-sal-${inst.institutionId}" value="${inst.salutation || inst.institutionName + ' Team'}"
+                  placeholder="Dear Risk Team"
+                  class="filled"
+                  data-markfilled="true" />
+              </div>
+              <div class="missing-field">
+                <label>Status</label>
+                <select id="edit-status-${inst.institutionId}"
+                  class="${inst.status ? 'filled' : ''}"
+                  data-markfilled="true">
+                  <option value="">Select…</option>
+                  <option ${inst.status==='Client'?'selected':''}>Client</option>
+                  <option ${inst.status==='Cold'?'selected':''}>Cold</option>
+                  <option ${inst.status==='Warm'?'selected':''}>Warm</option>
+                  <option ${inst.status==='Former Client'?'selected':''}>Former Client</option>
+                  <option ${inst.status==='Trial Over'?'selected':''}>Trial Over</option>
+                  <option ${inst.status==='Unsubscribed'?'selected':''}>Unsubscribed</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn-save-inst" data-institution-id="${inst.institutionId}">
+              Save changes
+            </button>
+            <div class="save-inst-status" id="save-status-${inst.institutionId}"></div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else {
+    missingPanel.style.display = 'none';
+    missingPanel.innerHTML = '';
+  }
+}
+// ── End missing data panel ────────────────────────────────────────
+
 // ── Manual institution add ────────────────────────────────────────
 let _instAddTimeout = null;
 
@@ -2876,6 +2887,7 @@ function initInstManualAdd() {
     else analysisResults.risk.push(entry);
 
     renderInstTags();
+    renderMissingPanel();
     updatePreview();
     input.value = '';
     drop.style.display = 'none';
