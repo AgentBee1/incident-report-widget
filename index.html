@@ -2186,7 +2186,8 @@ async function saveInstitutionData(institutionId) {
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.statusText); }
     statusEl.className = 'save-inst-status ok';
-    statusEl.textContent = '✓ Saved successfully.';
+    statusEl.textContent = '✓ Saved — edit any field and save again to update.';
+    setTimeout(() => { statusEl.className = 'save-inst-status'; statusEl.textContent = ''; }, 3000);
   } catch(e) {
     statusEl.className = 'save-inst-status err';
     statusEl.textContent = '✗ ' + e.message;
