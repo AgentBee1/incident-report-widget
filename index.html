@@ -2254,6 +2254,25 @@ async function submitIncident() {
         body: JSON.stringify(uniqueLinks.map(i => ({ incident_id: incidentId, institution_id: i.institutionId })))
       });
       if (!linkRes.ok) { const e = await linkRes.json(); throw new Error('Incident created but links failed: ' + (e.message || linkRes.statusText)); }
+      // Write to institution_agent_links for Risk Radar
+if (uniqueLinks.length) {
+  const agentId = (selectedAgent.canonical_agent_id || selectedAgent.id);
+  const ialRows = uniqueLinks.map(i => ({
+    agent_id: agentId,
+    institution_id: i.institutionId,
+    link_type: 'linked'
+  }));
+  await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify(ialRows)
+  });
+  await sbFetch(`${SUPABASE_URL}/rest/v1/agent_institution_links`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify(ialRows.map(({ agent_id, institution_id }) => ({ agent_id, institution_id })))
+  });
+}
     }
 
     // Link accreditations
