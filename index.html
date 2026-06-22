@@ -2256,6 +2256,13 @@ async function submitIncident() {
       if (!linkRes.ok) { const e = await linkRes.json(); throw new Error('Incident created but links failed: ' + (e.message || linkRes.statusText)); }
       // Write to institution_agent_links for Risk Radar
 if (uniqueLinks.length) {
+  const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_institution_links`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify(uniqueLinks.map(i => ({ incident_id: incidentId, institution_id: i.institutionId })))
+  });
+  if (!linkRes.ok) { const e = await linkRes.json(); throw new Error('Incident created but links failed: ' + (e.message || linkRes.statusText)); }
+
   const agentId = (selectedAgent.canonical_agent_id || selectedAgent.id);
   const ialRows = uniqueLinks.map(i => ({
     agent_id: agentId,
@@ -2272,8 +2279,23 @@ if (uniqueLinks.length) {
     headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
     body: JSON.stringify(ialRows.map(({ agent_id, institution_id }) => ({ agent_id, institution_id })))
   });
+
+  const actionUrl = document.getElementById('sourceUrl').value.trim() || null;
+  const agentLabel = selectedAgent.agency_name + (selectedAgent.country ? ` (${selectedAgent.country})` : '');
+  await sbFetch(`${SUPABASE_URL}/rest/v1/notification_events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify(uniqueLinks.map(i => ({
+      institution_id: i.institutionId,
+      event_type: 'incident',
+      title: `New incident report — ${agentLabel}`,
+      action_label: 'View report',
+      action_url: actionUrl,
+      severity: 'med',
+      icon: 'ti-alert-triangle'
+    })))
+  });
 }
-    }
 
     // Link accreditations
     if (_selectedAccredIds.size > 0) {
