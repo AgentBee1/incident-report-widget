@@ -968,7 +968,6 @@
 </head>
 <body>
 
-<!-- Auth logic defined early so onclick handlers work -->
 <script>
 async function submitAuth() {
   const passphrase = document.getElementById('passphraseInput').value;
@@ -1012,11 +1011,9 @@ async function submitAuth() {
   btnText.textContent = 'Continue';
 }
 
-// Check if already authenticated — restore key immediately, no DOMContentLoaded needed
 (function() {
   if (sessionStorage.getItem('ab-admin-auth') === 'true') {
     window._supabaseKey = sessionStorage.getItem('ab-supabase-key') || '';
-    // Hide auth screen and show main content as soon as DOM is ready
     function restoreSession() {
       const authScreen = document.getElementById('auth-screen');
       const mainContent = document.getElementById('main-content');
@@ -1024,7 +1021,6 @@ async function submitAuth() {
         authScreen.classList.add('hidden');
         mainContent.style.display = 'block';
       } else {
-        // DOM not ready yet, retry
         setTimeout(restoreSession, 10);
       }
     }
@@ -1089,7 +1085,6 @@ async function submitAuth() {
       <h2>Agent</h2>
     </div>
 
-    <!-- Step 1: Search -->
     <div class="agent-search-wrap">
       <div class="field suggestions-outer">
         <label>Agent name</label>
@@ -1100,7 +1095,7 @@ async function submitAuth() {
     </div>
     <div class="status" id="agentStatus"></div>
 
-    <!-- Step 2: Branch refinement — shown after canonical selected -->
+    <!-- Branch refinement -->
     <div id="branchPanel" style="display:none;margin-top:14px;padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;">
       <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:10px;">
         Is this report about a specific branch or office?
@@ -1138,7 +1133,7 @@ async function submitAuth() {
       <div class="tier-pill" id="agentCardTier"></div>
     </div>
 
-    <!-- Add new agent panel (only shown when nothing found at all) -->
+    <!-- Add new agent panel -->
     <div class="new-agent-panel" id="newAgentPanel">
       <h4>➕ Add new agent to AgentBee</h4>
       <div class="new-agent-grid">
@@ -1295,7 +1290,6 @@ async function submitAuth() {
       <h2>Institution linkage</h2>
     </div>
 
-    <!-- Other authorised clients panel — populated when agent is selected -->
     <div id="otherClientsPanel" style="display:none;margin-bottom:18px;">
       <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
         <span>🏛️</span> Agent is an authorised agent of these AgentBee client institutions
@@ -1425,7 +1419,6 @@ async function submitAuth() {
 <div class="modal-backdrop" id="emailModal">
   <div class="modal-box" style="max-width:560px;">
 
-    <!-- Step 1: generating -->
     <div id="emailStep1">
       <h2>📧 Email protocol</h2>
       <p style="margin-bottom:16px;">Generating a de-identified summary using Claude. This will be reviewed before saving.</p>
@@ -1435,7 +1428,6 @@ async function submitAuth() {
       </div>
     </div>
 
-    <!-- Step 2: review -->
     <div id="emailStep2" style="display:none;">
       <h2 style="margin-bottom:6px;">Review de-identified summary</h2>
       <p style="margin-bottom:14px;">This summary will be sent to <strong>Warm and Cold</strong> institutions in the next Monday digest. Linked <strong>client institutions</strong> will also receive a notification in their weekly client digest. Edit as needed before confirming.</p>
@@ -1454,7 +1446,6 @@ async function submitAuth() {
       <div class="status" id="emailConfirmStatus" style="margin-top:12px;"></div>
     </div>
 
-    <!-- Step 3: confirmed -->
     <div id="emailStep3" style="display:none;text-align:center;padding:8px 0;">
       <div style="font-size:36px;margin-bottom:12px;">✅</div>
       <h2 style="margin-bottom:8px;">Queued for Monday digest</h2>
@@ -1549,16 +1540,13 @@ function parseHandoff() {
   const populated = [];
   const skipped = [];
 
-  // Agent name
   const agentName = extractField(raw, 'Agent name', 'Agent');
   if (agentName) {
     document.getElementById('agentSearch').value = agentName;
     populated.push('Agent name');
-    // Trigger auto-lookup
     setTimeout(() => lookupAgent(), 300);
   } else skipped.push('Agent name');
 
-  // Incident date — parse various formats
   const dateRaw = extractField(raw, 'Incident date', 'Date');
   if (dateRaw) {
     const parsed = new Date(dateRaw);
@@ -1568,7 +1556,6 @@ function parseHandoff() {
     } else skipped.push('Incident date (unrecognised format)');
   } else skipped.push('Incident date');
 
-  // Report type — best match
   const reportTypeRaw = extractField(raw, 'Report type', 'Report');
   if (reportTypeRaw) {
     const matched = bestMatch(reportTypeRaw, REPORT_TYPE_MAP);
@@ -1578,7 +1565,6 @@ function parseHandoff() {
     } else skipped.push(`Report type (no match for "${reportTypeRaw}")`);
   } else skipped.push('Report type');
 
-  // Category — best match
   const categoryRaw = extractField(raw, 'Category');
   if (categoryRaw) {
     const matched = bestMatch(categoryRaw, CATEGORY_MAP);
@@ -1588,7 +1574,6 @@ function parseHandoff() {
     } else skipped.push(`Category (no match for "${categoryRaw}")`);
   } else skipped.push('Category');
 
-  // Source type — best match
   const sourceTypeRaw = extractField(raw, 'Source type', 'Source');
   if (sourceTypeRaw) {
     const matched = bestMatch(sourceTypeRaw, SOURCE_TYPE_MAP);
@@ -1598,7 +1583,6 @@ function parseHandoff() {
     } else skipped.push(`Source type (no match for "${sourceTypeRaw}")`);
   }
 
-  // Severity weight — best match
   const severityRaw = extractField(raw, 'Severity weight', 'Severity');
   if (severityRaw) {
     const matched = bestMatch(severityRaw, SEVERITY_MAP);
@@ -1606,7 +1590,6 @@ function parseHandoff() {
       document.getElementById('severityWeight').value = matched;
       populated.push(`Severity → ${matched}`);
     } else {
-      // Try direct numeric
       const num = severityRaw.match(/\d+/);
       if (num) {
         document.getElementById('severityWeight').value = num[0];
@@ -1615,22 +1598,19 @@ function parseHandoff() {
     }
   }
 
-  // Source URL
   const urlRaw = extractField(raw, 'Source URL', 'URL', 'Link');
   if (urlRaw && urlRaw.startsWith('http')) {
     document.getElementById('sourceUrl').value = urlRaw;
     populated.push('Source URL');
   }
 
-  // Incident description — everything after "Incident description:" label
   const descMatch = raw.match(/Incident description\s*[:\-]\s*\n([\s\S]+?)(?=\nInstitution names|\nDe-identified|\n─|$)/i);
   if (descMatch) {
     document.getElementById('description').value = descMatch[1].trim();
     populated.push('Incident description');
-    onDescriptionInput(); // trigger button enable
+    onDescriptionInput();
   }
 
-  // Institution names
   const instMatch = raw.match(/Institution names[^\n]*\n([\s\S]+?)(?=\n─|$)/i);
   if (instMatch) {
     const instText = instMatch[1].trim();
@@ -1645,7 +1625,7 @@ function parseHandoff() {
 
   document.getElementById('handoffZone').classList.add('populated');
   updatePreview();
-  onDescriptionInput(); // ensure generate button state is correct
+  onDescriptionInput();
 
   const msg = `✓ Populated: ${populated.join(' · ')}` +
     (skipped.length ? `\n⚠ Could not match: ${skipped.join(', ')}` : '');
@@ -1698,14 +1678,18 @@ agentInput.addEventListener('input', () => {
 });
 
 agentInput.addEventListener('keydown', e => { if (e.key === 'Escape') closeSuggestions(); });
-document.addEventListener('click', e => { if (!e.target.closest('.suggestions-outer')) closeSuggestions(); });
+
+// Close suggestions when clicking outside — but NOT when clicking inside the dropdown itself
+document.addEventListener('click', e => {
+  if (!e.target.closest('.suggestions-outer')) closeSuggestions();
+});
 
 // Store agents by index for CSP-safe selection
 let _suggestionAgents = [];
 
 async function fetchSuggestions(q) {
   try {
-    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id,canonical_agent_id&limit=8&order=agency_name`);
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id&limit=8&order=agency_name`);
     renderSuggestions(await res.json());
   } catch(e) {}
 }
@@ -1721,8 +1705,10 @@ function renderSuggestions(items) {
   suggestionsEl.classList.add('open');
 }
 
-// Event delegation on suggestions container
+// FIX 1: stopPropagation so the document click handler doesn't fire on the same click
+// and wipe _suggestionAgents before selectAgent can use it
 suggestionsEl.addEventListener('click', function(e) {
+  e.stopPropagation();
   const item = e.target.closest('[data-agent-index]');
   if (!item) return;
   const idx = parseInt(item.getAttribute('data-agent-index'), 10);
@@ -1731,7 +1717,6 @@ suggestionsEl.addEventListener('click', function(e) {
 
 function closeSuggestions() { suggestionsEl.classList.remove('open'); suggestionsEl.innerHTML = ''; }
 
-// Canonical agent selected — show branch panel
 let _canonicalAgent = null;
 
 function selectAgent(agent) {
@@ -1749,7 +1734,6 @@ function selectAgent(agent) {
   document.getElementById('branchPanel').style.display = 'block';
   document.getElementById('agentCard').classList.remove('visible');
   document.getElementById('agentHierarchy').style.display = 'none';
-  // Load existing children for live search
   loadBranchChildren();
 }
 
@@ -1768,7 +1752,6 @@ function resolveAgent(agent) {
 }
 
 async function applyBranch() {
-  // If user selected an existing branch from suggestions, use it directly
   if (_selectedBranchAgent) {
     resolveAgent(_selectedBranchAgent);
     return;
@@ -1788,7 +1771,6 @@ async function applyBranch() {
   const searchName = `${_canonicalAgent.agency_name} ${suffix}`;
 
   try {
-    // Try to match against already-loaded children
     const match = _branchChildren.find(c => {
       const cCountry = (c.country || '').toLowerCase();
       const cJuris = (c.jurisdiction || '').toLowerCase();
@@ -1826,7 +1808,6 @@ function skipBranch() {
   resolveAgent(_canonicalAgent);
 }
 
-// Live child agent search for branch fields
 let _branchChildren = [];
 let _selectedBranchAgent = null;
 let _branchSearchTimeout = null;
@@ -1841,7 +1822,7 @@ async function loadBranchChildren() {
 
 function filterBranchSuggestions(field, query) {
   const lower = query.toLowerCase();
-  const suggestionsEl = document.getElementById(field === 'country' ? 'branchCountrySuggestions' : 'branchCitySuggestions');
+  const sugEl = document.getElementById(field === 'country' ? 'branchCountrySuggestions' : 'branchCitySuggestions');
 
   const matches = _branchChildren.filter(c => {
     if (field === 'country') return (c.country || '').toLowerCase().includes(lower);
@@ -1849,17 +1830,17 @@ function filterBranchSuggestions(field, query) {
     return false;
   });
 
-  if (!matches.length || !query) { suggestionsEl.style.display = 'none'; return; }
+  if (!matches.length || !query) { sugEl.style.display = 'none'; return; }
 
-  suggestionsEl.innerHTML = matches.map((c, i) =>
+  sugEl.innerHTML = matches.map((c, i) =>
     `<div class="suggestion-item" data-branch-index="${i}" data-branch-field="${field}"
       style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:13px;">
       <div style="font-weight:500;color:#1a1d23;">${c.agency_name}</div>
       <div style="font-size:11px;color:#9ca3af;">${[c.jurisdiction, c.country].filter(Boolean).join(' · ')}</div>
     </div>`
   ).join('');
-  suggestionsEl._matches = matches;
-  suggestionsEl.style.display = 'block';
+  sugEl._matches = matches;
+  sugEl.style.display = 'block';
 }
 
 function initBranchSearch() {
@@ -1884,12 +1865,10 @@ function initBranchSearch() {
       const agent = sugEl._matches[idx];
       if (!agent) return;
       _selectedBranchAgent = agent;
-      // Fill both fields from the selected child
       document.getElementById('branchCountry').value = agent.country || '';
       document.getElementById('branchCity').value = agent.jurisdiction || '';
       document.getElementById('branchCountrySuggestions').style.display = 'none';
       document.getElementById('branchCitySuggestions').style.display = 'none';
-      // Show match card
       document.getElementById('branchMatchName').textContent = agent.agency_name;
       document.getElementById('branchMatchCard').style.display = 'block';
     });
@@ -1910,7 +1889,7 @@ async function lookupAgent() {
   document.getElementById('newAgentPanel').classList.remove('visible');
   closeSuggestions();
   try {
-    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id,canonical_agent_id&limit=8&order=agency_name`);
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id&limit=8&order=agency_name`);
     const data = await res.json();
     if (!data.length) {
       setStatus('agentStatus', 'error', 'No agent found matching that name.');
@@ -1923,34 +1902,36 @@ async function lookupAgent() {
       clearStatus('agentStatus');
       return;
     }
-    // Show inline match list
+    // Multiple results — show inline match list
     _suggestionAgents = data;
     const matchHtml = data.map((a, i) => `
-      <div data-agent-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;transition:background 0.1s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background=''">
+      <div data-agent-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;transition:background 0.1s;">
         <div style="font-size:13px;font-weight:500;color:#1a1d23;">${a.agency_name}</div>
         <div style="font-size:11px;color:#9ca3af;margin-top:2px;">${[a.jurisdiction, a.country].filter(Boolean).join(' · ')}${a.risk_tier ? ' · ' + a.risk_tier + ' tier' : ''}</div>
       </div>`).join('');
     setStatus('agentStatus', 'info', `${data.length} matches found — select one below:`);
-    // Insert inline match list after status
+
     let matchList = document.getElementById('agentMatchList');
     if (!matchList) {
+      // FIX 2: create element and attach listener ONCE only
       matchList = document.createElement('div');
       matchList.id = 'agentMatchList';
       matchList.style.cssText = 'border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-top:8px;';
+      matchList.addEventListener('click', function(e) {
+        const item = e.target.closest('[data-agent-index]');
+        if (!item) return;
+        const idx = parseInt(item.getAttribute('data-agent-index'), 10);
+        if (_suggestionAgents[idx]) {
+          selectAgent(_suggestionAgents[idx]);
+          clearStatus('agentStatus');
+          matchList.style.display = 'none';
+        }
+      });
       document.getElementById('agentStatus').after(matchList);
     }
     matchList.innerHTML = matchHtml;
     matchList.style.display = 'block';
-    matchList.addEventListener('click', function(e) {
-      const item = e.target.closest('[data-agent-index]');
-      if (!item) return;
-      const idx = parseInt(item.getAttribute('data-agent-index'), 10);
-      if (_suggestionAgents[idx]) {
-        selectAgent(_suggestionAgents[idx]);
-        clearStatus('agentStatus');
-        matchList.style.display = 'none';
-      }
-    });
+
   } catch(e) { setStatus('agentStatus', 'error', 'Search failed: ' + e.message); }
 }
 
@@ -1982,7 +1963,6 @@ async function createAgent() {
     const data = await res.json();
     const newAgent = data[0];
 
-    // Select the newly created agent
     selectAgent(newAgent);
     document.getElementById('newAgentPanel').classList.remove('visible');
     clearStatus('newAgentStatus');
@@ -2006,11 +1986,9 @@ async function lookupAuthorisedClients(agentId) {
   loading.style.display = 'flex';
 
   try {
-    // Build full agent family (matches Your Agents widget logic)
     const canonicalId = selectedAgent.canonical_agent_id || agentId;
     const agentIds = new Set([agentId, canonicalId]);
 
-    // Fetch all agents in the same canonical family
     const familyRes = await sbFetch(
       `${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${canonicalId}&select=id`
     );
@@ -2019,7 +1997,6 @@ async function lookupAuthorisedClients(agentId) {
 
     const idList = [...agentIds].join(',');
 
-    // Get all authorised institution links in a single query
     const allLinksRes = await sbFetch(
       `${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${idList})&link_type=eq.authorised&select=institution_id`
     );
@@ -2027,7 +2004,6 @@ async function lookupAuthorisedClients(agentId) {
 
     if (!allLinks.length) { loading.style.display = 'none'; return; }
 
-    // Deduplicate institution IDs
     const uniqueIds = [...new Set(allLinks.map(l => l.institution_id))];
     const ids = uniqueIds.join(',');
 
@@ -2072,11 +2048,9 @@ async function analyseInstitutions() {
 
   const NON_CLIENT_STATUSES = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed', null];
 
-  // Build full agent family (matches Your Agents widget logic)
   const canonicalId = selectedAgent.canonical_agent_id || selectedAgent.id;
   const agentIdChain = new Set([selectedAgent.id, canonicalId]);
 
-  // Fetch all agents in the same canonical family
   const familyRes = await sbFetch(
     `${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${canonicalId}&select=id`
   );
@@ -2085,7 +2059,6 @@ async function analyseInstitutions() {
 
   const familyIdList = [...agentIdChain].join(',');
 
-
   for (const name of names) {
     const instRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(name)}*&select=id,name,contact_email,salutation,status,is_client&limit=1`);
     const instData = await instRes.json();
@@ -2093,7 +2066,6 @@ async function analyseInstitutions() {
     const inst = instData[0];
     const isNonClient = !inst.is_client || NON_CLIENT_STATUSES.includes(inst.status);
 
-    // Check authorisation using single IN query across full family
     let isAuthorised = false;
     const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${familyIdList})&institution_id=eq.${inst.id}&link_type=eq.authorised&select=agent_id&limit=1`);
     const linkData = await linkRes.json();
@@ -2119,9 +2091,9 @@ async function analyseInstitutions() {
   renderInstTags();
   document.getElementById('instResults').style.display = 'block';
 
-  // Build missing data panel
   renderMissingPanel();
 
+  const missing = [...analysisResults.authorised, ...analysisResults.risk].filter(i => !i.contact_email || !i.salutation || !i.status);
   setStatus('instStatus', 'success', `Done — ${analysisResults.authorised.length} authorised · ${analysisResults.risk.length} risk radar · ${analysisResults.unknown.length} not found.${missing.length ? ` · ⚠️ ${missing.length} missing contact data.` : ''}`);
   btn.disabled = false;
   document.getElementById('analyseBtnIcon').textContent = '⚡';
@@ -2132,7 +2104,6 @@ function markFilled(el) {
   el.classList.toggle('filled', el.value.trim() !== '');
 }
 
-// Event delegation for dynamically generated missing panel buttons
 document.addEventListener('click', function(e) {
   const saveBtn = e.target.closest('[data-institution-id]');
   if (saveBtn) saveInstitutionData(saveBtn.getAttribute('data-institution-id'));
@@ -2144,7 +2115,6 @@ document.addEventListener('input', function(e) {
 
 document.addEventListener('click', function(e) {
   if (e.target.id === 'refreshMissingPanelBtn') {
-    // Sync any saved field values back into analysisResults before re-rendering
     [...analysisResults.authorised, ...analysisResults.risk].forEach(inst => {
       const emailEl = document.getElementById('edit-email-' + inst.institutionId);
       const salEl   = document.getElementById('edit-sal-'   + inst.institutionId);
@@ -2234,19 +2204,16 @@ async function submitIncident() {
     const incidentId = incData[0].id;
     submittedIncidentId = incidentId;
 
-   // Include manually analysed institutions from Section 3
     const allLinked = [...analysisResults.authorised, ...analysisResults.risk];
-
-    // Also include authorised client institutions auto-detected in the Section 3 panel
     const autoClients = (window._authorisedClientInstitutions || []).map(i => ({
       institutionId: i.id,
       institutionName: i.name,
     }));
 
-    // Merge and deduplicate by institution_id
     const uniqueLinks = [...new Map(
       [...allLinked, ...autoClients].map(i => [i.institutionId, i])
     ).values()];
+
     if (uniqueLinks.length) {
       const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_institution_links`, {
         method: 'POST',
@@ -2254,50 +2221,41 @@ async function submitIncident() {
         body: JSON.stringify(uniqueLinks.map(i => ({ incident_id: incidentId, institution_id: i.institutionId })))
       });
       if (!linkRes.ok) { const e = await linkRes.json(); throw new Error('Incident created but links failed: ' + (e.message || linkRes.statusText)); }
-      // Write to institution_agent_links for Risk Radar
-if (uniqueLinks.length) {
-  const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_institution_links`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify(uniqueLinks.map(i => ({ incident_id: incidentId, institution_id: i.institutionId })))
-  });
-  if (!linkRes.ok) { const e = await linkRes.json(); throw new Error('Incident created but links failed: ' + (e.message || linkRes.statusText)); }
 
-  const agentId = (selectedAgent.canonical_agent_id || selectedAgent.id);
-  const ialRows = uniqueLinks.map(i => ({
-    agent_id: agentId,
-    institution_id: i.institutionId,
-    link_type: 'linked'
-  }));
-  await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify(ialRows)
-  });
-  await sbFetch(`${SUPABASE_URL}/rest/v1/agent_institution_links`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify(ialRows.map(({ agent_id, institution_id }) => ({ agent_id, institution_id })))
-  });
+      const agentId = (selectedAgent.canonical_agent_id || selectedAgent.id);
+      const ialRows = uniqueLinks.map(i => ({
+        agent_id: agentId,
+        institution_id: i.institutionId,
+        link_type: 'linked'
+      }));
+      await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify(ialRows)
+      });
+      await sbFetch(`${SUPABASE_URL}/rest/v1/agent_institution_links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify(ialRows.map(({ agent_id, institution_id }) => ({ agent_id, institution_id })))
+      });
 
-  const actionUrl = document.getElementById('sourceUrl').value.trim() || null;
-  const agentLabel = selectedAgent.agency_name + (selectedAgent.country ? ` (${selectedAgent.country})` : '');
-  await sbFetch(`${SUPABASE_URL}/rest/v1/notification_events`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify(uniqueLinks.map(i => ({
-      institution_id: i.institutionId,
-      event_type: 'incident',
-      title: `New incident report — ${agentLabel}`,
-      action_label: 'View report',
-      action_url: actionUrl,
-      severity: 'med',
-      icon: 'ti-alert-triangle'
-    })))
-  });
-}
+      const actionUrl = document.getElementById('sourceUrl').value.trim() || null;
+      const agentLabel = selectedAgent.agency_name + (selectedAgent.country ? ` (${selectedAgent.country})` : '');
+      await sbFetch(`${SUPABASE_URL}/rest/v1/notification_events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify(uniqueLinks.map(i => ({
+          institution_id: i.institutionId,
+          event_type: 'incident',
+          title: `New incident report — ${agentLabel}`,
+          action_label: 'View report',
+          action_url: actionUrl,
+          severity: 'med',
+          icon: 'ti-alert-triangle'
+        })))
+      });
+    }
 
-    // Link accreditations
     if (_selectedAccredIds.size > 0) {
       const accredRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_accreditation_links`, {
         method: 'POST',
@@ -2368,7 +2326,7 @@ async function generateInlineSummary() {
   document.getElementById('summaryGenerating').style.display = 'none';
 }
 
-// ── Parent agent search (for new agent form) ─────────────────────
+// ── Parent agent search ──────────────────────────────────────────
 let _parentAgent = null;
 let _parentSearchTimeout = null;
 
@@ -2422,7 +2380,6 @@ function clearParentAgent() {
   document.getElementById('parentAgentCard').style.display = 'none';
 }
 
-// Build and display agent hierarchy
 async function showAgentHierarchy(agent) {
   const hierarchyEl = document.getElementById('agentHierarchy');
   if (!agent.canonical_agent_id) { hierarchyEl.style.display = 'none'; return; }
@@ -2430,7 +2387,6 @@ async function showAgentHierarchy(agent) {
   const chain = [];
   let currentId = agent.canonical_agent_id;
 
-  // Walk up the chain (max 3 levels)
   for (let i = 0; i < 3 && currentId; i++) {
     const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${currentId}&select=id,agency_name,canonical_agent_id&limit=1`);
     const data = await res.json();
@@ -2445,15 +2401,12 @@ async function showAgentHierarchy(agent) {
   }
 }
 
-// ── End parent agent search ───────────────────────────────────────
-
 function openEmailModal() {
   document.getElementById('emailModal').classList.add('open');
 }
 
 function closeEmailModal() {
   document.getElementById('emailModal').classList.remove('open');
-  // Reset steps
   document.getElementById('emailStep1').style.display = 'block';
   document.getElementById('emailStep2').style.display = 'none';
   document.getElementById('emailStep3').style.display = 'none';
@@ -2462,12 +2415,10 @@ function closeEmailModal() {
 }
 
 async function openEmailProtocol() {
-  // Check if any linked institutions are Warm/Cold (non-client)
   const NON_CLIENT = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed'];
   const linkedNonClients = analysisResults.risk.filter(i => NON_CLIENT.includes(i.status));
 
   if (linkedNonClients.length === 0) {
-    // Also check authorised institutions that might be non-client
     const authorisedNonClients = analysisResults.authorised.filter(i => NON_CLIENT.includes(i.status));
     if (authorisedNonClients.length === 0) {
       setStatus('submitStatus', 'error', '⚠ Cannot queue for email — no linked Warm or Cold institutions found for this incident. Add institutions in Section 3 and re-analyse first.');
@@ -2476,7 +2427,6 @@ async function openEmailProtocol() {
   }
 
   openEmailModal();
-  // Pre-fill from inline field if already drafted
   const existing = document.getElementById('deidentifiedSummary').value.trim();
   if (existing) {
     document.getElementById('emailSummaryText').value = existing;
@@ -2527,7 +2477,6 @@ async function generateSummary() {
 async function regenerateSummary() {
   document.getElementById('emailStep2').style.display = 'none';
   document.getElementById('emailStep1').style.display = 'block';
-  // Reset step1 HTML in case it was overwritten by error
   document.getElementById('emailStep1').innerHTML = `
     <h2>📧 Email protocol</h2>
     <p style="margin-bottom:16px;">Generating a de-identified summary using Claude. This will be reviewed before saving.</p>
@@ -2578,8 +2527,6 @@ async function confirmEmailProtocol() {
   }
 }
 
-// ── End email protocol ───────────────────────────────────────────
-
 function resetForm() {
   if (!confirm('Reset the form?')) return;
   selectedAgent = null;
@@ -2619,7 +2566,6 @@ function resetForm() {
   btn.disabled = false;
   btn.className = 'btn btn-primary';
   btn.innerHTML = 'Submit report';
-  // Reset accreditations
   _selectedAccredIds = new Set();
   if (_accredLoaded) renderAccredOptions();
   renderAccredTags();
@@ -2750,9 +2696,7 @@ function initAccredDropdown() {
   });
 }
 
-// ── End accreditations ───────────────────────────────────────────
-
-// ── Institution tag rendering + manual add ───────────────────────
+// ── Institution tag rendering ────────────────────────────────────
 
 function renderInstTags() {
   const container = document.getElementById('instTags');
@@ -2774,7 +2718,6 @@ function renderInstTags() {
       </span>`),
   ].join('');
 
-  // Removal handlers
   container.querySelectorAll('[data-remove-auth]').forEach(btn => {
     btn.addEventListener('click', () => {
       analysisResults.authorised.splice(parseInt(btn.getAttribute('data-remove-auth')), 1);
@@ -2860,7 +2803,6 @@ function renderMissingPanel() {
     missingPanel.innerHTML = '';
   }
 }
-// ── End missing data panel ────────────────────────────────────────
 
 // ── Manual institution add ────────────────────────────────────────
 let _instAddTimeout = null;
@@ -2897,14 +2839,12 @@ function initInstManualAdd() {
     const inst = drop._results[parseInt(item.getAttribute('data-inst-add-index'))];
     if (!inst) return;
 
-    // Check if already in results
     const alreadyIn = [
       ...analysisResults.authorised,
       ...analysisResults.risk,
     ].some(i => i.institutionId === inst.id);
     if (alreadyIn) { input.value = ''; drop.style.display = 'none'; return; }
 
-    // Check authorisation
     const NON_CLIENT_STATUSES = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed', null];
     const canonicalId = selectedAgent ? (selectedAgent.canonical_agent_id || selectedAgent.id) : null;
     let isAuthorised = false;
@@ -2951,14 +2891,12 @@ function initInstManualAdd() {
       drop.style.display = 'none';
   });
 }
-// ── End institution manual add ────────────────────────────────────
 
 // ── Ticker preview ───────────────────────────────────────────────
 function updateTickerPreview() {
   const panel = document.getElementById('tickerPreview');
   if (!panel || panel.closest('#otherClientsPanel').style.display === 'none') return;
 
-  // Title
   const agentName = selectedAgent ? selectedAgent.agency_name : null;
   const titleEl = document.getElementById('tickerTitle');
   if (agentName) {
@@ -2968,7 +2906,6 @@ function updateTickerPreview() {
     titleEl.innerHTML = 'New incident report — <em style="color:#9ca3af;font-style:italic;">(agent name)</em>';
   }
 
-  // Severity badge
   const sw = parseInt(document.getElementById('severityWeight').value, 10);
   const badge = document.getElementById('tickerSeverityBadge');
   if (!isNaN(sw)) {
@@ -2987,7 +2924,6 @@ function updateTickerPreview() {
     badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;';
   }
 
-  // Source URL
   const url = document.getElementById('sourceUrl').value.trim();
   const linkLine = document.getElementById('tickerLinkLine');
   const linkPreview = document.getElementById('tickerLinkPreview');
@@ -3002,48 +2938,34 @@ function updateTickerPreview() {
     linkPreview.style.display = 'none';
   }
 }
-// ── End ticker preview ────────────────────────────────────────────
 
-// ── Wire up all button event listeners ──────────────────────────
-// (script is at bottom of body so DOM is already ready — no DOMContentLoaded needed)
+// ── Wire up all event listeners ──────────────────────────────────
 
-// Handoff
 document.getElementById('parseHandoffBtn').addEventListener('click', parseHandoff);
 document.getElementById('clearHandoffBtn').addEventListener('click', clearHandoff);
 
-// Agent
 document.getElementById('agentLookupBtn').addEventListener('click', lookupAgent);
 document.getElementById('createAgentBtn').addEventListener('click', createAgent);
 document.getElementById('applyBranchBtn').addEventListener('click', applyBranch);
 document.getElementById('skipBranchBtn').addEventListener('click', skipBranch);
 document.getElementById('clearParentBtn').addEventListener('click', clearParentAgent);
 
-// Description → enable generate button
 document.getElementById('description').addEventListener('input', onDescriptionInput);
-
-// Generate summary
 document.getElementById('generateSummaryBtn').addEventListener('click', generateInlineSummary);
 
-// Analyse institutions
 document.getElementById('analyseBtn').addEventListener('click', analyseInstitutions);
 
-// Email protocol
 document.getElementById('commsBtn').addEventListener('click', openEmailProtocol);
 document.getElementById('cancelEmailBtn').addEventListener('click', closeEmailModal);
 document.getElementById('regenerateBtn').addEventListener('click', regenerateSummary);
 document.getElementById('confirmEmailBtn').addEventListener('click', confirmEmailProtocol);
 document.getElementById('closeEmailBtn').addEventListener('click', closeEmailModal);
 
-// Footer
 document.getElementById('resetFormBtn').addEventListener('click', resetForm);
 document.getElementById('submitBtn').addEventListener('click', submitIncident);
 
-// Parent agent search
 initParentAgentSearch();
-
-// Branch field live search
 initBranchSearch();
-
 initAccredDropdown();
 initInstManualAdd();
 </script>
