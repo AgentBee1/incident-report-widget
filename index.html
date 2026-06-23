@@ -2215,6 +2215,7 @@ async function submitIncident() {
     ).values()];
 
     if (uniqueLinks.length) {
+      // 1. incident_institution_links
       const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_institution_links`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
@@ -2223,22 +2224,44 @@ async function submitIncident() {
       if (!linkRes.ok) { const e = await linkRes.json(); throw new Error('Incident created but links failed: ' + (e.message || linkRes.statusText)); }
 
       const agentId = (selectedAgent.canonical_agent_id || selectedAgent.id);
-      const ialRows = uniqueLinks.map(i => ({
-        agent_id: agentId,
-        institution_id: i.institutionId,
-        link_type: 'linked'
-      }));
-      await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify(ialRows)
-      });
-      await sbFetch(`${SUPABASE_URL}/rest/v1/agent_institution_links`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify(ialRows.map(({ agent_id, institution_id }) => ({ agent_id, institution_id })))
-      });
+      const instIds = uniqueLinks.map(i => i.institutionId);
 
+      // 2. institution_agent_links — only insert 'linked' rows where agent isn't already authorised or linked
+      const existingIalRes = await sbFetch(
+        `${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=eq.${agentId}&institution_id=in.(${instIds.join(',')})&select=institution_id,link_type`
+      );
+      const existingIal = await existingIalRes.json() || [];
+      const authorisedSet = new Set(existingIal.filter(r => r.link_type === 'authorised').map(r => r.institution_id));
+      const linkedSet = new Set(existingIal.filter(r => r.link_type === 'linked').map(r => r.institution_id));
+      const newIalRows = instIds
+        .filter(id => !authorisedSet.has(id) && !linkedSet.has(id))
+        .map(id => ({ agent_id: agentId, institution_id: id, link_type: 'linked' }));
+      if (newIalRows.length) {
+        await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify(newIalRows)
+        });
+      }
+
+      // 3. agent_institution_links — only insert rows that don't already exist
+      const existingAilRes = await sbFetch(
+        `${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=eq.${agentId}&institution_id=in.(${instIds.join(',')})&select=institution_id`
+      );
+      const existingAil = await existingAilRes.json() || [];
+      const ailSet = new Set(existingAil.map(r => r.institution_id));
+      const newAilRows = instIds
+        .filter(id => !ailSet.has(id))
+        .map(id => ({ agent_id: agentId, institution_id: id }));
+      if (newAilRows.length) {
+        await sbFetch(`${SUPABASE_URL}/rest/v1/agent_institution_links`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify(newAilRows)
+        });
+      }
+
+      // 4. notification_events
       const actionUrl = document.getElementById('sourceUrl').value.trim() || null;
       const agentLabel = selectedAgent.agency_name + (selectedAgent.country ? ` (${selectedAgent.country})` : '');
       await sbFetch(`${SUPABASE_URL}/rest/v1/notification_events`, {
