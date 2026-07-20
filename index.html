@@ -2899,15 +2899,18 @@ const agentName = selectedAgent ? selectedAgent.agency_name : null;
   const sw = parseInt(document.getElementById('severityWeight').value, 10);
   const badge = document.getElementById('tickerSeverityBadge');
   if (!isNaN(sw)) {
-    if (sw >= 70) {
+  if (sw >= 70) {
       badge.textContent = 'High severity';
       badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;';
     } else if (sw >= 40) {
       badge.textContent = 'Medium severity';
       badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#fffbeb;color:#92400e;border:1px solid #fde68a;';
-    } else {
+    } else if (sw >= 5) {
       badge.textContent = 'Low severity';
       badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;';
+    } else {
+      badge.textContent = 'Informational';
+      badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;';
     }
   } else {
     badge.textContent = 'No severity set';
