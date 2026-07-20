@@ -1407,10 +1407,11 @@ async function submitAuth() {
   </div>
 
   <div class="footer-bar">
-    <button class="btn btn-secondary" id="resetFormBtn">Reset form</button>
+  <button class="btn btn-secondary" id="resetFormBtn">Reset form</button>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <button class="btn btn-secondary" id="addAnotherBtn" style="display:none;background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;">＋ Add another record</button>
     <button class="btn btn-primary" id="submitBtn">Submit report</button>
   </div>
-
 </div>
 
 </div><!-- end main-content -->
@@ -2236,9 +2237,10 @@ async function submitIncident() {
 
     const accredNote = _selectedAccredIds.size > 0 ? ` · ${_selectedAccredIds.size} accreditation(s) linked.` : '';
     setStatus('submitStatus', 'success', `Report submitted — ID: ${incidentId} · ${uniqueLinks.length} institution(s) linked.${accredNote}`);
-    document.getElementById('commsBtn').disabled = false;
-    btn.className = 'btn btn-success';
-    btn.innerHTML = '✓ Submitted';
+document.getElementById('commsBtn').disabled = false;
+btn.className = 'btn btn-success';
+btn.innerHTML = '✓ Submitted';
+document.getElementById('addAnotherBtn').style.display = 'inline-flex';
   } catch(e) {
     setStatus('submitStatus', 'error', e.message);
     btn.disabled = false;
