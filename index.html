@@ -1667,6 +1667,7 @@ function updatePreview() {
 
 document.getElementById('severityWeight').addEventListener('change', updateTickerPreview);
 document.getElementById('sourceUrl').addEventListener('input', updateTickerPreview);
+document.getElementById('reportType').addEventListener('change', updateTickerPreview);
 
 const agentInput = document.getElementById('agentSearch');
 const suggestionsEl = document.getElementById('suggestions');
@@ -2868,13 +2869,31 @@ function updateTickerPreview() {
   const panel = document.getElementById('tickerPreview');
   if (!panel || panel.closest('#otherClientsPanel').style.display === 'none') return;
 
-  const agentName = selectedAgent ? selectedAgent.agency_name : null;
+const agentName = selectedAgent ? selectedAgent.agency_name : null;
   const titleEl = document.getElementById('tickerTitle');
+  const reportType = document.getElementById('reportType').value;
+
+  const REPORT_TYPE_META = {
+    'Awards & Recognition': { prefix: 'Award & recognition —', icon: '🏆' },
+    'Kudos':                { prefix: 'Kudos —',               icon: '👏' },
+    'Market Intelligence':  { prefix: 'Market intelligence —', icon: '📊' },
+    'Data Analysis':        { prefix: 'Data analysis —',       icon: '📊' },
+    'Incentivisation':      { prefix: 'Incentivisation alert —', icon: '⚠️' },
+    'Aggregator Report':    { prefix: 'Aggregator report —',   icon: '📋' },
+    'Individual Report':    { prefix: 'Individual report —',   icon: '📋' },
+    'Privacy Flag':         { prefix: 'Privacy flag —',        icon: '🔒' },
+    'Incident Report':      { prefix: 'New incident report —', icon: '⚠️' },
+  };
+
+  const meta = REPORT_TYPE_META[reportType] || { prefix: 'New incident report —', icon: '⚠️' };
+  const iconEl = document.querySelector('#tickerPreview [style*="border-radius:8px;background:#fef2f2"]');
+  if (iconEl) iconEl.textContent = meta.icon;
+
   if (agentName) {
-    titleEl.textContent = 'New incident report — ' + agentName;
+    titleEl.textContent = meta.prefix + ' ' + agentName;
     titleEl.style.color = '#1a1d23';
   } else {
-    titleEl.innerHTML = 'New incident report — <em style="color:#9ca3af;font-style:italic;">(agent name)</em>';
+    titleEl.innerHTML = meta.prefix + ' <em style="color:#9ca3af;font-style:italic;">(agent name)</em>';
   }
 
   const sw = parseInt(document.getElementById('severityWeight').value, 10);
