@@ -2498,7 +2498,53 @@ async function confirmEmailProtocol() {
     btn.innerHTML = '✓ Confirm & queue';
   }
 }
-
+function resetFormSilent() {
+  selectedAgent = null;
+  analysisResults = { authorised: [], risk: [], unknown: [] };
+  submittedIncidentId = null;
+  agentInput.value = '';
+  _canonicalAgent = null;
+  const matchList = document.getElementById('agentMatchList');
+  if (matchList) matchList.style.display = 'none';
+  document.getElementById('branchPanel').style.display = 'none';
+  document.getElementById('agentCard').classList.remove('visible');
+  document.getElementById('agentHierarchy').style.display = 'none';
+  document.getElementById('newAgentPanel').classList.remove('visible');
+  clearParentAgent();
+  document.getElementById('otherClientsPanel').style.display = 'none';
+  document.getElementById('otherClientsTags').innerHTML = '';
+  window._authorisedClientInstitutions = [];
+  clearStatus('agentStatus');
+  ['reportType','category','sourceType','severityWeight'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('incidentDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('description').value = '';
+  document.getElementById('deidentifiedSummary').value = '';
+  document.getElementById('sourceUrl').value = '';
+  document.getElementById('newAgentWebsite').value = '';
+  document.getElementById('summaryGenerateStatus').textContent = '';
+  document.getElementById('generateSummaryBtn').disabled = true;
+  document.getElementById('generateSummaryBtn').innerHTML = '✨ Generate draft';
+  document.getElementById('institutionsList').value = '';
+  document.getElementById('instResults').style.display = 'none';
+  document.getElementById('missingDataPanel').style.display = 'none';
+  document.getElementById('missingDataPanel').innerHTML = '';
+  clearStatus('instStatus');
+  clearStatus('submitStatus');
+  document.getElementById('analyseBtn').disabled = true;
+  document.getElementById('commsBtn').disabled = true;
+  document.getElementById('commsBtn').textContent = 'Add to email protocol';
+  document.getElementById('addAnotherBtn').style.display = 'none';
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = false;
+  btn.className = 'btn btn-primary';
+  btn.innerHTML = 'Submit report';
+  _selectedAccredIds = new Set();
+  if (_accredLoaded) renderAccredOptions();
+  renderAccredTags();
+  updateAccredTriggerLabel();
+  updatePreview();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 function resetForm() {
   if (!confirm('Reset the form?')) return;
   selectedAgent = null;
@@ -2955,6 +3001,7 @@ document.getElementById('confirmEmailBtn').addEventListener('click', confirmEmai
 document.getElementById('closeEmailBtn').addEventListener('click', closeEmailModal);
 
 document.getElementById('resetFormBtn').addEventListener('click', resetForm);
+document.getElementById('addAnotherBtn').addEventListener('click', () => { resetFormSilent(); });
 document.getElementById('submitBtn').addEventListener('click', submitIncident);
 
 initParentAgentSearch();
