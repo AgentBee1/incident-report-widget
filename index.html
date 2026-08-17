@@ -1418,7 +1418,8 @@ async function submitIncident() {
     incidentDate: document.getElementById('incidentDate').value,
     description: document.getElementById('description').value.trim(),
   };
-  if (!vals.reportType || !vals.category || !vals.severityWeight || !vals.incidentDate || !vals.description) {
+  const isAward = vals.reportType === 'Awards & Recognition';
+  if (!vals.reportType || !vals.category || !vals.severityWeight || !vals.incidentDate || (!vals.description && !isAward)) {
     setStatus('submitStatus', 'error', 'Please complete all required fields before submitting.'); return;
   }
 
@@ -1449,8 +1450,11 @@ async function submitIncident() {
         source_type: document.getElementById('sourceType').value || null,
         report_type: vals.reportType || null,
         source_url: document.getElementById('sourceUrl').value.trim() || null,
-        award_title: (vals.reportType === 'Awards & Recognition')
+      award_title: (vals.reportType === 'Awards & Recognition')
           ? (document.getElementById('awardTitle').value.trim() || null)
+          : null,
+        issuing_institution_id: (vals.reportType === 'Awards & Recognition' && _issuingInstitution)
+          ? _issuingInstitution.id
           : null,
       })
     });
@@ -1470,8 +1474,12 @@ async function submitIncident() {
       if (!issuerLinkRes.ok) console.warn('Issuing institution link failed');
     }
 
-    const allLinked = [...analysisResults.authorised, ...analysisResults.risk];
-    const autoClients = (window._authorisedClientInstitutions || []).map(i => ({ institutionId: i.id, institutionName: i.name }));
+   const allLinked = [...analysisResults.authorised, ...analysisResults.risk];
+      const autoClients = (window._authorisedClientInstitutions || []).map(i => ({ institutionId: i.id, institutionName: i.name }));
+      // For Awards & Recognition, add issuing institution to notification links if they're a client
+      if (isAward && _issuingInstitution && (_issuingInstitution.is_client || _issuingInstitution.status === 'Client')) {
+        autoClients.push({ institutionId: _issuingInstitution.id, institutionName: _issuingInstitution.name });
+      }
 
     // Merge all links, deduplicating — ensure issuing institution is not double-linked
     const issuingId = _issuingInstitution ? _issuingInstitution.id : null;
