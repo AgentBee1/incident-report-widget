@@ -19,101 +19,52 @@
     }
 
     .page { max-width: 780px; margin: 0 auto; }
-
     .page-header { margin-bottom: 32px; }
 
     .breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: #9ca3af;
-      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: #9ca3af; margin-bottom: 12px;
     }
     .breadcrumb span { color: #3b82f6; }
-
-    .page-header h1 {
-      font-size: 22px;
-      font-weight: 600;
-      color: #1a1d23;
-      letter-spacing: -0.3px;
-    }
-
+    .page-header h1 { font-size: 22px; font-weight: 600; color: #1a1d23; letter-spacing: -0.3px; }
     .page-header p { color: #6b7280; font-size: 13px; margin-top: 4px; }
 
-    .card {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 16px;
-    }
+    .card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
 
     .card-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #f3f4f6;
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6;
     }
 
     .step-badge {
-      width: 24px; height: 24px;
-      border-radius: 50%;
-      background: #eff6ff;
-      color: #3b82f6;
-      font-size: 11px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #eff6ff; color: #3b82f6; font-size: 11px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
 
     .card-header h2 { font-size: 14px; font-weight: 600; color: #1a1d23; }
 
     .field { display: flex; flex-direction: column; gap: 5px; }
-
     .field label { font-size: 12px; font-weight: 500; color: #374151; }
 
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      padding: 9px 12px;
-      background: #ffffff;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #1a1d23;
-      font-family: inherit;
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 9px 12px; background: #ffffff;
+      border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px;
+      color: #1a1d23; font-family: inherit;
       transition: border-color 0.15s, box-shadow 0.15s;
-      outline: none;
-      -webkit-appearance: none;
-      appearance: none;
+      outline: none; -webkit-appearance: none; appearance: none;
     }
 
     .field select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 4.5L11 1' stroke='%239ca3af' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 11px center;
-      padding-right: 32px;
-      cursor: pointer;
+      background-repeat: no-repeat; background-position: right 11px center;
+      padding-right: 32px; cursor: pointer;
     }
-
     .field select option { background: #fff; color: #1a1d23; }
-
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
     }
-
-    .field input::placeholder,
-    .field textarea::placeholder { color: #9ca3af; }
-
+    .field input::placeholder, .field textarea::placeholder { color: #9ca3af; }
     .field textarea { resize: vertical; line-height: 1.6; }
 
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -124,119 +75,56 @@
     .agent-search-wrap .field { flex: 1; }
 
     .btn-lookup {
-      padding: 0 16px;
-      height: 38px;
-      background: #f9fafb;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #374151;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s;
-      font-family: inherit;
-      display: flex;
-      align-items: center;
+      padding: 0 16px; height: 38px; background: #f9fafb; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 13px; font-weight: 500; color: #374151;
+      cursor: pointer; white-space: nowrap; transition: all 0.15s; font-family: inherit;
+      display: flex; align-items: center;
     }
-
     .btn-lookup:hover { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
 
     .suggestions-outer { position: relative; }
-
     .suggestions-drop {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0; right: 0;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      z-index: 200;
-      overflow: hidden;
-      display: none;
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08); z-index: 200; overflow: hidden; display: none;
     }
-
     .suggestions-drop.open { display: block; }
 
     .suggestion-item {
-      padding: 10px 14px;
-      cursor: pointer;
-      border-bottom: 1px solid #f3f4f6;
-      transition: background 0.1s;
+      padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f3f4f6; transition: background 0.1s;
     }
-
     .suggestion-item:last-child { border-bottom: none; }
     .suggestion-item:hover { background: #f9fafb; }
-
     .sug-name { font-size: 13px; font-weight: 500; color: #1a1d23; }
     .sug-meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
 
     .agent-resolved {
-      display: none;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 9px;
-      margin-top: 10px;
+      display: none; align-items: center; gap: 12px; padding: 12px 14px;
+      background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9px; margin-top: 10px;
     }
-
     .agent-resolved.visible { display: flex; }
-
     .agent-avatar {
-      width: 36px; height: 36px;
-      border-radius: 8px;
-      background: #dcfce7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      flex-shrink: 0;
-      color: #15803d;
-      font-weight: 600;
+      width: 36px; height: 36px; border-radius: 8px; background: #dcfce7;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0; color: #15803d; font-weight: 600;
     }
-
     .agent-resolved-name { font-weight: 600; font-size: 13px; color: #15803d; }
     .agent-resolved-meta { font-size: 11px; color: #4ade80; margin-top: 2px; }
-
     .tier-pill {
-      margin-left: auto;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 500;
-      background: #dcfce7;
-      color: #15803d;
-      border: 1px solid #bbf7d0;
-      white-space: nowrap;
+      margin-left: auto; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500;
+      background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; white-space: nowrap;
     }
 
-    .status {
-      font-size: 12px;
-      padding: 9px 12px;
-      border-radius: 7px;
-      margin-top: 10px;
-      display: none;
-    }
-
+    .status { font-size: 12px; padding: 9px 12px; border-radius: 7px; margin-top: 10px; display: none; }
     .status.info { display: block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
     .status.success { display: block; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
     .status.error { display: block; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
     .inst-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-
     .inst-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 500;
+      display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px;
+      border-radius: 20px; font-size: 11px; font-weight: 500;
     }
-
     .inst-tag.auth { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
     .inst-tag.risk { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
     .inst-tag.unknown { background: #f9fafb; border: 1px solid #e5e7eb; color: #6b7280; }
@@ -247,148 +135,68 @@
     .dot.grey { background: #9ca3af; }
 
     .legend {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      font-size: 11px;
-      color: #6b7280;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid #f3f4f6;
+      display: flex; gap: 16px; flex-wrap: wrap; font-size: 11px; color: #6b7280;
+      margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6;
     }
-
     .legend-item { display: flex; align-items: center; gap: 5px; }
 
     .btn-analyse {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 12px;
-      padding: 8px 14px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 500;
-      color: #374151;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.15s;
+      display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;
+      padding: 8px 14px; background: #f9fafb; border: 1px solid #e5e7eb;
+      border-radius: 7px; font-size: 12px; font-weight: 500; color: #374151;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
     }
-
     .btn-analyse:hover:not(:disabled) { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
     .btn-analyse:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-    .summary-item {
-      background: #f9fafb;
-      border-radius: 8px;
-      padding: 10px 12px;
-    }
-
+    .summary-item { background: #f9fafb; border-radius: 8px; padding: 10px 12px; }
     .summary-label { font-size: 11px; color: #9ca3af; margin-bottom: 3px; }
     .summary-val { font-size: 13px; font-weight: 500; color: #1a1d23; }
 
     .comms-banner {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-left: 3px solid #8b5cf6;
-      border-radius: 12px;
-      padding: 18px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 16px;
+      background: #fff; border: 1px solid #e5e7eb; border-left: 3px solid #8b5cf6;
+      border-radius: 12px; padding: 18px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px;
     }
-
     .comms-banner h3 { font-size: 14px; font-weight: 600; color: #1a1d23; }
     .comms-banner p { font-size: 12px; color: #6b7280; margin-top: 2px; }
 
-    .badge-soon {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 20px;
-      background: #f3e8ff;
-      color: #7c3aed;
-      border: 1px solid #e9d5ff;
-      white-space: nowrap;
-    }
-
     .btn {
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      border: none;
-      transition: all 0.15s;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
+      padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      font-family: inherit; cursor: pointer; border: none; transition: all 0.15s;
+      display: inline-flex; align-items: center; gap: 7px;
     }
-
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
     .btn-secondary { background: #f9fafb; color: #374151; border: 1px solid #e5e7eb; }
     .btn-secondary:hover:not(:disabled) { background: #f3f4f6; }
-
     .btn-comms { background: #7c3aed; color: #fff; }
     .btn-comms:hover:not(:disabled) { background: #6d28d9; }
-
     .btn-primary { background: #1d4ed8; color: #fff; padding: 11px 24px; font-size: 14px; }
     .btn-primary:hover:not(:disabled) { background: #1e40af; }
-
     .btn-success { background: #15803d; color: #fff; padding: 11px 24px; font-size: 14px; }
 
     .footer-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 8px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px;
     }
 
     .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.3);
-      z-index: 999;
-      display: none;
-      align-items: center;
-      justify-content: center;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 999; display: none;
+      align-items: center; justify-content: center;
     }
-
     .modal-backdrop.open { display: flex; }
-
     .modal-box {
-      background: #fff;
-      border-radius: 14px;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-      padding: 28px;
-      max-width: 440px;
-      width: 90%;
+      background: #fff; border-radius: 14px; border: 1px solid #e5e7eb;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15); padding: 28px; max-width: 440px; width: 90%;
     }
-
     .modal-box h2 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
     .modal-box p { font-size: 13px; color: #6b7280; line-height: 1.6; margin-bottom: 20px; }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
     .spinner {
-      width: 13px; height: 13px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      display: inline-block;
+      width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 580px) {
@@ -398,571 +206,227 @@
       .comms-banner { flex-direction: column; align-items: flex-start; }
     }
 
-    /* Missing data panel */
-    .missing-panel {
-      margin-top: 16px;
-      border: 1px solid #fde68a;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .missing-panel-header {
-      background: #fffbeb;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #92400e;
-      border-bottom: 1px solid #fde68a;
-    }
-
-    .missing-inst-row {
-      padding: 14px;
-      border-bottom: 1px solid #f3f4f6;
-      background: #fff;
-    }
-
-    .missing-inst-row:last-child { border-bottom: none; }
-
-    .missing-inst-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: #1a1d23;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .missing-fields-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-    }
-
-    .missing-field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .missing-field label {
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #9ca3af;
-    }
-
-    .missing-field input,
-    .missing-field select {
-      padding: 7px 10px;
-      border: 1px solid #fde68a;
-      border-radius: 6px;
-      font-size: 12px;
-      font-family: inherit;
-      color: #1a1d23;
-      background: #fffbeb;
-      outline: none;
-      transition: border-color 0.15s;
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    .missing-field select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 3.5L9 1' stroke='%239ca3af' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 8px center;
-      padding-right: 26px;
-      cursor: pointer;
-    }
-
-    .missing-field input:focus,
-    .missing-field select:focus {
-      border-color: #f59e0b;
-      box-shadow: 0 0 0 2px rgba(245,158,11,0.15);
-    }
-
-    .missing-field input.filled,
-    .missing-field select.filled {
-      border-color: #bbf7d0;
-      background: #f0fdf4;
-    }
-
-    .btn-save-inst {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      margin-top: 10px;
-      padding: 6px 12px;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 500;
-      color: #15803d;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.15s;
-    }
-
-    .btn-save-inst:hover:not(:disabled) { background: #dcfce7; }
-    .btn-save-inst:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .save-inst-status {
-      font-size: 11px;
-      margin-top: 6px;
+    /* ── Awards & Recognition panel ── */
+    .awards-panel {
       display: none;
-    }
-
-    .save-inst-status.ok { display: block; color: #15803d; }
-    .save-inst-status.err { display: block; color: #b91c1c; }
-
-    /* Handoff card import */
-    .handoff-zone {
-      background: #fff;
-      border: 2px dashed #d1d5db;
-      border-radius: 12px;
-      padding: 20px 24px;
-      margin-bottom: 16px;
-      transition: border-color 0.15s, background 0.15s;
-    }
-
-    .handoff-zone.populated {
-      border-style: solid;
-      border-color: #bbf7d0;
-      background: #f0fdf4;
-    }
-
-    .handoff-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .handoff-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: #374151;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .handoff-zone textarea {
-      width: 100%;
-      padding: 10px 12px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 12px;
-      font-family: 'Courier New', monospace;
-      color: #374151;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.15s;
-      line-height: 1.6;
-      min-height: 80px;
-    }
-
-    .handoff-zone textarea:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
-    }
-
-    .handoff-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .btn-parse {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      background: #1d4ed8;
-      color: #fff;
-      border: none;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-
-    .btn-parse:hover { background: #1e40af; }
-
-    .btn-clear-handoff {
-      padding: 8px 12px;
-      background: transparent;
-      color: #9ca3af;
-      border: 1px solid #e5e7eb;
-      border-radius: 7px;
-      font-size: 12px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .btn-clear-handoff:hover { color: #ef4444; border-color: #fca5a5; }
-
-    .parse-result {
-      font-size: 12px;
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin-top: 10px;
-      display: none;
-    }
-
-    .parse-result.ok { display: block; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-    .parse-result.warn { display: block; background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
-
-    .btn-generate-summary {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 14px;
-      background: #1d4ed8;
-      color: #fff;
-      border: none;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.15s;
-      flex-shrink: 0;
-    }
-
-    .btn-generate-summary:hover:not(:disabled) { background: #1e40af; }
-    .btn-generate-summary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    /* Add new agent panel */
-    .new-agent-panel {
-      display: none;
-      margin-top: 12px;
+      margin-bottom: 14px;
       background: #fffbeb;
       border: 1px solid #fde68a;
       border-radius: 10px;
       padding: 16px;
     }
+    .awards-panel.visible { display: block; }
+    .awards-panel-title {
+      font-size: 12px; font-weight: 600; color: #92400e;
+      margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+    }
+    .awards-panel .field input {
+      background: #fff; border-color: #fde68a;
+    }
+    .awards-panel .field input:focus {
+      border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+    }
+    .issuing-inst-resolved {
+      display: none; align-items: center; gap: 8px; padding: 9px 12px;
+      background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+      margin-top: 8px; font-size: 12px; color: #15803d; font-weight: 500;
+    }
+    .issuing-inst-resolved.visible { display: flex; }
+    .inst-linkage-notice {
+      display: none; font-size: 11px; color: #92400e; background: #fffbeb;
+      border: 1px solid #fde68a; border-radius: 6px; padding: 8px 10px;
+      margin-bottom: 12px; line-height: 1.5;
+    }
+    .inst-linkage-notice.visible { display: block; }
 
+    /* Missing data panel */
+    .missing-panel { margin-top: 16px; border: 1px solid #fde68a; border-radius: 10px; overflow: hidden; }
+    .missing-panel-header {
+      background: #fffbeb; padding: 10px 14px; display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600; color: #92400e; border-bottom: 1px solid #fde68a;
+    }
+    .missing-inst-row { padding: 14px; border-bottom: 1px solid #f3f4f6; background: #fff; }
+    .missing-inst-row:last-child { border-bottom: none; }
+    .missing-inst-name {
+      font-size: 13px; font-weight: 600; color: #1a1d23; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .missing-fields-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .missing-field { display: flex; flex-direction: column; gap: 4px; }
+    .missing-field label {
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #9ca3af;
+    }
+    .missing-field input, .missing-field select {
+      padding: 7px 10px; border: 1px solid #fde68a; border-radius: 6px; font-size: 12px;
+      font-family: inherit; color: #1a1d23; background: #fffbeb; outline: none;
+      transition: border-color 0.15s; -webkit-appearance: none; appearance: none;
+    }
+    .missing-field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 3.5L9 1' stroke='%239ca3af' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center; padding-right: 26px; cursor: pointer;
+    }
+    .missing-field input:focus, .missing-field select:focus {
+      border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,0.15);
+    }
+    .missing-field input.filled, .missing-field select.filled { border-color: #bbf7d0; background: #f0fdf4; }
+    .btn-save-inst {
+      display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;
+      padding: 6px 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px;
+      font-size: 11px; font-weight: 500; color: #15803d; cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .btn-save-inst:hover:not(:disabled) { background: #dcfce7; }
+    .btn-save-inst:disabled { opacity: 0.4; cursor: not-allowed; }
+    .save-inst-status { font-size: 11px; margin-top: 6px; display: none; }
+    .save-inst-status.ok { display: block; color: #15803d; }
+    .save-inst-status.err { display: block; color: #b91c1c; }
+
+    /* Handoff card import */
+    .handoff-zone {
+      background: #fff; border: 2px dashed #d1d5db; border-radius: 12px;
+      padding: 20px 24px; margin-bottom: 16px; transition: border-color 0.15s, background 0.15s;
+    }
+    .handoff-zone.populated { border-style: solid; border-color: #bbf7d0; background: #f0fdf4; }
+    .handoff-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .handoff-title { font-size: 13px; font-weight: 600; color: #374151; display: flex; align-items: center; gap: 7px; }
+    .handoff-zone textarea {
+      width: 100%; padding: 10px 12px; background: #f9fafb; border: 1px solid #e5e7eb;
+      border-radius: 8px; font-size: 12px; font-family: 'Courier New', monospace; color: #374151;
+      resize: vertical; outline: none; transition: border-color 0.15s; line-height: 1.6; min-height: 80px;
+    }
+    .handoff-zone textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.08); }
+    .handoff-actions { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .btn-parse {
+      display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+      background: #1d4ed8; color: #fff; border: none; border-radius: 7px;
+      font-size: 12px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-parse:hover { background: #1e40af; }
+    .btn-clear-handoff {
+      padding: 8px 12px; background: transparent; color: #9ca3af; border: 1px solid #e5e7eb;
+      border-radius: 7px; font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-clear-handoff:hover { color: #ef4444; border-color: #fca5a5; }
+    .parse-result { font-size: 12px; padding: 8px 12px; border-radius: 6px; margin-top: 10px; display: none; }
+    .parse-result.ok { display: block; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .parse-result.warn { display: block; background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+
+    .btn-generate-summary {
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+      background: #1d4ed8; color: #fff; border: none; border-radius: 7px; font-size: 12px; font-weight: 500;
+      font-family: inherit; cursor: pointer; white-space: nowrap; transition: background 0.15s; flex-shrink: 0;
+    }
+    .btn-generate-summary:hover:not(:disabled) { background: #1e40af; }
+    .btn-generate-summary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Add new agent panel */
+    .new-agent-panel {
+      display: none; margin-top: 12px; background: #fffbeb;
+      border: 1px solid #fde68a; border-radius: 10px; padding: 16px;
+    }
     .new-agent-panel.visible { display: block; }
-
     .new-agent-panel h4 {
-      font-size: 13px;
-      font-weight: 600;
-      color: #92400e;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 13px; font-weight: 600; color: #92400e; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
     }
-
-    .new-agent-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 12px;
+    .new-agent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .new-agent-grid .field input, .new-agent-grid .field select { background: #fff; border-color: #fde68a; }
+    .new-agent-grid .field input:focus, .new-agent-grid .field select:focus {
+      border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
     }
-
-    .new-agent-grid .field input,
-    .new-agent-grid .field select {
-      background: #fff;
-      border-color: #fde68a;
-    }
-
-    .new-agent-grid .field input:focus,
-    .new-agent-grid .field select:focus {
-      border-color: #f59e0b;
-      box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
-    }
-
     .btn-create-agent {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      background: #d97706;
-      color: #fff;
-      border: none;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.15s;
+      display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+      background: #d97706; color: #fff; border: none; border-radius: 7px;
+      font-size: 12px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.15s;
     }
-
     .btn-create-agent:hover:not(:disabled) { background: #b45309; }
     .btn-create-agent:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── Accreditation multi-select ── */
     .accred-dropdown-wrap { position: relative; }
-
     .accred-trigger {
-      width: 100%;
-      padding: 9px 32px 9px 12px;
-      background: #ffffff;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #1a1d23;
-      font-family: inherit;
-      cursor: pointer;
-      text-align: left;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      outline: none;
+      width: 100%; padding: 9px 32px 9px 12px; background: #ffffff; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 13px; color: #1a1d23; font-family: inherit; cursor: pointer;
+      text-align: left; display: flex; align-items: center; justify-content: space-between;
+      transition: border-color 0.15s, box-shadow 0.15s; outline: none;
     }
-
-    .accred-trigger:focus, .accred-trigger.open {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-    }
-
+    .accred-trigger:focus, .accred-trigger.open { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
     .accred-trigger .placeholder { color: #9ca3af; }
-
     .accred-trigger-chevron { flex-shrink: 0; color: #9ca3af; transition: transform 0.15s; }
     .accred-trigger.open .accred-trigger-chevron { transform: rotate(180deg); }
-
     .accred-dropdown {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0; right: 0;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-      z-index: 300;
-      display: none;
-      max-height: 220px;
-      overflow-y: auto;
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff;
+      border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      z-index: 300; display: none; max-height: 220px; overflow-y: auto;
     }
-
     .accred-dropdown.open { display: block; }
-
     .accred-option {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 14px;
-      cursor: pointer;
-      border-bottom: 1px solid #f3f4f6;
-      transition: background 0.1s;
-      font-size: 13px;
-      color: #1a1d23;
+      display: flex; align-items: center; gap: 10px; padding: 9px 14px; cursor: pointer;
+      border-bottom: 1px solid #f3f4f6; transition: background 0.1s; font-size: 13px; color: #1a1d23;
     }
-
     .accred-option:last-child { border-bottom: none; }
     .accred-option:hover { background: #f9fafb; }
     .accred-option.selected { background: #eff6ff; }
-
     .accred-checkbox {
-      width: 15px; height: 15px;
-      border: 1.5px solid #d1d5db;
-      border-radius: 4px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fff;
-      transition: all 0.12s;
+      width: 15px; height: 15px; border: 1.5px solid #d1d5db; border-radius: 4px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; background: #fff; transition: all 0.12s;
     }
-
-    .accred-option.selected .accred-checkbox {
-      background: #3b82f6;
-      border-color: #3b82f6;
-    }
-
+    .accred-option.selected .accred-checkbox { background: #3b82f6; border-color: #3b82f6; }
     .accred-option.selected .accred-checkbox::after {
-      content: '';
-      display: block;
-      width: 8px; height: 5px;
-      border-left: 1.5px solid #fff;
-      border-bottom: 1.5px solid #fff;
+      content: ''; display: block; width: 8px; height: 5px;
+      border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff;
       transform: rotate(-45deg) translate(1px, -1px);
     }
-
-    .accred-loading {
-      padding: 12px 14px;
-      font-size: 12px;
-      color: #9ca3af;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    .accred-loading { padding: 12px 14px; font-size: 12px; color: #9ca3af; display: flex; align-items: center; gap: 8px; }
     .accred-selected-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-
     .accred-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 10px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 500;
-      color: #1d4ed8;
+      display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px;
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; font-size: 11px; font-weight: 500; color: #1d4ed8;
     }
-
     .accred-tag-remove {
-      background: none; border: none; color: #93c5fd;
-      cursor: pointer; font-size: 13px; line-height: 1;
-      padding: 0; display: flex; align-items: center;
+      background: none; border: none; color: #93c5fd; cursor: pointer; font-size: 13px;
+      line-height: 1; padding: 0; display: flex; align-items: center;
     }
-
     .accred-tag-remove:hover { color: #1d4ed8; }
 
     #auth-screen {
-      position: fixed;
-      inset: 0;
-      background: #f0ede8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      padding: 20px;
+      position: fixed; inset: 0; background: #f0ede8; display: flex;
+      align-items: center; justify-content: center; z-index: 9999; padding: 20px;
     }
-
     #auth-screen.hidden { display: none; }
-
     .auth-card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 36px 40px 40px;
-      width: 100%;
-      max-width: 480px;
-      text-align: left;
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 16px;
+      padding: 36px 40px 40px; width: 100%; max-width: 480px; text-align: left;
     }
-
-    .auth-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-
+    .auth-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
     .auth-brand-icon {
-      width: 44px;
-      height: 44px;
-      background: #eff6ff;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
+      width: 44px; height: 44px; background: #eff6ff; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
     }
-
-    .auth-brand-name {
-      font-size: 15px;
-      font-weight: 600;
-      color: #1a1d23;
-      line-height: 1.2;
-    }
-
-    .auth-brand-sub {
-      font-size: 12px;
-      color: #6b7280;
-      margin-top: 2px;
-    }
-
-    .auth-card h1 {
-      font-size: 26px;
-      font-weight: 700;
-      color: #1a1d23;
-      margin-bottom: 6px;
-      letter-spacing: -0.3px;
-    }
-
-    .auth-card > p {
-      font-size: 14px;
-      color: #6b7280;
-      margin-bottom: 28px;
-    }
-
-    .auth-field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 14px;
-    }
-
-    .auth-field label {
-      font-size: 11px;
-      font-weight: 600;
-      color: #374151;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
+    .auth-brand-name { font-size: 15px; font-weight: 600; color: #1a1d23; line-height: 1.2; }
+    .auth-brand-sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .auth-card h1 { font-size: 26px; font-weight: 700; color: #1a1d23; margin-bottom: 6px; letter-spacing: -0.3px; }
+    .auth-card > p { font-size: 14px; color: #6b7280; margin-bottom: 28px; }
+    .auth-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .auth-field label { font-size: 11px; font-weight: 600; color: #374151; letter-spacing: 0.08em; text-transform: uppercase; }
     .auth-field input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      font-size: 14px;
-      font-family: inherit;
-      color: #1a1d23;
-      outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      background: #fff;
+      width: 100%; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 10px;
+      font-size: 14px; font-family: inherit; color: #1a1d23; outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s; background: #fff;
     }
-
     .auth-field input::placeholder { color: #9ca3af; }
-
-    .auth-field input:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-    }
-
+    .auth-field input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
     .auth-submit {
-      width: 100%;
-      padding: 14px;
-      background: #8b9ab0;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 4px;
+      width: 100%; padding: 14px; background: #8b9ab0; color: #fff; border: none;
+      border-radius: 10px; font-size: 15px; font-weight: 500; font-family: inherit; cursor: pointer;
+      transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px;
     }
-
     .auth-submit:hover:not(:disabled) { background: #6b7a8d; }
     .auth-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
     .auth-error {
-      font-size: 12px;
-      color: #b91c1c;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 7px;
-      padding: 8px 12px;
-      margin-top: 12px;
-      display: none;
+      font-size: 12px; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca;
+      border-radius: 7px; padding: 8px 12px; margin-top: 12px; display: none;
     }
-
     .auth-error.visible { display: block; }
   </style>
 </head>
@@ -972,24 +436,16 @@
 async function submitAuth() {
   const passphrase = document.getElementById('passphraseInput').value;
   if (!passphrase) return;
-
   const btn = document.getElementById('authSubmitBtn');
   const btnText = document.getElementById('authBtnText');
   const errorEl = document.getElementById('authError');
-
-  btn.disabled = true;
-  btnText.textContent = 'Checking…';
-  errorEl.classList.remove('visible');
-
+  btn.disabled = true; btnText.textContent = 'Checking…'; errorEl.classList.remove('visible');
   try {
     const res = await fetch('/api/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ passphrase }),
     });
-
     const data = await res.json();
-
     if (res.ok && data.ok) {
       sessionStorage.setItem('ab-admin-auth', 'true');
       if (data.supabaseKey) sessionStorage.setItem('ab-supabase-key', data.supabaseKey);
@@ -1002,13 +458,8 @@ async function submitAuth() {
       document.getElementById('passphraseInput').value = '';
       document.getElementById('passphraseInput').focus();
     }
-  } catch(e) {
-    errorEl.textContent = 'Connection error — please try again.';
-    errorEl.classList.add('visible');
-  }
-
-  btn.disabled = false;
-  btnText.textContent = 'Continue';
+  } catch(e) { errorEl.textContent = 'Connection error — please try again.'; errorEl.classList.add('visible'); }
+  btn.disabled = false; btnText.textContent = 'Continue';
 }
 
 (function() {
@@ -1018,11 +469,8 @@ async function submitAuth() {
       const authScreen = document.getElementById('auth-screen');
       const mainContent = document.getElementById('main-content');
       if (authScreen && mainContent) {
-        authScreen.classList.add('hidden');
-        mainContent.style.display = 'block';
-      } else {
-        setTimeout(restoreSession, 10);
-      }
+        authScreen.classList.add('hidden'); mainContent.style.display = 'block';
+      } else { setTimeout(restoreSession, 10); }
     }
     restoreSession();
   }
@@ -1055,9 +503,7 @@ async function submitAuth() {
 <div class="page" id="main-content" style="display:none;">
 
   <div class="page-header">
-    <div class="breadcrumb">
-      <span>Admin</span> › Incident Management › New Report
-    </div>
+    <div class="breadcrumb"><span>Admin</span> › Incident Management › New Report</div>
     <h1>New Incident Report</h1>
     <p>Create a new incident or report and link it to affected institutions.</p>
   </div>
@@ -1080,11 +526,7 @@ async function submitAuth() {
 
   <!-- 1. Agent -->
   <div class="card">
-    <div class="card-header">
-      <div class="step-badge">1</div>
-      <h2>Agent</h2>
-    </div>
-
+    <div class="card-header"><div class="step-badge">1</div><h2>Agent</h2></div>
     <div class="agent-search-wrap">
       <div class="field suggestions-outer">
         <label>Agent name</label>
@@ -1097,9 +539,7 @@ async function submitAuth() {
 
     <!-- Branch refinement -->
     <div id="branchPanel" style="display:none;margin-top:14px;padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;">
-      <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:10px;">
-        Is this report about a specific branch or office?
-      </div>
+      <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:10px;">Is this report about a specific branch or office?</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
         <div class="field" style="position:relative;">
           <label>Country office <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
@@ -1137,18 +577,9 @@ async function submitAuth() {
     <div class="new-agent-panel" id="newAgentPanel">
       <h4>➕ Add new agent to AgentBee</h4>
       <div class="new-agent-grid">
-        <div class="field">
-          <label>Agency name *</label>
-          <input type="text" id="newAgentName" placeholder="Full agency name" />
-        </div>
-        <div class="field">
-          <label>Country</label>
-          <input type="text" id="newAgentCountry" placeholder="e.g. India" />
-        </div>
-        <div class="field">
-          <label>City / office</label>
-          <input type="text" id="newAgentJurisdiction" placeholder="e.g. Lahore" />
-        </div>
+        <div class="field"><label>Agency name *</label><input type="text" id="newAgentName" placeholder="Full agency name" /></div>
+        <div class="field"><label>Country</label><input type="text" id="newAgentCountry" placeholder="e.g. India" /></div>
+        <div class="field"><label>City / office</label><input type="text" id="newAgentJurisdiction" placeholder="e.g. Lahore" /></div>
         <div class="field" style="grid-column:1/-1;">
           <label>Website <span style="font-weight:400;color:#9ca3af;">— optional</span></label>
           <input type="url" id="newAgentWebsite" placeholder="https://www.agencyname.com" style="background:#fff;border-color:#fde68a;" />
@@ -1157,8 +588,7 @@ async function submitAuth() {
       <div class="field" style="margin-bottom:12px;">
         <label>Parent agent (canonical brand) <span style="font-weight:400;color:#9ca3af;">— optional</span></label>
         <div style="position:relative;">
-          <input type="text" id="parentAgentSearch" placeholder="Search for parent agent…" autocomplete="off"
-            style="background:#fff;border-color:#fde68a;" />
+          <input type="text" id="parentAgentSearch" placeholder="Search for parent agent…" autocomplete="off" style="background:#fff;border-color:#fde68a;" />
           <div id="parentSuggestions" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:200;overflow:hidden;display:none;margin-top:4px;"></div>
         </div>
         <div id="parentAgentCard" style="display:none;margin-top:8px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#15803d;align-items:center;justify-content:space-between;">
@@ -1173,10 +603,27 @@ async function submitAuth() {
 
   <!-- 2. Classification -->
   <div class="card">
-    <div class="card-header">
-      <div class="step-badge">2</div>
-      <h2>Classification</h2>
+    <div class="card-header"><div class="step-badge">2</div><h2>Classification</h2></div>
+
+    <!-- Awards & Recognition panel — shown only when that report type is selected -->
+    <div class="awards-panel" id="awardsPanel">
+      <div class="awards-panel-title">🏆 Awards &amp; Recognition details</div>
+      <div class="field field-row">
+        <label>Award title <span style="font-weight:400;color:#b45309;">— required for this report type</span></label>
+        <input type="text" id="awardTitle" placeholder="e.g. Agent of the Year 2026, Best Recruiter Award" />
+      </div>
+      <div class="field" style="position:relative;">
+        <label>Issuing institution <span style="font-weight:400;color:#b45309;">— the institution that issued the award</span></label>
+        <input type="text" id="issuingInstSearch" placeholder="Search for institution…" autocomplete="off" />
+        <div id="issuingInstDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:300;overflow:hidden;margin-top:4px;max-height:200px;overflow-y:auto;"></div>
+        <div class="issuing-inst-resolved" id="issuingInstCard">
+          <span>✓</span>
+          <span id="issuingInstName" style="flex:1;"></span>
+          <button id="clearIssuingInstBtn" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;padding:0;">✕ Remove</button>
+        </div>
+      </div>
     </div>
+
     <div class="grid-3 field-row">
       <div class="field">
         <label>Report type</label>
@@ -1212,10 +659,7 @@ async function submitAuth() {
       </div>
     </div>
     <div class="grid-2 field-row">
-      <div class="field">
-        <label>Incident date</label>
-        <input type="date" id="incidentDate" />
-      </div>
+      <div class="field"><label>Incident date</label><input type="date" id="incidentDate" /></div>
       <div class="field">
         <label>Severity weight</label>
         <select id="severityWeight">
@@ -1235,6 +679,7 @@ async function submitAuth() {
         </select>
       </div>
     </div>
+
     <!-- Accreditation multi-select -->
     <div class="field field-row">
       <label>Accreditations <span style="font-weight:400;color:#9ca3af;">(optional — select all that apply)</span></label>
@@ -1270,9 +715,7 @@ async function submitAuth() {
           <div style="font-size:12px;font-weight:600;color:#1d4ed8;">De-identified summary</div>
           <div style="font-size:11px;color:#9ca3af;margin-top:2px;">Sent to non-client institutions (Cold, Warm, Former Client etc.) — Claude will draft this for you</div>
         </div>
-        <button class="btn-generate-summary" id="generateSummaryBtn" disabled>
-          ✨ Generate draft
-        </button>
+        <button class="btn-generate-summary" id="generateSummaryBtn" disabled>✨ Generate draft</button>
       </div>
       <div id="summaryGenerating" style="display:none;align-items:center;gap:8px;font-size:12px;color:#6b7280;margin-bottom:8px;">
         <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:#3b82f6;width:12px;height:12px;border-width:2px;"></span>
@@ -1281,14 +724,11 @@ async function submitAuth() {
       <textarea id="deidentifiedSummary" rows="4" placeholder="Click 'Generate draft' after writing the incident description — Claude will draft a de-identified version for you to review and edit…" style="width:100%;padding:10px 12px;background:#fff;border:1px solid #bfdbfe;border-radius:7px;font-size:13px;font-family:inherit;color:#1a1d23;resize:vertical;outline:none;line-height:1.6;transition:border-color 0.15s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#bfdbfe'"></textarea>
       <div id="summaryGenerateStatus" style="font-size:11px;margin-top:6px;color:#9ca3af;"></div>
     </div>
-
+  </div>
 
   <!-- 3. Institutions -->
   <div class="card">
-    <div class="card-header">
-      <div class="step-badge">3</div>
-      <h2>Institution linkage</h2>
-    </div>
+    <div class="card-header"><div class="step-badge">3</div><h2>Institution linkage</h2></div>
 
     <div id="otherClientsPanel" style="display:none;margin-bottom:18px;">
       <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
@@ -1327,6 +767,11 @@ async function submitAuth() {
       Looking up authorised client institutions…
     </div>
 
+    <!-- Notice shown for Awards & Recognition -->
+    <div class="inst-linkage-notice" id="instLinkageNotice">
+      ⚠️ <strong>Awards &amp; Recognition:</strong> Use the <strong>Issuing institution</strong> field above (in the Classification section) to record who issued the award. This field is for client institutions who should be notified of this award in their ticker and Your Agents widget.
+    </div>
+
     <div class="field field-row">
       <label>Additional institution names to analyse <span style="font-weight:400;color:#9ca3af;">— one per line</span></label>
       <textarea id="institutionsList" rows="6" placeholder="University of Melbourne&#10;Monash University&#10;RMIT University&#10;…"></textarea>
@@ -1342,14 +787,11 @@ async function submitAuth() {
         <div class="legend-item"><span class="dot grey"></span> Institution not found</div>
       </div>
       <div style="margin-top:14px;position:relative;">
-        <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:6px;display:flex;align-items:center;gap:5px;">
-          ＋ Add or correct institution
-        </div>
+        <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:6px;display:flex;align-items:center;gap:5px;">＋ Add or correct institution</div>
         <input type="text" id="instManualSearch" placeholder="Search institutions to add…"
           style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit;color:#1a1d23;outline:none;transition:border-color 0.15s;"
           onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'" />
-        <div id="instManualDrop"
-          style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:200;overflow:hidden;margin-top:2px;max-height:200px;overflow-y:auto;"></div>
+        <div id="instManualDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:200;overflow:hidden;margin-top:2px;max-height:200px;overflow-y:auto;"></div>
       </div>
     </div>
     <div id="missingDataPanel" style="display:none;"></div>
@@ -1358,39 +800,15 @@ async function submitAuth() {
 
   <!-- 4. Preview -->
   <div class="card">
-    <div class="card-header">
-      <div class="step-badge">4</div>
-      <h2>Preview</h2>
-    </div>
+    <div class="card-header"><div class="step-badge">4</div><h2>Preview</h2></div>
     <div class="summary-grid">
-      <div class="summary-item">
-        <div class="summary-label">Agent</div>
-        <div class="summary-val" id="sum-agent">—</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Report type</div>
-        <div class="summary-val" id="sum-type">—</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Category</div>
-        <div class="summary-val" id="sum-cat">—</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Severity</div>
-        <div class="summary-val" id="sum-sev">—</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Date</div>
-        <div class="summary-val" id="sum-date">—</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-label">Institutions linked</div>
-        <div class="summary-val" id="sum-inst">—</div>
-      </div>
-      <div class="summary-item" id="sum-accred-wrap" style="display:none;">
-        <div class="summary-label">Accreditations</div>
-        <div class="summary-val" id="sum-accred">—</div>
-      </div>
+      <div class="summary-item"><div class="summary-label">Agent</div><div class="summary-val" id="sum-agent">—</div></div>
+      <div class="summary-item"><div class="summary-label">Report type</div><div class="summary-val" id="sum-type">—</div></div>
+      <div class="summary-item"><div class="summary-label">Category</div><div class="summary-val" id="sum-cat">—</div></div>
+      <div class="summary-item"><div class="summary-label">Severity</div><div class="summary-val" id="sum-sev">—</div></div>
+      <div class="summary-item"><div class="summary-label">Date</div><div class="summary-val" id="sum-date">—</div></div>
+      <div class="summary-item"><div class="summary-label">Institutions linked</div><div class="summary-val" id="sum-inst">—</div></div>
+      <div class="summary-item" id="sum-accred-wrap" style="display:none;"><div class="summary-label">Accreditations</div><div class="summary-val" id="sum-accred">—</div></div>
     </div>
     <div class="status" id="submitStatus"></div>
   </div>
@@ -1407,19 +825,18 @@ async function submitAuth() {
   </div>
 
   <div class="footer-bar">
-  <button class="btn btn-secondary" id="resetFormBtn">Reset form</button>
-  <div style="display:flex;gap:10px;align-items:center;">
-    <button class="btn btn-secondary" id="addAnotherBtn" style="display:none;background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;">＋ Add another record</button>
-    <button class="btn btn-primary" id="submitBtn">Submit report</button>
+    <button class="btn btn-secondary" id="resetFormBtn">Reset form</button>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn btn-secondary" id="addAnotherBtn" style="display:none;background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;">＋ Add another record</button>
+      <button class="btn btn-primary" id="submitBtn">Submit report</button>
+    </div>
   </div>
-</div>
 
 </div><!-- end main-content -->
 
 <!-- Email protocol modal -->
 <div class="modal-backdrop" id="emailModal">
   <div class="modal-box" style="max-width:560px;">
-
     <div id="emailStep1">
       <h2>📧 Email protocol</h2>
       <p style="margin-bottom:16px;">Generating a de-identified summary using Claude. This will be reviewed before saving.</p>
@@ -1428,7 +845,6 @@ async function submitAuth() {
         Calling Claude API…
       </div>
     </div>
-
     <div id="emailStep2" style="display:none;">
       <h2 style="margin-bottom:6px;">Review de-identified summary</h2>
       <p style="margin-bottom:14px;">This summary will be sent to <strong>Warm and Cold</strong> institutions in the next Monday digest. Linked <strong>client institutions</strong> will also receive a notification in their weekly client digest. Edit as needed before confirming.</p>
@@ -1446,14 +862,12 @@ async function submitAuth() {
       </div>
       <div class="status" id="emailConfirmStatus" style="margin-top:12px;"></div>
     </div>
-
     <div id="emailStep3" style="display:none;text-align:center;padding:8px 0;">
       <div style="font-size:36px;margin-bottom:12px;">✅</div>
       <h2 style="margin-bottom:8px;">Queued for Monday digest</h2>
       <p style="font-size:13px;color:#6b7280;margin-bottom:20px;">This incident has been flagged with <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">include_in_email = true</code> and the de-identified summary saved. It will be picked up by the clever-task Edge Function on the next Monday at 8am Sydney time.</p>
       <button class="btn btn-secondary" id="closeEmailBtn">Close</button>
     </div>
-
   </div>
 </div>
 
@@ -1462,11 +876,11 @@ const SUPABASE_URL = 'https://mtatzzrbapftzwuxrcko.supabase.co';
 const SUPABASE_KEY = sessionStorage.getItem('ab-supabase-key') || '';
 
 let selectedAgent = null;
+let _issuingInstitution = null; // for Awards & Recognition
 let analysisResults = { authorised: [], risk: [], unknown: [] };
 let submittedIncidentId = null;
 let searchTimeout = null;
 
-// Accreditation state
 let _allAccreditations = [];
 let _selectedAccredIds = new Set();
 let _accredLoaded = false;
@@ -1533,123 +947,113 @@ function extractField(text, ...labels) {
 
 function parseHandoff() {
   const raw = document.getElementById('handoffInput').value.trim();
-  if (!raw) {
-    showParseResult('warn', 'Please paste a handoff card first.');
-    return;
-  }
-
-  const populated = [];
-  const skipped = [];
+  if (!raw) { showParseResult('warn', 'Please paste a handoff card first.'); return; }
+  const populated = [], skipped = [];
 
   const agentName = extractField(raw, 'Agent name', 'Agent');
-  if (agentName) {
-    document.getElementById('agentSearch').value = agentName;
-    populated.push('Agent name');
-    setTimeout(() => lookupAgent(), 300);
-  } else skipped.push('Agent name');
+  if (agentName) { document.getElementById('agentSearch').value = agentName; populated.push('Agent name'); setTimeout(() => lookupAgent(), 300); } else skipped.push('Agent name');
 
   const dateRaw = extractField(raw, 'Incident date', 'Date');
-  if (dateRaw) {
-    const parsed = new Date(dateRaw);
-    if (!isNaN(parsed)) {
-      document.getElementById('incidentDate').value = parsed.toISOString().split('T')[0];
-      populated.push('Incident date');
-    } else skipped.push('Incident date (unrecognised format)');
-  } else skipped.push('Incident date');
+  if (dateRaw) { const parsed = new Date(dateRaw); if (!isNaN(parsed)) { document.getElementById('incidentDate').value = parsed.toISOString().split('T')[0]; populated.push('Incident date'); } else skipped.push('Incident date (unrecognised format)'); } else skipped.push('Incident date');
 
   const reportTypeRaw = extractField(raw, 'Report type', 'Report');
-  if (reportTypeRaw) {
-    const matched = bestMatch(reportTypeRaw, REPORT_TYPE_MAP);
-    if (matched) {
-      document.getElementById('reportType').value = matched;
-      populated.push(`Report type → ${matched}`);
-    } else skipped.push(`Report type (no match for "${reportTypeRaw}")`);
-  } else skipped.push('Report type');
+  if (reportTypeRaw) { const matched = bestMatch(reportTypeRaw, REPORT_TYPE_MAP); if (matched) { document.getElementById('reportType').value = matched; populated.push(`Report type → ${matched}`); toggleAwardsPanel(); } else skipped.push(`Report type (no match for "${reportTypeRaw}")`); } else skipped.push('Report type');
 
   const categoryRaw = extractField(raw, 'Category');
-  if (categoryRaw) {
-    const matched = bestMatch(categoryRaw, CATEGORY_MAP);
-    if (matched) {
-      document.getElementById('category').value = matched;
-      populated.push(`Category → ${matched}`);
-    } else skipped.push(`Category (no match for "${categoryRaw}")`);
-  } else skipped.push('Category');
+  if (categoryRaw) { const matched = bestMatch(categoryRaw, CATEGORY_MAP); if (matched) { document.getElementById('category').value = matched; populated.push(`Category → ${matched}`); } else skipped.push(`Category (no match for "${categoryRaw}")`); } else skipped.push('Category');
 
   const sourceTypeRaw = extractField(raw, 'Source type', 'Source');
-  if (sourceTypeRaw) {
-    const matched = bestMatch(sourceTypeRaw, SOURCE_TYPE_MAP);
-    if (matched) {
-      document.getElementById('sourceType').value = matched;
-      populated.push(`Source type → ${matched}`);
-    } else skipped.push(`Source type (no match for "${sourceTypeRaw}")`);
-  }
+  if (sourceTypeRaw) { const matched = bestMatch(sourceTypeRaw, SOURCE_TYPE_MAP); if (matched) { document.getElementById('sourceType').value = matched; populated.push(`Source type → ${matched}`); } }
 
   const severityRaw = extractField(raw, 'Severity weight', 'Severity');
-  if (severityRaw) {
-    const matched = bestMatch(severityRaw, SEVERITY_MAP);
-    if (matched) {
-      document.getElementById('severityWeight').value = matched;
-      populated.push(`Severity → ${matched}`);
-    } else {
-      const num = severityRaw.match(/\d+/);
-      if (num) {
-        document.getElementById('severityWeight').value = num[0];
-        populated.push(`Severity → ${num[0]}`);
-      } else skipped.push('Severity weight');
-    }
-  }
+  if (severityRaw) { const matched = bestMatch(severityRaw, SEVERITY_MAP); if (matched) { document.getElementById('severityWeight').value = matched; populated.push(`Severity → ${matched}`); } else { const num = severityRaw.match(/\d+/); if (num) { document.getElementById('severityWeight').value = num[0]; populated.push(`Severity → ${num[0]}`); } else skipped.push('Severity weight'); } }
 
   const urlRaw = extractField(raw, 'Source URL', 'URL', 'Link');
-  if (urlRaw && urlRaw.startsWith('http')) {
-    document.getElementById('sourceUrl').value = urlRaw;
-    populated.push('Source URL');
-  }
+  if (urlRaw && urlRaw.startsWith('http')) { document.getElementById('sourceUrl').value = urlRaw; populated.push('Source URL'); }
 
   const descMatch = raw.match(/Incident description\s*[:\-]\s*\n([\s\S]+?)(?=\nInstitution names|\nDe-identified|\n─|$)/i);
-  if (descMatch) {
-    document.getElementById('description').value = descMatch[1].trim();
-    populated.push('Incident description');
-    onDescriptionInput();
-  }
+  if (descMatch) { document.getElementById('description').value = descMatch[1].trim(); populated.push('Incident description'); onDescriptionInput(); }
 
   const instMatch = raw.match(/Institution names[^\n]*\n([\s\S]+?)(?=\n─|$)/i);
-  if (instMatch) {
-    const instText = instMatch[1].trim();
-    const isNone = /^none/i.test(instText);
-    if (!isNone) {
-      document.getElementById('institutionsList').value = instText;
-      populated.push('Institution names');
-    } else {
-      populated.push('Institution names (none identified — left blank for manual entry)');
-    }
-  }
+  if (instMatch) { const instText = instMatch[1].trim(); if (!/^none/i.test(instText)) { document.getElementById('institutionsList').value = instText; populated.push('Institution names'); } else { populated.push('Institution names (none identified)'); } }
 
   document.getElementById('handoffZone').classList.add('populated');
-  updatePreview();
-  onDescriptionInput();
-
-  const msg = `✓ Populated: ${populated.join(' · ')}` +
-    (skipped.length ? `\n⚠ Could not match: ${skipped.join(', ')}` : '');
+  updatePreview(); onDescriptionInput();
+  const msg = `✓ Populated: ${populated.join(' · ')}` + (skipped.length ? `\n⚠ Could not match: ${skipped.join(', ')}` : '');
   showParseResult(skipped.length ? 'warn' : 'ok', msg);
 }
 
 function clearHandoff() {
   document.getElementById('handoffInput').value = '';
   document.getElementById('handoffZone').classList.remove('populated');
-  const pr = document.getElementById('parseResult');
-  pr.className = 'parse-result';
-  pr.textContent = '';
+  const pr = document.getElementById('parseResult'); pr.className = 'parse-result'; pr.textContent = '';
 }
 
 function showParseResult(type, msg) {
   const el = document.getElementById('parseResult');
-  el.className = `parse-result ${type}`;
-  el.style.whiteSpace = 'pre-line';
-  el.textContent = msg;
+  el.className = `parse-result ${type}`; el.style.whiteSpace = 'pre-line'; el.textContent = msg;
 }
 
-// ── End handoff parser ───────────────────────────────────────────
+// ── Awards & Recognition panel ───────────────────────────────────
+let _issuingInstSearchTimeout = null;
 
+function toggleAwardsPanel() {
+  const isAward = document.getElementById('reportType').value === 'Awards & Recognition';
+  document.getElementById('awardsPanel').classList.toggle('visible', isAward);
+  document.getElementById('instLinkageNotice').classList.toggle('visible', isAward);
+}
+
+function initIssuingInstSearch() {
+  const input = document.getElementById('issuingInstSearch');
+  const drop = document.getElementById('issuingInstDrop');
+
+  input.addEventListener('input', () => {
+    clearTimeout(_issuingInstSearchTimeout);
+    const q = input.value.trim();
+    if (q.length < 2) { drop.style.display = 'none'; return; }
+    _issuingInstSearchTimeout = setTimeout(async () => {
+      const res = await sbFetch(
+        `${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,status&order=name&limit=10`
+      );
+      const data = await res.json();
+      if (!data || !data.length) { drop.style.display = 'none'; return; }
+      drop.innerHTML = data.map((inst, i) =>
+        `<div class="suggestion-item" data-issuing-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:13px;">
+          <div style="font-weight:500;color:#1a1d23;">${inst.name}</div>
+          <div style="font-size:11px;color:#9ca3af;">${inst.status || ''}</div>
+        </div>`
+      ).join('');
+      drop._results = data;
+      drop.style.display = 'block';
+    }, 250);
+  });
+
+  drop.addEventListener('click', e => {
+    e.stopPropagation();
+    const item = e.target.closest('[data-issuing-index]');
+    if (!item) return;
+    const inst = drop._results[parseInt(item.getAttribute('data-issuing-index'))];
+    if (!inst) return;
+    _issuingInstitution = inst;
+    input.value = inst.name;
+    drop.style.display = 'none';
+    document.getElementById('issuingInstName').textContent = inst.name;
+    document.getElementById('issuingInstCard').classList.add('visible');
+  });
+
+  document.getElementById('clearIssuingInstBtn').addEventListener('click', () => {
+    _issuingInstitution = null;
+    input.value = '';
+    document.getElementById('issuingInstCard').classList.remove('visible');
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#issuingInstSearch') && !e.target.closest('#issuingInstDrop'))
+      drop.style.display = 'none';
+  });
+}
+
+// ── Preview ──────────────────────────────────────────────────────
 function updatePreview() {
   document.getElementById('sum-agent').textContent = selectedAgent ? selectedAgent.agency_name : '—';
   document.getElementById('sum-type').textContent = document.getElementById('reportType').value || '—';
@@ -1668,7 +1072,10 @@ function updatePreview() {
 document.getElementById('severityWeight').addEventListener('change', updateTickerPreview);
 document.getElementById('sourceUrl').addEventListener('input', updateTickerPreview);
 document.getElementById('reportType').addEventListener('change', updateTickerPreview);
+document.getElementById('reportType').addEventListener('change', toggleAwardsPanel);
+document.getElementById('awardTitle').addEventListener('input', updateTickerPreview);
 
+// ── Agent search ─────────────────────────────────────────────────
 const agentInput = document.getElementById('agentSearch');
 const suggestionsEl = document.getElementById('suggestions');
 
@@ -1678,15 +1085,9 @@ agentInput.addEventListener('input', () => {
   if (q.length < 2) { closeSuggestions(); return; }
   searchTimeout = setTimeout(() => fetchSuggestions(q), 280);
 });
-
 agentInput.addEventListener('keydown', e => { if (e.key === 'Escape') closeSuggestions(); });
+document.addEventListener('click', e => { if (!e.target.closest('.suggestions-outer')) closeSuggestions(); });
 
-// Close suggestions when clicking outside — but NOT when clicking inside the dropdown itself
-document.addEventListener('click', e => {
-  if (!e.target.closest('.suggestions-outer')) closeSuggestions();
-});
-
-// Store agents by index for CSP-safe selection
 let _suggestionAgents = [];
 
 async function fetchSuggestions(q) {
@@ -1707,8 +1108,6 @@ function renderSuggestions(items) {
   suggestionsEl.classList.add('open');
 }
 
-// FIX 1: stopPropagation so the document click handler doesn't fire on the same click
-// and wipe _suggestionAgents before selectAgent can use it
 suggestionsEl.addEventListener('click', function(e) {
   e.stopPropagation();
   const item = e.target.closest('[data-agent-index]');
@@ -1747,102 +1146,59 @@ function resolveAgent(agent) {
   document.getElementById('agentCard').classList.add('visible');
   document.getElementById('branchPanel').style.display = 'none';
   document.getElementById('analyseBtn').disabled = false;
-  updatePreview();
-  updateTickerPreview();
+  updatePreview(); updateTickerPreview();
   lookupAuthorisedClients(agent.id);
   showAgentHierarchy(agent);
 }
 
 async function applyBranch() {
-  if (_selectedBranchAgent) {
-    resolveAgent(_selectedBranchAgent);
-    return;
-  }
-
+  if (_selectedBranchAgent) { resolveAgent(_selectedBranchAgent); return; }
   const country = document.getElementById('branchCountry').value.trim();
   const city = document.getElementById('branchCity').value.trim();
-
-  if (!country && !city) {
-    resolveAgent(_canonicalAgent);
-    return;
-  }
-
+  if (!country && !city) { resolveAgent(_canonicalAgent); return; }
   setStatus('branchStatus', 'info', 'Looking for matching branch…');
-
   const suffix = [country, city].filter(Boolean).join(' ');
   const searchName = `${_canonicalAgent.agency_name} ${suffix}`;
-
   try {
     const match = _branchChildren.find(c => {
-      const cCountry = (c.country || '').toLowerCase();
-      const cJuris = (c.jurisdiction || '').toLowerCase();
-      const countryMatch = !country || cCountry.includes(country.toLowerCase());
-      const cityMatch = !city || cJuris.includes(city.toLowerCase());
-      return countryMatch && cityMatch;
+      const cCountry = (c.country || '').toLowerCase(), cJuris = (c.jurisdiction || '').toLowerCase();
+      return (!country || cCountry.includes(country.toLowerCase())) && (!city || cJuris.includes(city.toLowerCase()));
     });
-
-    if (match) {
-      clearStatus('branchStatus');
-      resolveAgent(match);
-    } else {
+    if (match) { clearStatus('branchStatus'); resolveAgent(match); }
+    else {
       setStatus('branchStatus', 'info', `No existing branch found — creating "${searchName}"…`);
       const createRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agents`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-        body: JSON.stringify({
-          agency_name: searchName,
-          country: country || _canonicalAgent.country || null,
-          jurisdiction: city || null,
-          canonical_agent_id: _canonicalAgent.id,
-        }),
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify({ agency_name: searchName, country: country || _canonicalAgent.country || null, jurisdiction: city || null, canonical_agent_id: _canonicalAgent.id }),
       });
       if (!createRes.ok) { const e = await createRes.json(); throw new Error(e.message || createRes.statusText); }
       const newAgent = (await createRes.json())[0];
-      clearStatus('branchStatus');
-      resolveAgent(newAgent);
+      clearStatus('branchStatus'); resolveAgent(newAgent);
     }
-  } catch(e) {
-    setStatus('branchStatus', 'error', '✗ ' + e.message);
-  }
+  } catch(e) { setStatus('branchStatus', 'error', '✗ ' + e.message); }
 }
 
-function skipBranch() {
-  resolveAgent(_canonicalAgent);
-}
+function skipBranch() { resolveAgent(_canonicalAgent); }
 
-let _branchChildren = [];
-let _selectedBranchAgent = null;
-let _branchSearchTimeout = null;
+let _branchChildren = [], _selectedBranchAgent = null, _branchSearchTimeout = null;
 
 async function loadBranchChildren() {
   if (!_canonicalAgent) return;
-  const res = await sbFetch(
-    `${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${_canonicalAgent.id}&select=id,agency_name,country,jurisdiction,risk_tier,risk_score,canonical_agent_id&order=agency_name`
-  );
+  const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${_canonicalAgent.id}&select=id,agency_name,country,jurisdiction,risk_tier,risk_score,canonical_agent_id&order=agency_name`);
   _branchChildren = await res.json() || [];
 }
 
 function filterBranchSuggestions(field, query) {
   const lower = query.toLowerCase();
   const sugEl = document.getElementById(field === 'country' ? 'branchCountrySuggestions' : 'branchCitySuggestions');
-
-  const matches = _branchChildren.filter(c => {
-    if (field === 'country') return (c.country || '').toLowerCase().includes(lower);
-    if (field === 'city') return (c.jurisdiction || '').toLowerCase().includes(lower);
-    return false;
-  });
-
+  const matches = _branchChildren.filter(c => field === 'country' ? (c.country || '').toLowerCase().includes(lower) : (c.jurisdiction || '').toLowerCase().includes(lower));
   if (!matches.length || !query) { sugEl.style.display = 'none'; return; }
-
   sugEl.innerHTML = matches.map((c, i) =>
-    `<div class="suggestion-item" data-branch-index="${i}" data-branch-field="${field}"
-      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:13px;">
+    `<div class="suggestion-item" data-branch-index="${i}" data-branch-field="${field}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:13px;">
       <div style="font-weight:500;color:#1a1d23;">${c.agency_name}</div>
       <div style="font-size:11px;color:#9ca3af;">${[c.jurisdiction, c.country].filter(Boolean).join(' · ')}</div>
-    </div>`
-  ).join('');
-  sugEl._matches = matches;
-  sugEl.style.display = 'block';
+    </div>`).join('');
+  sugEl._matches = matches; sugEl.style.display = 'block';
 }
 
 function initBranchSearch() {
@@ -1850,21 +1206,17 @@ function initBranchSearch() {
     const field = fieldId === 'branchCountry' ? 'country' : 'city';
     const input = document.getElementById(fieldId);
     const sugEl = document.getElementById(field === 'country' ? 'branchCountrySuggestions' : 'branchCitySuggestions');
-
     input.addEventListener('input', () => {
-      clearTimeout(_branchSearchTimeout);
-      _selectedBranchAgent = null;
+      clearTimeout(_branchSearchTimeout); _selectedBranchAgent = null;
       document.getElementById('branchMatchCard').style.display = 'none';
       const q = input.value.trim();
       if (q.length < 1) { sugEl.style.display = 'none'; return; }
       _branchSearchTimeout = setTimeout(() => filterBranchSuggestions(field, q), 200);
     });
-
     sugEl.addEventListener('click', e => {
       const item = e.target.closest('[data-branch-index]');
       if (!item) return;
-      const idx = parseInt(item.getAttribute('data-branch-index'), 10);
-      const agent = sugEl._matches[idx];
+      const agent = sugEl._matches[parseInt(item.getAttribute('data-branch-index'))];
       if (!agent) return;
       _selectedBranchAgent = agent;
       document.getElementById('branchCountry').value = agent.country || '';
@@ -1875,7 +1227,6 @@ function initBranchSearch() {
       document.getElementById('branchMatchCard').style.display = 'block';
     });
   });
-
   document.addEventListener('click', e => {
     if (!e.target.closest('#branchCountry') && !e.target.closest('#branchCountrySuggestions'))
       document.getElementById('branchCountrySuggestions').style.display = 'none';
@@ -1893,18 +1244,8 @@ async function lookupAgent() {
   try {
     const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id&limit=8&order=agency_name`);
     const data = await res.json();
-    if (!data.length) {
-      setStatus('agentStatus', 'error', 'No agent found matching that name.');
-      document.getElementById('newAgentName').value = q;
-      document.getElementById('newAgentPanel').classList.add('visible');
-      return;
-    }
-    if (data.length === 1) {
-      selectAgent(data[0]);
-      clearStatus('agentStatus');
-      return;
-    }
-    // Multiple results — show inline match list
+    if (!data.length) { setStatus('agentStatus', 'error', 'No agent found matching that name.'); document.getElementById('newAgentName').value = q; document.getElementById('newAgentPanel').classList.add('visible'); return; }
+    if (data.length === 1) { selectAgent(data[0]); clearStatus('agentStatus'); return; }
     _suggestionAgents = data;
     const matchHtml = data.map((a, i) => `
       <div data-agent-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;transition:background 0.1s;">
@@ -1912,10 +1253,8 @@ async function lookupAgent() {
         <div style="font-size:11px;color:#9ca3af;margin-top:2px;">${[a.jurisdiction, a.country].filter(Boolean).join(' · ')}${a.risk_tier ? ' · ' + a.risk_tier + ' tier' : ''}</div>
       </div>`).join('');
     setStatus('agentStatus', 'info', `${data.length} matches found — select one below:`);
-
     let matchList = document.getElementById('agentMatchList');
     if (!matchList) {
-      // FIX 2: create element and attach listener ONCE only
       matchList = document.createElement('div');
       matchList.id = 'agentMatchList';
       matchList.style.cssText = 'border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-top:8px;';
@@ -1923,29 +1262,20 @@ async function lookupAgent() {
         const item = e.target.closest('[data-agent-index]');
         if (!item) return;
         const idx = parseInt(item.getAttribute('data-agent-index'), 10);
-        if (_suggestionAgents[idx]) {
-          selectAgent(_suggestionAgents[idx]);
-          clearStatus('agentStatus');
-          matchList.style.display = 'none';
-        }
+        if (_suggestionAgents[idx]) { selectAgent(_suggestionAgents[idx]); clearStatus('agentStatus'); matchList.style.display = 'none'; }
       });
       document.getElementById('agentStatus').after(matchList);
     }
-    matchList.innerHTML = matchHtml;
-    matchList.style.display = 'block';
-
+    matchList.innerHTML = matchHtml; matchList.style.display = 'block';
   } catch(e) { setStatus('agentStatus', 'error', 'Search failed: ' + e.message); }
 }
 
 async function createAgent() {
   const name = document.getElementById('newAgentName').value.trim();
   if (!name) { setStatus('newAgentStatus', 'error', 'Agency name is required.'); return; }
-
   const btn = document.getElementById('createAgentBtn');
-  btn.disabled = true;
-  btn.textContent = 'Creating…';
+  btn.disabled = true; btn.textContent = 'Creating…';
   setStatus('newAgentStatus', 'info', 'Creating agent record…');
-
   const payload = {
     agency_name: name,
     country: document.getElementById('newAgentCountry').value.trim() || null,
@@ -1953,29 +1283,18 @@ async function createAgent() {
     canonical_agent_id: _parentAgent ? _parentAgent.id : null,
     website: document.getElementById('newAgentWebsite').value.trim() || null,
   };
-
   try {
     const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
       body: JSON.stringify(payload),
     });
-
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.statusText); }
-    const data = await res.json();
-    const newAgent = data[0];
-
+    const newAgent = (await res.json())[0];
     selectAgent(newAgent);
     document.getElementById('newAgentPanel').classList.remove('visible');
-    clearStatus('newAgentStatus');
-    clearStatus('agentStatus');
+    clearStatus('newAgentStatus'); clearStatus('agentStatus');
     setStatus('agentStatus', 'success', `✓ New agent "${name}" created and selected.`);
-
-  } catch(e) {
-    setStatus('newAgentStatus', 'error', '✗ ' + e.message);
-    btn.disabled = false;
-    btn.textContent = 'Create agent & continue';
-  }
+  } catch(e) { setStatus('newAgentStatus', 'error', '✗ ' + e.message); btn.disabled = false; btn.textContent = 'Create agent & continue'; }
 }
 
 async function lookupAuthorisedClients(agentId) {
@@ -1983,56 +1302,29 @@ async function lookupAuthorisedClients(agentId) {
   const loading = document.getElementById('otherClientsLoading');
   const tagsEl = document.getElementById('otherClientsTags');
   const badge = document.getElementById('otherClientsBadge');
-
-  panel.style.display = 'none';
-  loading.style.display = 'flex';
-
+  panel.style.display = 'none'; loading.style.display = 'flex';
   try {
     const canonicalId = selectedAgent.canonical_agent_id || agentId;
     const agentIds = new Set([agentId, canonicalId]);
-
-    const familyRes = await sbFetch(
-      `${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${canonicalId}&select=id`
-    );
+    const familyRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${canonicalId}&select=id`);
     const familyData = await familyRes.json();
     (familyData || []).forEach(a => agentIds.add(a.id));
-
     const idList = [...agentIds].join(',');
-
-    const allLinksRes = await sbFetch(
-      `${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${idList})&link_type=eq.authorised&select=institution_id`
-    );
+    const allLinksRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${idList})&link_type=eq.authorised&select=institution_id`);
     const allLinks = await allLinksRes.json();
-
     if (!allLinks.length) { loading.style.display = 'none'; return; }
-
     const uniqueIds = [...new Set(allLinks.map(l => l.institution_id))];
-    const ids = uniqueIds.join(',');
-
-    const instRes = await sbFetch(
-      `${SUPABASE_URL}/rest/v1/institutions?id=in.(${ids})&select=id,name,status,is_client&order=name`
-    );
+    const instRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?id=in.(${uniqueIds.join(',')})&select=id,name,status,is_client&order=name`);
     const institutions = await instRes.json();
     const clients = institutions.filter(i => i.is_client || i.status === 'Client');
-
     loading.style.display = 'none';
     if (!clients.length) return;
-
-    tagsEl.innerHTML = clients.map(i => `
-      <span class="inst-tag auth" title="Status: ${i.status || 'Client'}">
-        <span class="dot green"></span>${i.name}
-      </span>
-    `).join('');
-
+    tagsEl.innerHTML = clients.map(i => `<span class="inst-tag auth" title="Status: ${i.status || 'Client'}"><span class="dot green"></span>${i.name}</span>`).join('');
     badge.textContent = `${clients.length} client${clients.length !== 1 ? 's' : ''}`;
     panel.style.display = 'block';
     window._authorisedClientInstitutions = clients;
     updateTickerPreview();
-
-  } catch(e) {
-    loading.style.display = 'none';
-    console.error('Client lookup failed:', e);
-  }
+  } catch(e) { loading.style.display = 'none'; console.error('Client lookup failed:', e); }
 }
 
 // ── Analyse institutions ─────────────────────────────────────────
@@ -2040,131 +1332,79 @@ async function analyseInstitutions() {
   if (!selectedAgent) { setStatus('instStatus', 'error', 'Please select an agent first.'); return; }
   const raw = document.getElementById('institutionsList').value.trim();
   if (!raw) { setStatus('instStatus', 'error', 'Please enter at least one institution name.'); return; }
-
   const names = raw.split('\n').map(s => s.trim()).filter(Boolean);
   const btn = document.getElementById('analyseBtn');
-  btn.disabled = true;
-  document.getElementById('analyseBtnIcon').textContent = '…';
+  btn.disabled = true; document.getElementById('analyseBtnIcon').textContent = '…';
   setStatus('instStatus', 'info', `Analysing ${names.length} institution(s)…`);
   analysisResults = { authorised: [], risk: [], unknown: [] };
-
   const NON_CLIENT_STATUSES = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed', null];
-
   const canonicalId = selectedAgent.canonical_agent_id || selectedAgent.id;
   const agentIdChain = new Set([selectedAgent.id, canonicalId]);
-
-  const familyRes = await sbFetch(
-    `${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${canonicalId}&select=id`
-  );
-  const familyData = await familyRes.json();
-  (familyData || []).forEach(a => agentIdChain.add(a.id));
-
+  const familyRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${canonicalId}&select=id`);
+  (await familyRes.json() || []).forEach(a => agentIdChain.add(a.id));
   const familyIdList = [...agentIdChain].join(',');
-
   for (const name of names) {
     const instRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(name)}*&select=id,name,contact_email,salutation,status,is_client&limit=1`);
     const instData = await instRes.json();
     if (!instData || !instData.length) { analysisResults.unknown.push({ name }); continue; }
     const inst = instData[0];
     const isNonClient = !inst.is_client || NON_CLIENT_STATUSES.includes(inst.status);
-
-    let isAuthorised = false;
     const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${familyIdList})&institution_id=eq.${inst.id}&link_type=eq.authorised&select=agent_id&limit=1`);
     const linkData = await linkRes.json();
-    if (linkData && linkData.length) isAuthorised = true;
-
-    const entry = {
-      name,
-      institutionId: inst.id,
-      institutionName: inst.name,
-      contact_email: inst.contact_email,
-      salutation: inst.salutation,
-      status: inst.status,
-      is_client: inst.is_client,
-      isNonClient,
-    };
-    if (isAuthorised) {
-      analysisResults.authorised.push(entry);
-    } else {
-      analysisResults.risk.push(entry);
-    }
+    const entry = { name, institutionId: inst.id, institutionName: inst.name, contact_email: inst.contact_email, salutation: inst.salutation, status: inst.status, is_client: inst.is_client, isNonClient };
+    if (linkData && linkData.length) analysisResults.authorised.push(entry);
+    else analysisResults.risk.push(entry);
   }
-
   renderInstTags();
   document.getElementById('instResults').style.display = 'block';
-
   renderMissingPanel();
-
-  const missing = [...analysisResults.authorised, ...analysisResults.risk].filter(i => !i.contact_email || !i.salutation || !i.status);
   const _mc = [...analysisResults.authorised, ...analysisResults.risk].filter(i => !i.contact_email || !i.salutation || !i.status).length;
-  setStatus('instStatus', 'success', `Done — ${analysisResults.authorised.length} authorised · ${analysisResults.risk.length} risk radar · ${analysisResults.unknown.length} not found.${_mc ? ' · ⚠️ ' + _mc + ' missing contact data.' : ''}`);;
-  btn.disabled = false;
-  document.getElementById('analyseBtnIcon').textContent = '⚡';
+  setStatus('instStatus', 'success', `Done — ${analysisResults.authorised.length} authorised · ${analysisResults.risk.length} risk radar · ${analysisResults.unknown.length} not found.${_mc ? ' · ⚠️ ' + _mc + ' missing contact data.' : ''}`);
+  btn.disabled = false; document.getElementById('analyseBtnIcon').textContent = '⚡';
   updatePreview();
 }
 
-function markFilled(el) {
-  el.classList.toggle('filled', el.value.trim() !== '');
-}
+function markFilled(el) { el.classList.toggle('filled', el.value.trim() !== ''); }
 
 document.addEventListener('click', function(e) {
   const saveBtn = e.target.closest('[data-institution-id]');
   if (saveBtn) saveInstitutionData(saveBtn.getAttribute('data-institution-id'));
 });
-
-document.addEventListener('input', function(e) {
-  if (e.target.getAttribute('data-markfilled')) markFilled(e.target);
-});
-
+document.addEventListener('input', function(e) { if (e.target.getAttribute('data-markfilled')) markFilled(e.target); });
 document.addEventListener('click', function(e) {
   if (e.target.id === 'refreshMissingPanelBtn') {
     [...analysisResults.authorised, ...analysisResults.risk].forEach(inst => {
       const emailEl = document.getElementById('edit-email-' + inst.institutionId);
-      const salEl   = document.getElementById('edit-sal-'   + inst.institutionId);
-      const statEl  = document.getElementById('edit-status-'+ inst.institutionId);
+      const salEl = document.getElementById('edit-sal-' + inst.institutionId);
+      const statEl = document.getElementById('edit-status-' + inst.institutionId);
       if (emailEl) inst.contact_email = emailEl.value.trim() || null;
-      if (salEl)   inst.salutation    = salEl.value.trim()   || null;
-      if (statEl)  inst.status        = statEl.value         || null;
+      if (salEl) inst.salutation = salEl.value.trim() || null;
+      if (statEl) inst.status = statEl.value || null;
     });
     renderMissingPanel();
   }
 });
-
-document.addEventListener('change', function(e) {
-  if (e.target.getAttribute('data-markfilled')) markFilled(e.target);
-});
+document.addEventListener('change', function(e) { if (e.target.getAttribute('data-markfilled')) markFilled(e.target); });
 
 async function saveInstitutionData(institutionId) {
   const email = document.getElementById(`edit-email-${institutionId}`).value.trim();
   const salutation = document.getElementById(`edit-sal-${institutionId}`).value.trim();
   const status = document.getElementById(`edit-status-${institutionId}`).value;
   const statusEl = document.getElementById(`save-status-${institutionId}`);
-
   const payload = {};
   if (email) payload.contact_email = email;
   if (salutation) payload.salutation = salutation;
   if (status) payload.status = status;
-
-  if (!Object.keys(payload).length) {
-    statusEl.className = 'save-inst-status err';
-    statusEl.textContent = 'Nothing to save.';
-    return;
-  }
-
+  if (!Object.keys(payload).length) { statusEl.className = 'save-inst-status err'; statusEl.textContent = 'Nothing to save.'; return; }
   try {
     const res = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?id=eq.${institutionId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      method: 'PATCH', headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify(payload),
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.statusText); }
-    statusEl.className = 'save-inst-status ok';
-    statusEl.textContent = '✓ Saved — edit any field and save again to update.';
+    statusEl.className = 'save-inst-status ok'; statusEl.textContent = '✓ Saved — edit any field and save again to update.';
     setTimeout(() => { statusEl.className = 'save-inst-status'; statusEl.textContent = ''; }, 3000);
-  } catch(e) {
-    statusEl.className = 'save-inst-status err';
-    statusEl.textContent = '✗ ' + e.message;
-  }
+  } catch(e) { statusEl.className = 'save-inst-status err'; statusEl.textContent = '✗ ' + e.message; }
 }
 
 async function submitIncident() {
@@ -2177,13 +1417,21 @@ async function submitIncident() {
     description: document.getElementById('description').value.trim(),
   };
   if (!vals.reportType || !vals.category || !vals.severityWeight || !vals.incidentDate || !vals.description) {
-    setStatus('submitStatus', 'error', 'Please complete all required fields before submitting.');
-    return;
+    setStatus('submitStatus', 'error', 'Please complete all required fields before submitting.'); return;
+  }
+
+  // Awards & Recognition validation
+  if (vals.reportType === 'Awards & Recognition') {
+    if (!document.getElementById('awardTitle').value.trim()) {
+      setStatus('submitStatus', 'error', 'Please enter the award title.'); return;
+    }
+    if (!_issuingInstitution) {
+      setStatus('submitStatus', 'error', 'Please select the issuing institution for this award.'); return;
+    }
   }
 
   const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Submitting…';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Submitting…';
   setStatus('submitStatus', 'info', 'Creating incident record…');
 
   try {
@@ -2199,6 +1447,9 @@ async function submitIncident() {
         source_type: document.getElementById('sourceType').value || null,
         report_type: vals.reportType || null,
         source_url: document.getElementById('sourceUrl').value.trim() || null,
+        award_title: (vals.reportType === 'Awards & Recognition')
+          ? (document.getElementById('awardTitle').value.trim() || null)
+          : null,
       })
     });
 
@@ -2207,18 +1458,28 @@ async function submitIncident() {
     const incidentId = incData[0].id;
     submittedIncidentId = incidentId;
 
-    const allLinked = [...analysisResults.authorised, ...analysisResults.risk];
-    const autoClients = (window._authorisedClientInstitutions || []).map(i => ({
-      institutionId: i.id,
-      institutionName: i.name,
-    }));
+    // For Awards & Recognition — insert the issuing institution link first
+    if (vals.reportType === 'Awards & Recognition' && _issuingInstitution) {
+      const issuerLinkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_institution_links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify([{ incident_id: incidentId, institution_id: _issuingInstitution.id }]),
+      });
+      if (!issuerLinkRes.ok) console.warn('Issuing institution link failed');
+    }
 
+    const allLinked = [...analysisResults.authorised, ...analysisResults.risk];
+    const autoClients = (window._authorisedClientInstitutions || []).map(i => ({ institutionId: i.id, institutionName: i.name }));
+
+    // Merge all links, deduplicating — ensure issuing institution is not double-linked
+    const issuingId = _issuingInstitution ? _issuingInstitution.id : null;
     const uniqueLinks = [...new Map(
-      [...allLinked, ...autoClients].map(i => [i.institutionId, i])
+      [...allLinked, ...autoClients]
+        .filter(i => i.institutionId !== issuingId)
+        .map(i => [i.institutionId, i])
     ).values()];
 
     if (uniqueLinks.length) {
-      // 1. incident_institution_links
       const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incident_institution_links`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
@@ -2236,77 +1497,48 @@ async function submitIncident() {
       if (!accredRes.ok) { const e = await accredRes.json(); throw new Error('Incident created but accreditation links failed: ' + (e.message || accredRes.statusText)); }
     }
 
+    const totalLinked = (issuingId ? 1 : 0) + uniqueLinks.length;
     const accredNote = _selectedAccredIds.size > 0 ? ` · ${_selectedAccredIds.size} accreditation(s) linked.` : '';
-    setStatus('submitStatus', 'success', `Report submitted — ID: ${incidentId} · ${uniqueLinks.length} institution(s) linked.${accredNote}`);
-document.getElementById('commsBtn').disabled = false;
-btn.className = 'btn btn-success';
-btn.innerHTML = '✓ Submitted';
-document.getElementById('addAnotherBtn').style.display = 'inline-flex';
-  } catch(e) {
-    setStatus('submitStatus', 'error', e.message);
-    btn.disabled = false;
-    btn.innerHTML = 'Submit report';
-  }
+    setStatus('submitStatus', 'success', `Report submitted — ID: ${incidentId} · ${totalLinked} institution(s) linked.${accredNote}`);
+    document.getElementById('commsBtn').disabled = false;
+    btn.className = 'btn btn-success'; btn.innerHTML = '✓ Submitted';
+    document.getElementById('addAnotherBtn').style.display = 'inline-flex';
+  } catch(e) { setStatus('submitStatus', 'error', e.message); btn.disabled = false; btn.innerHTML = 'Submit report'; }
 }
 
 function onDescriptionInput() {
-  const hasDescription = document.getElementById('description').value.trim().length > 20;
-  document.getElementById('generateSummaryBtn').disabled = !hasDescription;
+  document.getElementById('generateSummaryBtn').disabled = document.getElementById('description').value.trim().length <= 20;
 }
 
 async function generateInlineSummary() {
   const description = document.getElementById('description').value.trim();
-  const category = document.getElementById('category').value;
-  const severity = document.getElementById('severityWeight').value;
-  const reportType = document.getElementById('reportType').value;
-
-  if (!description) {
-    document.getElementById('summaryGenerateStatus').textContent = 'Please write an incident description first.';
-    document.getElementById('summaryGenerateStatus').style.color = '#b91c1c';
-    return;
-  }
-
+  if (!description) { document.getElementById('summaryGenerateStatus').textContent = 'Please write an incident description first.'; document.getElementById('summaryGenerateStatus').style.color = '#b91c1c'; return; }
   const btn = document.getElementById('generateSummaryBtn');
-  btn.disabled = true;
-  btn.textContent = 'Generating…';
+  btn.disabled = true; btn.textContent = 'Generating…';
   document.getElementById('summaryGenerating').style.display = 'flex';
   document.getElementById('summaryGenerateStatus').textContent = '';
-
   try {
     const res = await fetch('/api/summarise', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description, category, severity, reportType }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description, category: document.getElementById('category').value, severity: document.getElementById('severityWeight').value, reportType: document.getElementById('reportType').value }),
     });
-
-    if (!res.ok) {
-      const e = await res.json();
-      throw new Error(e.error || res.statusText);
-    }
-
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || res.statusText); }
     const data = await res.json();
     document.getElementById('deidentifiedSummary').value = data.summary || '';
     document.getElementById('summaryGenerateStatus').textContent = '✓ Draft generated — please review and edit before submitting.';
     document.getElementById('summaryGenerateStatus').style.color = '#15803d';
-  } catch(e) {
-    document.getElementById('summaryGenerateStatus').textContent = '✗ Generation failed: ' + e.message;
-    document.getElementById('summaryGenerateStatus').style.color = '#b91c1c';
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = '↺ Regenerate';
+  } catch(e) { document.getElementById('summaryGenerateStatus').textContent = '✗ Generation failed: ' + e.message; document.getElementById('summaryGenerateStatus').style.color = '#b91c1c'; }
+  btn.disabled = false; btn.innerHTML = '↺ Regenerate';
   document.getElementById('summaryGenerating').style.display = 'none';
 }
 
 // ── Parent agent search ──────────────────────────────────────────
-let _parentAgent = null;
-let _parentSearchTimeout = null;
+let _parentAgent = null, _parentSearchTimeout = null;
 
 function initParentAgentSearch() {
   const input = document.getElementById('parentAgentSearch');
   const suggestions = document.getElementById('parentSuggestions');
   if (!input) return;
-
   input.addEventListener('input', () => {
     clearTimeout(_parentSearchTimeout);
     const q = input.value.trim();
@@ -2320,29 +1552,20 @@ function initParentAgentSearch() {
           <div style="font-weight:500;">${a.agency_name}</div>
           <div style="font-size:11px;color:#9ca3af;">${[a.jurisdiction, a.country].filter(Boolean).join(' · ')}</div>
         </div>`).join('');
-      suggestions._agents = data;
-      suggestions.style.display = 'block';
+      suggestions._agents = data; suggestions.style.display = 'block';
     }, 280);
   });
-
   suggestions.addEventListener('click', e => {
     const item = e.target.closest('[data-parent-index]');
     if (!item) return;
-    const idx = parseInt(item.getAttribute('data-parent-index'), 10);
-    const agent = suggestions._agents[idx];
+    const agent = suggestions._agents[parseInt(item.getAttribute('data-parent-index'))];
     if (!agent) return;
-    _parentAgent = agent;
-    input.value = agent.agency_name;
-    suggestions.style.display = 'none';
-    const card = document.getElementById('parentAgentCard');
+    _parentAgent = agent; input.value = agent.agency_name; suggestions.style.display = 'none';
     document.getElementById('parentAgentCardName').textContent = `↑ Parent: ${agent.agency_name}`;
-    card.style.display = 'flex';
+    document.getElementById('parentAgentCard').style.display = 'flex';
   });
-
   document.addEventListener('click', e => {
-    if (!e.target.closest('#parentAgentSearch') && !e.target.closest('#parentSuggestions')) {
-      suggestions.style.display = 'none';
-    }
+    if (!e.target.closest('#parentAgentSearch') && !e.target.closest('#parentSuggestions')) suggestions.style.display = 'none';
   });
 }
 
@@ -2355,157 +1578,98 @@ function clearParentAgent() {
 async function showAgentHierarchy(agent) {
   const hierarchyEl = document.getElementById('agentHierarchy');
   if (!agent.canonical_agent_id) { hierarchyEl.style.display = 'none'; return; }
-
-  const chain = [];
-  let currentId = agent.canonical_agent_id;
-
+  const chain = []; let currentId = agent.canonical_agent_id;
   for (let i = 0; i < 3 && currentId; i++) {
     const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${currentId}&select=id,agency_name,canonical_agent_id&limit=1`);
     const data = await res.json();
     if (!data.length) break;
-    chain.push(data[0].agency_name);
-    currentId = data[0].canonical_agent_id;
+    chain.push(data[0].agency_name); currentId = data[0].canonical_agent_id;
   }
-
-  if (chain.length) {
-    hierarchyEl.textContent = '↑ ' + chain.join(' → ');
-    hierarchyEl.style.display = 'block';
-  }
+  if (chain.length) { hierarchyEl.textContent = '↑ ' + chain.join(' → '); hierarchyEl.style.display = 'block'; }
 }
 
-function openEmailModal() {
-  document.getElementById('emailModal').classList.add('open');
-}
-
+// ── Email protocol ───────────────────────────────────────────────
+function openEmailModal() { document.getElementById('emailModal').classList.add('open'); }
 function closeEmailModal() {
   document.getElementById('emailModal').classList.remove('open');
   document.getElementById('emailStep1').style.display = 'block';
   document.getElementById('emailStep2').style.display = 'none';
   document.getElementById('emailStep3').style.display = 'none';
-  const cs = document.getElementById('emailConfirmStatus');
-  cs.className = 'status'; cs.textContent = '';
+  const cs = document.getElementById('emailConfirmStatus'); cs.className = 'status'; cs.textContent = '';
 }
 
 async function openEmailProtocol() {
   const NON_CLIENT = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed'];
   const linkedNonClients = analysisResults.risk.filter(i => NON_CLIENT.includes(i.status));
-
   if (linkedNonClients.length === 0) {
     const authorisedNonClients = analysisResults.authorised.filter(i => NON_CLIENT.includes(i.status));
     if (authorisedNonClients.length === 0) {
-      setStatus('submitStatus', 'error', '⚠ Cannot queue for email — no linked Warm or Cold institutions found for this incident. Add institutions in Section 3 and re-analyse first.');
-      return;
+      setStatus('submitStatus', 'error', '⚠ Cannot queue for email — no linked Warm or Cold institutions found. Add institutions in Section 3 and re-analyse first.'); return;
     }
   }
-
   openEmailModal();
   const existing = document.getElementById('deidentifiedSummary').value.trim();
-  if (existing) {
-    document.getElementById('emailSummaryText').value = existing;
-    document.getElementById('emailStep1').style.display = 'none';
-    document.getElementById('emailStep2').style.display = 'block';
-  } else {
-    await generateSummary();
-  }
+  if (existing) { document.getElementById('emailSummaryText').value = existing; document.getElementById('emailStep1').style.display = 'none'; document.getElementById('emailStep2').style.display = 'block'; }
+  else await generateSummary();
 }
 
 async function generateSummary() {
   document.getElementById('emailStep1').style.display = 'block';
   document.getElementById('emailStep2').style.display = 'none';
   document.getElementById('emailStep3').style.display = 'none';
-
-  const description = document.getElementById('description').value.trim();
-  const category = document.getElementById('category').value;
-  const severity = document.getElementById('severityWeight').value;
-  const reportType = document.getElementById('reportType').value;
-
   try {
     const res = await fetch('/api/summarise', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description, category, severity, reportType }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: document.getElementById('description').value.trim(), category: document.getElementById('category').value, severity: document.getElementById('severityWeight').value, reportType: document.getElementById('reportType').value }),
     });
-
-    if (!res.ok) {
-      const e = await res.json();
-      throw new Error(e.error || res.statusText);
-    }
-
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || res.statusText); }
     const data = await res.json();
     document.getElementById('emailSummaryText').value = data.summary || '';
-    document.getElementById('emailStep1').style.display = 'none';
-    document.getElementById('emailStep2').style.display = 'block';
+    document.getElementById('emailStep1').style.display = 'none'; document.getElementById('emailStep2').style.display = 'block';
   } catch(e) {
-    document.getElementById('emailStep1').innerHTML = `
-      <h2>📧 Email protocol</h2>
-      <div class="status error" style="display:block;margin-top:12px;">✗ Failed to generate summary: ${e.message}</div>
-      <div class="modal-actions" style="margin-top:16px;">
-        <button class="btn btn-secondary" onclick="closeEmailModal()">Close</button>
-        <button class="btn btn-primary" onclick="generateSummary()">Retry</button>
-      </div>`;
+    document.getElementById('emailStep1').innerHTML = `<h2>📧 Email protocol</h2><div class="status error" style="display:block;margin-top:12px;">✗ Failed to generate summary: ${e.message}</div><div class="modal-actions" style="margin-top:16px;"><button class="btn btn-secondary" onclick="closeEmailModal()">Close</button><button class="btn btn-primary" onclick="generateSummary()">Retry</button></div>`;
   }
 }
 
 async function regenerateSummary() {
   document.getElementById('emailStep2').style.display = 'none';
+  document.getElementById('emailStep1').innerHTML = `<h2>📧 Email protocol</h2><p style="margin-bottom:16px;">Generating a de-identified summary using Claude.</p><div style="display:flex;align-items:center;gap:10px;color:#6b7280;font-size:13px;"><span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:#6b7280;"></span>Calling Claude API…</div>`;
   document.getElementById('emailStep1').style.display = 'block';
-  document.getElementById('emailStep1').innerHTML = `
-    <h2>📧 Email protocol</h2>
-    <p style="margin-bottom:16px;">Generating a de-identified summary using Claude. This will be reviewed before saving.</p>
-    <div style="display:flex;align-items:center;gap:10px;color:#6b7280;font-size:13px;">
-      <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:#6b7280;"></span>
-      Calling Claude API…
-    </div>`;
   await generateSummary();
 }
 
 async function confirmEmailProtocol() {
   const summaryText = document.getElementById('emailSummaryText').value.trim();
-  if (!summaryText) {
-    setStatus('emailConfirmStatus', 'error', 'Please enter a summary before confirming.');
-    return;
-  }
-  if (!submittedIncidentId) {
-    setStatus('emailConfirmStatus', 'error', 'No incident ID found — please submit the report first.');
-    return;
-  }
-
+  if (!summaryText) { setStatus('emailConfirmStatus', 'error', 'Please enter a summary before confirming.'); return; }
+  if (!submittedIncidentId) { setStatus('emailConfirmStatus', 'error', 'No incident ID found — please submit the report first.'); return; }
   const btn = document.getElementById('confirmEmailBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Saving…';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving…';
   setStatus('emailConfirmStatus', 'info', 'Updating incident record…');
-
   try {
     const res = await sbFetch(`${SUPABASE_URL}/rest/v1/incidents?id=eq.${submittedIncidentId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      method: 'PATCH', headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify({ include_in_email: true, email_summary: summaryText }),
     });
-
-    if (!res.ok) {
-      const e = await res.json();
-      throw new Error(e.message || res.statusText);
-    }
-
-    document.getElementById('emailStep2').style.display = 'none';
-    document.getElementById('emailStep3').style.display = 'block';
-    document.getElementById('commsBtn').disabled = true;
-    document.getElementById('commsBtn').textContent = '✓ Queued for digest';
-
-  } catch(e) {
-    setStatus('emailConfirmStatus', 'error', '✗ ' + e.message);
-    btn.disabled = false;
-    btn.innerHTML = '✓ Confirm & queue';
-  }
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.statusText); }
+    document.getElementById('emailStep2').style.display = 'none'; document.getElementById('emailStep3').style.display = 'block';
+    document.getElementById('commsBtn').disabled = true; document.getElementById('commsBtn').textContent = '✓ Queued for digest';
+  } catch(e) { setStatus('emailConfirmStatus', 'error', '✗ ' + e.message); btn.disabled = false; btn.innerHTML = '✓ Confirm & queue'; }
 }
+
+// ── Reset ────────────────────────────────────────────────────────
+function _resetAwardFields() {
+  _issuingInstitution = null;
+  document.getElementById('awardTitle').value = '';
+  document.getElementById('issuingInstSearch').value = '';
+  document.getElementById('issuingInstCard').classList.remove('visible');
+  document.getElementById('awardsPanel').classList.remove('visible');
+  document.getElementById('instLinkageNotice').classList.remove('visible');
+}
+
 function resetFormSilent() {
-  selectedAgent = null;
-  analysisResults = { authorised: [], risk: [], unknown: [] };
-  submittedIncidentId = null;
-  agentInput.value = '';
-  _canonicalAgent = null;
-  const matchList = document.getElementById('agentMatchList');
-  if (matchList) matchList.style.display = 'none';
+  selectedAgent = null; analysisResults = { authorised: [], risk: [], unknown: [] }; submittedIncidentId = null;
+  agentInput.value = ''; _canonicalAgent = null;
+  const matchList = document.getElementById('agentMatchList'); if (matchList) matchList.style.display = 'none';
   document.getElementById('branchPanel').style.display = 'none';
   document.getElementById('agentCard').classList.remove('visible');
   document.getElementById('agentHierarchy').style.display = 'none';
@@ -2528,32 +1692,23 @@ function resetFormSilent() {
   document.getElementById('instResults').style.display = 'none';
   document.getElementById('missingDataPanel').style.display = 'none';
   document.getElementById('missingDataPanel').innerHTML = '';
-  clearStatus('instStatus');
-  clearStatus('submitStatus');
+  clearStatus('instStatus'); clearStatus('submitStatus');
   document.getElementById('analyseBtn').disabled = true;
   document.getElementById('commsBtn').disabled = true;
   document.getElementById('commsBtn').textContent = 'Add to email protocol';
   document.getElementById('addAnotherBtn').style.display = 'none';
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = false;
-  btn.className = 'btn btn-primary';
-  btn.innerHTML = 'Submit report';
-  _selectedAccredIds = new Set();
-  if (_accredLoaded) renderAccredOptions();
-  renderAccredTags();
-  updateAccredTriggerLabel();
+  const btn = document.getElementById('submitBtn'); btn.disabled = false; btn.className = 'btn btn-primary'; btn.innerHTML = 'Submit report';
+  _selectedAccredIds = new Set(); if (_accredLoaded) renderAccredOptions(); renderAccredTags(); updateAccredTriggerLabel();
+  _resetAwardFields();
   updatePreview();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 function resetForm() {
   if (!confirm('Reset the form?')) return;
-  selectedAgent = null;
-  analysisResults = { authorised: [], risk: [], unknown: [] };
-  submittedIncidentId = null;
-  agentInput.value = '';
-  _canonicalAgent = null;
-  const matchList = document.getElementById('agentMatchList');
-  if (matchList) matchList.style.display = 'none';
+  selectedAgent = null; analysisResults = { authorised: [], risk: [], unknown: [] }; submittedIncidentId = null;
+  agentInput.value = ''; _canonicalAgent = null;
+  const matchList = document.getElementById('agentMatchList'); if (matchList) matchList.style.display = 'none';
   document.getElementById('branchPanel').style.display = 'none';
   document.getElementById('agentCard').classList.remove('visible');
   document.getElementById('agentHierarchy').style.display = 'none';
@@ -2576,18 +1731,12 @@ function resetForm() {
   document.getElementById('instResults').style.display = 'none';
   document.getElementById('missingDataPanel').style.display = 'none';
   document.getElementById('missingDataPanel').innerHTML = '';
-  clearStatus('instStatus');
-  clearStatus('submitStatus');
+  clearStatus('instStatus'); clearStatus('submitStatus');
   document.getElementById('analyseBtn').disabled = true;
   document.getElementById('commsBtn').disabled = true;
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = false;
-  btn.className = 'btn btn-primary';
-  btn.innerHTML = 'Submit report';
-  _selectedAccredIds = new Set();
-  if (_accredLoaded) renderAccredOptions();
-  renderAccredTags();
-  updateAccredTriggerLabel();
+  const btn = document.getElementById('submitBtn'); btn.disabled = false; btn.className = 'btn btn-primary'; btn.innerHTML = 'Submit report';
+  _selectedAccredIds = new Set(); if (_accredLoaded) renderAccredOptions(); renderAccredTags(); updateAccredTriggerLabel();
+  _resetAwardFields();
   updatePreview();
 }
 
@@ -2597,163 +1746,91 @@ function sbFetch(url, opts = {}) {
   return fetch(url, { ...opts, headers: { 'apikey': key, 'Authorization': `Bearer ${key}`, ...(opts.headers || {}) } });
 }
 
-function setStatus(id, type, msg) {
-  const el = document.getElementById(id);
-  el.className = `status ${type}`;
-  el.textContent = msg;
-}
-
-function clearStatus(id) {
-  const el = document.getElementById(id);
-  el.className = 'status';
-  el.textContent = '';
-}
+function setStatus(id, type, msg) { const el = document.getElementById(id); el.className = `status ${type}`; el.textContent = msg; }
+function clearStatus(id) { const el = document.getElementById(id); el.className = 'status'; el.textContent = ''; }
 
 updatePreview();
 
 // ── Accreditations ───────────────────────────────────────────────
-
 async function loadAccreditations() {
   if (_accredLoaded) return;
   try {
     const res = await sbFetch(`${SUPABASE_URL}/rest/v1/accreditations?select=id,name&order=name`);
     const data = await res.json();
-    _allAccreditations = data || [];
-    _accredLoaded = true;
-    renderAccredOptions();
-  } catch(e) {
-    document.getElementById('accredLoading').textContent = 'Failed to load accreditations.';
-  }
+    _allAccreditations = data || []; _accredLoaded = true; renderAccredOptions();
+  } catch(e) { document.getElementById('accredLoading').textContent = 'Failed to load accreditations.'; }
 }
 
 function updateAccredTriggerLabel() {
   const label = document.getElementById('accredTriggerLabel');
-  if (_selectedAccredIds.size === 0) {
-    label.textContent = 'Select accreditations…';
-    label.className = 'placeholder';
-  } else {
-    label.textContent = `${_selectedAccredIds.size} selected`;
-    label.className = '';
-  }
+  if (_selectedAccredIds.size === 0) { label.textContent = 'Select accreditations…'; label.className = 'placeholder'; }
+  else { label.textContent = `${_selectedAccredIds.size} selected`; label.className = ''; }
 }
 
 function renderAccredTags() {
   const container = document.getElementById('accredSelectedTags');
   const selected = _allAccreditations.filter(a => _selectedAccredIds.has(String(a.id)));
   container.innerHTML = selected.map(a =>
-    `<span class="accred-tag">${a.name}
-      <button class="accred-tag-remove" data-remove-accred="${a.id}" title="Remove">×</button>
-    </span>`
-  ).join('');
+    `<span class="accred-tag">${a.name}<button class="accred-tag-remove" data-remove-accred="${a.id}" title="Remove">×</button></span>`).join('');
 }
 
 function updateAccredPreview() {
-  const wrap = document.getElementById('sum-accred-wrap');
-  const val = document.getElementById('sum-accred');
-  if (_selectedAccredIds.size === 0) {
-    wrap.style.display = 'none';
-  } else {
-    const names = _allAccreditations.filter(a => _selectedAccredIds.has(String(a.id))).map(a => a.name);
-    val.textContent = names.join(', ');
-    wrap.style.display = 'block';
-  }
+  const wrap = document.getElementById('sum-accred-wrap'), val = document.getElementById('sum-accred');
+  if (_selectedAccredIds.size === 0) { wrap.style.display = 'none'; }
+  else { val.textContent = _allAccreditations.filter(a => _selectedAccredIds.has(String(a.id))).map(a => a.name).join(', '); wrap.style.display = 'block'; }
 }
 
 function toggleAccred(id) {
   const sid = String(id);
-  if (_selectedAccredIds.has(sid)) _selectedAccredIds.delete(sid);
-  else _selectedAccredIds.add(sid);
-  renderAccredOptions();
-  renderAccredTags();
-  updateAccredTriggerLabel();
-  updateAccredPreview();
+  if (_selectedAccredIds.has(sid)) _selectedAccredIds.delete(sid); else _selectedAccredIds.add(sid);
+  renderAccredOptions(); renderAccredTags(); updateAccredTriggerLabel(); updateAccredPreview();
 }
 
 function renderAccredOptions() {
   const dropdown = document.getElementById('accredDropdown');
-  if (!_allAccreditations.length) {
-    dropdown.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:#9ca3af;">No accreditations found.</div>';
-    return;
-  }
+  if (!_allAccreditations.length) { dropdown.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:#9ca3af;">No accreditations found.</div>'; return; }
   dropdown.innerHTML = _allAccreditations.map(a => {
-    const sid = String(a.id);
-    const checked = _selectedAccredIds.has(sid);
+    const sid = String(a.id), checked = _selectedAccredIds.has(sid);
     return `<div class="accred-option${checked ? ' selected' : ''}" data-accred-id="${sid}">
       <div class="accred-checkbox">${checked ? '<svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3l2.5 2.5L8 1" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}</div>
-      <span>${a.name}</span>
-    </div>`;
+      <span>${a.name}</span></div>`;
   }).join('');
 }
 
 function initAccredDropdown() {
-  const trigger = document.getElementById('accredTrigger');
-  const dropdown = document.getElementById('accredDropdown');
-
+  const trigger = document.getElementById('accredTrigger'), dropdown = document.getElementById('accredDropdown');
   trigger.addEventListener('click', function(e) {
     e.stopPropagation();
     const isOpen = dropdown.classList.contains('open');
-    dropdown.classList.toggle('open', !isOpen);
-    trigger.classList.toggle('open', !isOpen);
+    dropdown.classList.toggle('open', !isOpen); trigger.classList.toggle('open', !isOpen);
     if (!isOpen && !_accredLoaded) loadAccreditations();
   });
-
   dropdown.addEventListener('click', function(e) {
     e.stopPropagation();
     const option = e.target.closest('[data-accred-id]');
-    if (!option) return;
-    toggleAccred(option.getAttribute('data-accred-id'));
+    if (!option) return; toggleAccred(option.getAttribute('data-accred-id'));
   });
-
   document.addEventListener('click', function(e) {
-    if (!e.target.closest('#accredTrigger') && !e.target.closest('#accredDropdown')) {
-      dropdown.classList.remove('open');
-      trigger.classList.remove('open');
-    }
+    if (!e.target.closest('#accredTrigger') && !e.target.closest('#accredDropdown')) { dropdown.classList.remove('open'); trigger.classList.remove('open'); }
     const removeBtn = e.target.closest('[data-remove-accred]');
     if (removeBtn) toggleAccred(removeBtn.getAttribute('data-remove-accred'));
   });
 }
 
 // ── Institution tag rendering ────────────────────────────────────
-
 function renderInstTags() {
   const container = document.getElementById('instTags');
   container.innerHTML = [
     ...analysisResults.authorised.map((i, idx) =>
-      `<span class="inst-tag auth" style="padding-right:6px;">
-        <span class="dot green"></span>${i.institutionName}
-        <button data-remove-auth="${idx}" title="Remove" style="background:none;border:none;color:#86efac;cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 4px;display:inline-flex;align-items:center;">×</button>
-      </span>`),
+      `<span class="inst-tag auth" style="padding-right:6px;"><span class="dot green"></span>${i.institutionName}<button data-remove-auth="${idx}" title="Remove" style="background:none;border:none;color:#86efac;cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 4px;display:inline-flex;align-items:center;">×</button></span>`),
     ...analysisResults.risk.map((i, idx) =>
-      `<span class="inst-tag risk" style="padding-right:6px;">
-        <span class="dot red"></span>${i.institutionName}
-        <button data-remove-risk="${idx}" title="Remove" style="background:none;border:none;color:#fca5a5;cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 4px;display:inline-flex;align-items:center;">×</button>
-      </span>`),
+      `<span class="inst-tag risk" style="padding-right:6px;"><span class="dot red"></span>${i.institutionName}<button data-remove-risk="${idx}" title="Remove" style="background:none;border:none;color:#fca5a5;cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 4px;display:inline-flex;align-items:center;">×</button></span>`),
     ...analysisResults.unknown.map((i, idx) =>
-      `<span class="inst-tag unknown" style="padding-right:6px;">
-        <span class="dot grey"></span>${i.name}
-        <button data-remove-unknown="${idx}" title="Remove" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 4px;display:inline-flex;align-items:center;">×</button>
-      </span>`),
+      `<span class="inst-tag unknown" style="padding-right:6px;"><span class="dot grey"></span>${i.name}<button data-remove-unknown="${idx}" title="Remove" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 4px;display:inline-flex;align-items:center;">×</button></span>`),
   ].join('');
-
-  container.querySelectorAll('[data-remove-auth]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      analysisResults.authorised.splice(parseInt(btn.getAttribute('data-remove-auth')), 1);
-      renderInstTags(); updatePreview();
-    });
-  });
-  container.querySelectorAll('[data-remove-risk]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      analysisResults.risk.splice(parseInt(btn.getAttribute('data-remove-risk')), 1);
-      renderInstTags(); updatePreview();
-    });
-  });
-  container.querySelectorAll('[data-remove-unknown]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      analysisResults.unknown.splice(parseInt(btn.getAttribute('data-remove-unknown')), 1);
-      renderInstTags(); updatePreview();
-    });
-  });
+  container.querySelectorAll('[data-remove-auth]').forEach(btn => btn.addEventListener('click', () => { analysisResults.authorised.splice(parseInt(btn.getAttribute('data-remove-auth')), 1); renderInstTags(); updatePreview(); }));
+  container.querySelectorAll('[data-remove-risk]').forEach(btn => btn.addEventListener('click', () => { analysisResults.risk.splice(parseInt(btn.getAttribute('data-remove-risk')), 1); renderInstTags(); updatePreview(); }));
+  container.querySelectorAll('[data-remove-unknown]').forEach(btn => btn.addEventListener('click', () => { analysisResults.unknown.splice(parseInt(btn.getAttribute('data-remove-unknown')), 1); renderInstTags(); updatePreview(); }));
 }
 
 // ── Missing data panel ───────────────────────────────────────────
@@ -2761,164 +1838,94 @@ function renderMissingPanel() {
   const allFound = [...analysisResults.authorised, ...analysisResults.risk];
   const missing = allFound.filter(i => !i.contact_email || !i.salutation || !i.status);
   const missingPanel = document.getElementById('missingDataPanel');
-
   if (missing.length > 0) {
     missingPanel.style.display = 'block';
-    missingPanel.innerHTML = `
-      <div class="missing-panel">
-        <div class="missing-panel-header" style="justify-content:space-between;">
-          <span>⚠️ ${missing.length} institution(s) have missing contact data — fill in before sending comms</span>
-          <button id="refreshMissingPanelBtn" style="background:none;border:1px solid #fde68a;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:500;color:#92400e;cursor:pointer;font-family:inherit;flex-shrink:0;">↺ Refresh</button>
-        </div>
-        ${missing.map(inst => `
-          <div class="missing-inst-row" id="missing-row-${inst.institutionId}">
-            <div class="missing-inst-name">
-              ${inst.institutionName}
-              <span class="inst-tag ${inst.isNonClient ? 'risk' : 'auth'}" style="font-size:10px;padding:2px 7px;">
-                ${inst.status || 'No status'}
-              </span>
-            </div>
-            <div class="missing-fields-grid">
-              <div class="missing-field">
-                <label>Contact email</label>
-                <input type="email" id="edit-email-${inst.institutionId}" value="${inst.contact_email || ''}"
-                  placeholder="email@institution.edu"
-                  class="${inst.contact_email ? 'filled' : ''}"
-                  data-markfilled="true" />
-              </div>
-              <div class="missing-field">
-                <label>Salutation</label>
-                <input type="text" id="edit-sal-${inst.institutionId}" value="${inst.salutation || inst.institutionName + ' Team'}"
-                  placeholder="Dear Risk Team"
-                  class="filled"
-                  data-markfilled="true" />
-              </div>
-              <div class="missing-field">
-                <label>Status</label>
-                <select id="edit-status-${inst.institutionId}"
-                  class="${inst.status ? 'filled' : ''}"
-                  data-markfilled="true">
-                  <option value="">Select…</option>
-                  <option ${inst.status==='Client'?'selected':''}>Client</option>
-                  <option ${inst.status==='Cold'?'selected':''}>Cold</option>
-                  <option ${inst.status==='Warm'?'selected':''}>Warm</option>
-                  <option ${inst.status==='Former Client'?'selected':''}>Former Client</option>
-                  <option ${inst.status==='Trial Over'?'selected':''}>Trial Over</option>
-                  <option ${inst.status==='Unsubscribed'?'selected':''}>Unsubscribed</option>
-                </select>
-              </div>
-            </div>
-            <button class="btn-save-inst" data-institution-id="${inst.institutionId}">
-              Save changes
-            </button>
-            <div class="save-inst-status" id="save-status-${inst.institutionId}"></div>
-          </div>
-        `).join('')}
+    missingPanel.innerHTML = `<div class="missing-panel">
+      <div class="missing-panel-header" style="justify-content:space-between;">
+        <span>⚠️ ${missing.length} institution(s) have missing contact data — fill in before sending comms</span>
+        <button id="refreshMissingPanelBtn" style="background:none;border:1px solid #fde68a;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:500;color:#92400e;cursor:pointer;font-family:inherit;flex-shrink:0;">↺ Refresh</button>
       </div>
-    `;
-  } else {
-    missingPanel.style.display = 'none';
-    missingPanel.innerHTML = '';
-  }
+      ${missing.map(inst => `
+        <div class="missing-inst-row" id="missing-row-${inst.institutionId}">
+          <div class="missing-inst-name">${inst.institutionName}<span class="inst-tag ${inst.isNonClient ? 'risk' : 'auth'}" style="font-size:10px;padding:2px 7px;">${inst.status || 'No status'}</span></div>
+          <div class="missing-fields-grid">
+            <div class="missing-field"><label>Contact email</label><input type="email" id="edit-email-${inst.institutionId}" value="${inst.contact_email || ''}" placeholder="email@institution.edu" class="${inst.contact_email ? 'filled' : ''}" data-markfilled="true" /></div>
+            <div class="missing-field"><label>Salutation</label><input type="text" id="edit-sal-${inst.institutionId}" value="${inst.salutation || inst.institutionName + ' Team'}" placeholder="Dear Risk Team" class="filled" data-markfilled="true" /></div>
+            <div class="missing-field"><label>Status</label>
+              <select id="edit-status-${inst.institutionId}" class="${inst.status ? 'filled' : ''}" data-markfilled="true">
+                <option value="">Select…</option>
+                <option ${inst.status==='Client'?'selected':''}>Client</option>
+                <option ${inst.status==='Cold'?'selected':''}>Cold</option>
+                <option ${inst.status==='Warm'?'selected':''}>Warm</option>
+                <option ${inst.status==='Former Client'?'selected':''}>Former Client</option>
+                <option ${inst.status==='Trial Over'?'selected':''}>Trial Over</option>
+                <option ${inst.status==='Unsubscribed'?'selected':''}>Unsubscribed</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-save-inst" data-institution-id="${inst.institutionId}">Save changes</button>
+          <div class="save-inst-status" id="save-status-${inst.institutionId}"></div>
+        </div>`).join('')}
+    </div>`;
+  } else { missingPanel.style.display = 'none'; missingPanel.innerHTML = ''; }
 }
 
 // ── Manual institution add ────────────────────────────────────────
 let _instAddTimeout = null;
 
 function initInstManualAdd() {
-  const input = document.getElementById('instManualSearch');
-  const drop = document.getElementById('instManualDrop');
+  const input = document.getElementById('instManualSearch'), drop = document.getElementById('instManualDrop');
   if (!input) return;
-
   input.addEventListener('input', () => {
     clearTimeout(_instAddTimeout);
     const q = input.value.trim();
     if (q.length < 2) { drop.style.display = 'none'; return; }
     _instAddTimeout = setTimeout(async () => {
-      const res = await sbFetch(
-        `${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,contact_email,salutation,status,is_client&order=name&limit=10`
-      );
+      const res = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,contact_email,salutation,status,is_client&order=name&limit=10`);
       const data = await res.json();
       if (!data || !data.length) { drop.style.display = 'none'; return; }
       drop.innerHTML = data.map((inst, i) =>
         `<div class="suggestion-item" data-inst-add-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:13px;">
           <div style="font-weight:500;color:#1a1d23;">${inst.name}</div>
           <div style="font-size:11px;color:#9ca3af;">${inst.status || 'Unknown status'}</div>
-        </div>`
-      ).join('');
-      drop._results = data;
-      drop.style.display = 'block';
+        </div>`).join('');
+      drop._results = data; drop.style.display = 'block';
     }, 250);
   });
-
   drop.addEventListener('click', async e => {
     const item = e.target.closest('[data-inst-add-index]');
     if (!item) return;
     const inst = drop._results[parseInt(item.getAttribute('data-inst-add-index'))];
     if (!inst) return;
-
-    const alreadyIn = [
-      ...analysisResults.authorised,
-      ...analysisResults.risk,
-    ].some(i => i.institutionId === inst.id);
+    const alreadyIn = [...analysisResults.authorised, ...analysisResults.risk].some(i => i.institutionId === inst.id);
     if (alreadyIn) { input.value = ''; drop.style.display = 'none'; return; }
-
     const NON_CLIENT_STATUSES = ['Cold', 'Warm', 'Former Client', 'Trial Over', 'Unsubscribed', null];
     const canonicalId = selectedAgent ? (selectedAgent.canonical_agent_id || selectedAgent.id) : null;
     let isAuthorised = false;
-
     if (canonicalId) {
-      const familyRes = await sbFetch(
-        `${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${canonicalId}&select=id`
-      );
+      const familyRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${canonicalId}&select=id`);
       const familyData = await familyRes.json();
       const agentIds = new Set([selectedAgent.id, canonicalId]);
       (familyData || []).forEach(a => agentIds.add(a.id));
-      const idList = [...agentIds].join(',');
-
-      const linkRes = await sbFetch(
-        `${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${idList})&institution_id=eq.${inst.id}&link_type=eq.authorised&select=agent_id&limit=1`
-      );
+      const linkRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${[...agentIds].join(',')})&institution_id=eq.${inst.id}&link_type=eq.authorised&select=agent_id&limit=1`);
       const linkData = await linkRes.json();
       if (linkData && linkData.length) isAuthorised = true;
     }
-
-    const entry = {
-      name: inst.name,
-      institutionId: inst.id,
-      institutionName: inst.name,
-      contact_email: inst.contact_email,
-      salutation: inst.salutation,
-      status: inst.status,
-      is_client: inst.is_client,
-      isNonClient: !inst.is_client || NON_CLIENT_STATUSES.includes(inst.status),
-    };
-
-    if (isAuthorised) analysisResults.authorised.push(entry);
-    else analysisResults.risk.push(entry);
-
-    renderInstTags();
-    renderMissingPanel();
-    updatePreview();
-    input.value = '';
-    drop.style.display = 'none';
+    const entry = { name: inst.name, institutionId: inst.id, institutionName: inst.name, contact_email: inst.contact_email, salutation: inst.salutation, status: inst.status, is_client: inst.is_client, isNonClient: !inst.is_client || NON_CLIENT_STATUSES.includes(inst.status) };
+    if (isAuthorised) analysisResults.authorised.push(entry); else analysisResults.risk.push(entry);
+    renderInstTags(); renderMissingPanel(); updatePreview();
+    input.value = ''; drop.style.display = 'none';
   });
-
-  document.addEventListener('click', e => {
-    if (!e.target.closest('#instManualSearch') && !e.target.closest('#instManualDrop'))
-      drop.style.display = 'none';
-  });
+  document.addEventListener('click', e => { if (!e.target.closest('#instManualSearch') && !e.target.closest('#instManualDrop')) drop.style.display = 'none'; });
 }
 
 // ── Ticker preview ───────────────────────────────────────────────
 function updateTickerPreview() {
   const panel = document.getElementById('tickerPreview');
   if (!panel || panel.closest('#otherClientsPanel').style.display === 'none') return;
-
-const agentName = selectedAgent ? selectedAgent.agency_name : null;
+  const agentName = selectedAgent ? selectedAgent.agency_name : null;
   const titleEl = document.getElementById('tickerTitle');
   const reportType = document.getElementById('reportType').value;
-
   const REPORT_TYPE_META = {
     'Awards & Recognition': { prefix: 'Awards & recognition —', icon: '🏆' },
     'Kudos':                { prefix: 'Kudos —',               icon: '👏' },
@@ -2930,76 +1937,50 @@ const agentName = selectedAgent ? selectedAgent.agency_name : null;
     'Privacy Flag':         { prefix: 'Privacy flag —',        icon: '🔒' },
     'Incident Report':      { prefix: 'New incident report —', icon: '⚠️' },
   };
-
   const meta = REPORT_TYPE_META[reportType] || { prefix: 'New incident report —', icon: '⚠️' };
   const iconEl = document.querySelector('#tickerPreview [style*="border-radius:8px;background:#fef2f2"]');
   if (iconEl) iconEl.textContent = meta.icon;
 
-  if (agentName) {
-    titleEl.textContent = meta.prefix + ' ' + agentName;
-    titleEl.style.color = '#1a1d23';
-  } else {
-    titleEl.innerHTML = meta.prefix + ' <em style="color:#9ca3af;font-style:italic;">(agent name)</em>';
-  }
+  // For Awards & Recognition, include award title in ticker preview
+  const awardTitle = document.getElementById('awardTitle') ? document.getElementById('awardTitle').value.trim() : '';
+  const titleSuffix = (reportType === 'Awards & Recognition' && awardTitle)
+    ? awardTitle + ' — ' + (agentName || '(agent name)')
+    : agentName;
+
+  if (titleSuffix) { titleEl.textContent = meta.prefix + ' ' + titleSuffix; titleEl.style.color = '#1a1d23'; }
+  else { titleEl.innerHTML = meta.prefix + ' <em style="color:#9ca3af;font-style:italic;">(agent name)</em>'; }
 
   const sw = parseInt(document.getElementById('severityWeight').value, 10);
   const badge = document.getElementById('tickerSeverityBadge');
   if (!isNaN(sw)) {
-  if (sw >= 70) {
-      badge.textContent = 'High severity';
-      badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;';
-    } else if (sw >= 40) {
-      badge.textContent = 'Medium severity';
-      badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#fffbeb;color:#92400e;border:1px solid #fde68a;';
-    } else if (sw >= 5) {
-      badge.textContent = 'Low severity';
-      badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;';
-    } else {
-      badge.textContent = 'Informational';
-      badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;';
-    }
-  } else {
-    badge.textContent = 'No severity set';
-    badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;';
-  }
+    if (sw >= 70) { badge.textContent = 'High severity'; badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;'; }
+    else if (sw >= 40) { badge.textContent = 'Medium severity'; badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#fffbeb;color:#92400e;border:1px solid #fde68a;'; }
+    else if (sw >= 5) { badge.textContent = 'Low severity'; badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;'; }
+    else { badge.textContent = 'Informational'; badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;'; }
+  } else { badge.textContent = 'No severity set'; badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;'; }
 
   const url = document.getElementById('sourceUrl').value.trim();
-  const linkLine = document.getElementById('tickerLinkLine');
-  const linkPreview = document.getElementById('tickerLinkPreview');
-  const linkAnchor = document.getElementById('tickerLinkAnchor');
-  if (url && url.startsWith('http')) {
-    linkLine.style.display = 'none';
-    linkPreview.style.display = 'block';
-    linkAnchor.href = url;
-    linkAnchor.title = url;
-  } else {
-    linkLine.style.display = 'block';
-    linkPreview.style.display = 'none';
-  }
+  const linkLine = document.getElementById('tickerLinkLine'), linkPreview = document.getElementById('tickerLinkPreview'), linkAnchor = document.getElementById('tickerLinkAnchor');
+  if (url && url.startsWith('http')) { linkLine.style.display = 'none'; linkPreview.style.display = 'block'; linkAnchor.href = url; linkAnchor.title = url; }
+  else { linkLine.style.display = 'block'; linkPreview.style.display = 'none'; }
 }
 
 // ── Wire up all event listeners ──────────────────────────────────
-
 document.getElementById('parseHandoffBtn').addEventListener('click', parseHandoff);
 document.getElementById('clearHandoffBtn').addEventListener('click', clearHandoff);
-
 document.getElementById('agentLookupBtn').addEventListener('click', lookupAgent);
 document.getElementById('createAgentBtn').addEventListener('click', createAgent);
 document.getElementById('applyBranchBtn').addEventListener('click', applyBranch);
 document.getElementById('skipBranchBtn').addEventListener('click', skipBranch);
 document.getElementById('clearParentBtn').addEventListener('click', clearParentAgent);
-
 document.getElementById('description').addEventListener('input', onDescriptionInput);
 document.getElementById('generateSummaryBtn').addEventListener('click', generateInlineSummary);
-
 document.getElementById('analyseBtn').addEventListener('click', analyseInstitutions);
-
 document.getElementById('commsBtn').addEventListener('click', openEmailProtocol);
 document.getElementById('cancelEmailBtn').addEventListener('click', closeEmailModal);
 document.getElementById('regenerateBtn').addEventListener('click', regenerateSummary);
 document.getElementById('confirmEmailBtn').addEventListener('click', confirmEmailProtocol);
 document.getElementById('closeEmailBtn').addEventListener('click', closeEmailModal);
-
 document.getElementById('resetFormBtn').addEventListener('click', resetForm);
 document.getElementById('addAnotherBtn').addEventListener('click', () => { resetFormSilent(); });
 document.getElementById('submitBtn').addEventListener('click', submitIncident);
@@ -3008,6 +1989,7 @@ initParentAgentSearch();
 initBranchSearch();
 initAccredDropdown();
 initInstManualAdd();
+initIssuingInstSearch();
 </script>
 </body>
 </html>
