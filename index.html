@@ -1001,6 +1001,8 @@ function toggleAwardsPanel() {
   const isAward = document.getElementById('reportType').value === 'Awards & Recognition';
   document.getElementById('awardsPanel').classList.toggle('visible', isAward);
   document.getElementById('instLinkageNotice').classList.toggle('visible', isAward);
+  // Hide email protocol banner for awards — client institutions notified via ticker automatically
+  document.getElementById('emailProtocolBanner').style.display = isAward ? 'none' : '';
 }
 
 function initIssuingInstSearch() {
@@ -1664,6 +1666,7 @@ function _resetAwardFields() {
   document.getElementById('issuingInstCard').classList.remove('visible');
   document.getElementById('awardsPanel').classList.remove('visible');
   document.getElementById('instLinkageNotice').classList.remove('visible');
+  document.getElementById('emailProtocolBanner').style.display = '';
 }
 
 function resetFormSilent() {
