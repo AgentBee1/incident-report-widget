@@ -994,6 +994,33 @@ function showParseResult(type, msg) {
   el.className = `parse-result ${type}`; el.style.whiteSpace = 'pre-line'; el.textContent = msg;
 }
 
+
+// ── Auto-populate award description ──────────────────────────────
+function autoPopulateAwardDescription() {
+  const reportType = document.getElementById('reportType').value;
+  if (reportType !== 'Awards & Recognition') return;
+  if (!selectedAgent || !_issuingInstitution) return;
+
+  const agentName = selectedAgent.agency_name;
+  const instName = _issuingInstitution.name;
+  const text = `${agentName} received an award from ${instName}.`;
+
+  // Only auto-populate if the field is empty or still has the previous auto-text
+  const descEl = document.getElementById('description');
+  const summaryEl = document.getElementById('deidentifiedSummary');
+
+  if (!descEl.value.trim() || descEl.dataset.autoPopulated === 'true') {
+    descEl.value = text;
+    descEl.dataset.autoPopulated = 'true';
+    onDescriptionInput();
+  }
+
+  if (!summaryEl.value.trim() || summaryEl.dataset.autoPopulated === 'true') {
+    summaryEl.value = text;
+    summaryEl.dataset.autoPopulated = 'true';
+  }
+}
+
 // ── Awards & Recognition panel ───────────────────────────────────
 let _issuingInstSearchTimeout = null;
 
@@ -1041,6 +1068,7 @@ function initIssuingInstSearch() {
     drop.style.display = 'none';
     document.getElementById('issuingInstName').textContent = inst.name;
     document.getElementById('issuingInstCard').classList.add('visible');
+    autoPopulateAwardDescription();
   });
 
   document.getElementById('clearIssuingInstBtn').addEventListener('click', () => {
@@ -1142,6 +1170,8 @@ function selectAgent(agent) {
 
 function resolveAgent(agent) {
   selectedAgent = agent;
+  // Trigger auto-populate if issuing institution already selected
+  if (_issuingInstitution) autoPopulateAwardDescription();
   document.getElementById('agentCardName').textContent = agent.agency_name;
   document.getElementById('agentCardMeta').textContent = [agent.jurisdiction, agent.country].filter(Boolean).join(' · ') + (agent.risk_score != null ? ' · Score: ' + agent.risk_score : '');
   document.getElementById('agentCardTier').textContent = agent.risk_tier || 'Unknown';
@@ -1675,6 +1705,10 @@ function _resetAwardFields() {
   document.getElementById('awardsPanel').classList.remove('visible');
   document.getElementById('instLinkageNotice').classList.remove('visible');
   document.getElementById('emailProtocolBanner').style.display = '';
+  const descEl = document.getElementById('description');
+  const summaryEl = document.getElementById('deidentifiedSummary');
+  descEl.dataset.autoPopulated = 'false';
+  summaryEl.dataset.autoPopulated = 'false';
 }
 
 function resetFormSilent() {
@@ -1984,7 +2018,11 @@ document.getElementById('createAgentBtn').addEventListener('click', createAgent)
 document.getElementById('applyBranchBtn').addEventListener('click', applyBranch);
 document.getElementById('skipBranchBtn').addEventListener('click', skipBranch);
 document.getElementById('clearParentBtn').addEventListener('click', clearParentAgent);
-document.getElementById('description').addEventListener('input', onDescriptionInput);
+document.getElementById('description').addEventListener('input', function() {
+  onDescriptionInput();
+  // Mark as manually edited so auto-populate won't overwrite
+  this.dataset.autoPopulated = 'false';
+});
 document.getElementById('generateSummaryBtn').addEventListener('click', generateInlineSummary);
 document.getElementById('analyseBtn').addEventListener('click', analyseInstitutions);
 document.getElementById('commsBtn').addEventListener('click', openEmailProtocol);
