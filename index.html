@@ -95,8 +95,15 @@
     }
     .suggestion-item:last-child { border-bottom: none; }
     .suggestion-item:hover { background: #f9fafb; }
-    .sug-name { font-size: 13px; font-weight: 500; color: #1a1d23; }
+    .sug-name { font-size: 13px; font-weight: 500; color: #1a1d23; display: flex; align-items: center; gap: 6px; }
     .sug-meta { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+    .entity-badge {
+      display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
+      padding: 1.5px 6px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
+    }
+    .entity-badge.canonical { background: #eef2ff; color: #4338ca; border: 1px solid #e0e7ff; }
+    .entity-badge.branch { background: #f9fafb; color: #6b7280; border: 1px solid #e5e7eb; }
+    .sug-parent-of { font-size: 10px; color: #9ca3af; margin-top: 1px; }
 
     .agent-resolved {
       display: none; align-items: center; gap: 12px; padding: 12px 14px;
@@ -1123,18 +1130,55 @@ let _suggestionAgents = [];
 async function fetchSuggestions(q) {
   try {
     const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id&limit=8&order=agency_name`);
-    renderSuggestions(await res.json());
+    await renderSuggestions(await res.json());
   } catch(e) {}
 }
 
-function renderSuggestions(items) {
+function escAgentName(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Given a list of agent rows (each possibly carrying canonical_agent_id), resolve
+// the display name of every referenced canonical/parent, even ones not present
+// in the list itself (e.g. a branch matched the search but its parent didn't).
+async function resolveParentNames(items) {
+  const names = {};
+  items.forEach(a => { if (!a.canonical_agent_id) names[a.id] = a.agency_name; });
+  const missingIds = [...new Set(items.filter(a => a.canonical_agent_id).map(a => a.canonical_agent_id))]
+    .filter(id => !names[id]);
+  if (!missingIds.length) return names;
+  try {
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=in.(${missingIds.join(',')})&select=id,agency_name`);
+    (await res.json() || []).forEach(p => { names[p.id] = p.agency_name; });
+  } catch(e) {}
+  return names;
+}
+
+// Renders the canonical/branch badge + (for branches) the parent name line
+// used underneath an agent row in search dropdowns.
+function agentEntityMarkup(a, parentNames) {
+  if (!a.canonical_agent_id) {
+    return { badge: `<span class="entity-badge canonical">Canonical</span>`, sub: '' };
+  }
+  const parentName = parentNames[a.canonical_agent_id];
+  return {
+    badge: `<span class="entity-badge branch">Branch</span>`,
+    sub: `<div class="sug-parent-of">↳ of ${escAgentName(parentName || 'unknown parent')}</div>`
+  };
+}
+
+async function renderSuggestions(items) {
   if (!items || !items.length) { closeSuggestions(); return; }
   _suggestionAgents = items;
-  suggestionsEl.innerHTML = items.map((a, i) =>
-    `<div class="suggestion-item" data-agent-index="${i}">
-      <div class="sug-name">${a.agency_name}</div>
+  const parentNames = await resolveParentNames(items);
+  suggestionsEl.innerHTML = items.map((a, i) => {
+    const { badge, sub } = agentEntityMarkup(a, parentNames);
+    return `<div class="suggestion-item" data-agent-index="${i}">
+      <div class="sug-name">${escAgentName(a.agency_name)} ${badge}</div>
       <div class="sug-meta">${[a.jurisdiction, a.country].filter(Boolean).join(' · ')}${a.risk_tier ? ' · ' + a.risk_tier + ' tier' : ''}</div>
-    </div>`).join('');
+      ${sub}
+    </div>`;
+  }).join('');
   suggestionsEl.classList.add('open');
 }
 
@@ -1279,11 +1323,16 @@ async function lookupAgent() {
     if (!data.length) { setStatus('agentStatus', 'error', 'No agent found matching that name.'); document.getElementById('newAgentName').value = q; document.getElementById('newAgentPanel').classList.add('visible'); return; }
     if (data.length === 1) { selectAgent(data[0]); clearStatus('agentStatus'); return; }
     _suggestionAgents = data;
-    const matchHtml = data.map((a, i) => `
+    const parentNames = await resolveParentNames(data);
+    const matchHtml = data.map((a, i) => {
+      const { badge, sub } = agentEntityMarkup(a, parentNames);
+      return `
       <div data-agent-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;transition:background 0.1s;">
-        <div style="font-size:13px;font-weight:500;color:#1a1d23;">${a.agency_name}</div>
+        <div style="font-size:13px;font-weight:500;color:#1a1d23;display:flex;align-items:center;gap:6px;">${escAgentName(a.agency_name)} ${badge}</div>
         <div style="font-size:11px;color:#9ca3af;margin-top:2px;">${[a.jurisdiction, a.country].filter(Boolean).join(' · ')}${a.risk_tier ? ' · ' + a.risk_tier + ' tier' : ''}</div>
-      </div>`).join('');
+        ${sub}
+      </div>`;
+    }).join('');
     setStatus('agentStatus', 'info', `${data.length} matches found — select one below:`);
     let matchList = document.getElementById('agentMatchList');
     if (!matchList) {
