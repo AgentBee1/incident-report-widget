@@ -1197,6 +1197,7 @@ let _canonicalAgent = null;
 function selectAgent(agent) {
   _canonicalAgent = agent;
   _selectedBranchAgent = null;
+  window._authorisedClientsPromise = null;
   agentInput.value = agent.agency_name;
   const matchList = document.getElementById('agentMatchList');
   if (matchList) matchList.style.display = 'none';
@@ -1223,7 +1224,7 @@ function resolveAgent(agent) {
   document.getElementById('branchPanel').style.display = 'none';
   document.getElementById('analyseBtn').disabled = false;
   updatePreview(); updateTickerPreview();
-  lookupAuthorisedClients(agent.id);
+  window._authorisedClientsPromise = lookupAuthorisedClients(agent.id);
   showAgentHierarchy(agent);
 }
 
@@ -1553,6 +1554,16 @@ async function submitIncident() {
       if (!issuerLinkRes.ok) console.warn('Issuing institution link failed');
     }
 
+    // The authorised-institutions lookup (lookupAuthorisedClients) runs in the background
+    // from the moment an agent is resolved — it is NOT awaited there so the form stays
+    // responsive. If it hasn't finished by the time Submit is clicked (common on the
+    // Awards flow, which has fewer fields to fill in first), window._authorisedClientInstitutions
+    // is still empty and the incident/award gets saved with no institution links at all.
+    // Wait for it here before reading the result.
+    if (window._authorisedClientsPromise) {
+      try { await window._authorisedClientsPromise; } catch (e) { /* lookup failure already logged */ }
+    }
+
    const allLinked = [...analysisResults.authorised, ...analysisResults.risk];
       const autoClients = (window._authorisedClientInstitutions || []).map(i => ({ institutionId: i.id, institutionName: i.name }));
       // For Awards & Recognition, add issuing institution to notification links if they're a client
@@ -1772,6 +1783,7 @@ function resetFormSilent() {
   document.getElementById('otherClientsPanel').style.display = 'none';
   document.getElementById('otherClientsTags').innerHTML = '';
   window._authorisedClientInstitutions = [];
+  window._authorisedClientsPromise = null;
   clearStatus('agentStatus');
   ['reportType','category','sourceType','severityWeight'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('incidentDate').value = new Date().toISOString().split('T')[0];
@@ -1811,6 +1823,7 @@ function resetForm() {
   document.getElementById('otherClientsPanel').style.display = 'none';
   document.getElementById('otherClientsTags').innerHTML = '';
   window._authorisedClientInstitutions = [];
+  window._authorisedClientsPromise = null;
   clearStatus('agentStatus');
   ['reportType','category','sourceType','severityWeight'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('incidentDate').value = new Date().toISOString().split('T')[0];
