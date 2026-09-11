@@ -580,6 +580,15 @@ async function submitAuth() {
       <div class="tier-pill" id="agentCardTier"></div>
     </div>
 
+    <!-- Agent email field — shown for Awards & Recognition when no email on file -->
+    <div id="agentEmailWrap" style="display:none;margin-top:10px;">
+      <div class="field">
+        <label>Agent email address <span style="font-weight:400;color:#b45309;">— no email on file for this agent</span></label>
+        <input type="email" id="agentEmailInput" placeholder="e.g. awards@agencyname.com" />
+        <div style="font-size:11px;color:#6b7280;margin-top:4px;">This will be saved to the agent record and used for award notifications.</div>
+      </div>
+    </div>
+
     <!-- Add new agent panel -->
     <div class="new-agent-panel" id="newAgentPanel">
       <h4>➕ Add new agent to AgentBee</h4>
@@ -627,6 +636,14 @@ async function submitAuth() {
           <span>✓</span>
           <span id="issuingInstName" style="flex:1;"></span>
           <button id="clearIssuingInstBtn" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;padding:0;">✕ Remove</button>
+        </div>
+      </div>
+      <!-- Award notification toggle -->
+      <div style="margin-top:16px;padding:14px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:9px;display:flex;align-items:flex-start;gap:12px;">
+        <input type="checkbox" id="sendAwardEmail" style="margin-top:2px;width:15px;height:15px;cursor:pointer;flex-shrink:0;" />
+        <div>
+          <label for="sendAwardEmail" style="font-size:13px;font-weight:600;color:#92400e;cursor:pointer;">📧 Send award notification email to agent</label>
+          <div style="font-size:11px;color:#a16207;margin-top:3px;">Immediately emails the agent to let them know their award has been recorded on AgentBee Kudos. Requires an email address on file.</div>
         </div>
       </div>
     </div>
@@ -1037,6 +1054,7 @@ function toggleAwardsPanel() {
   document.getElementById('instLinkageNotice').classList.toggle('visible', isAward);
   // Hide email protocol banner for awards — client institutions notified via ticker automatically
   document.getElementById('emailProtocolBanner').style.display = isAward ? 'none' : '';
+  checkAgentEmailField();
 }
 
 function initIssuingInstSearch() {
@@ -1129,7 +1147,7 @@ let _suggestionAgents = [];
 
 async function fetchSuggestions(q) {
   try {
-    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id&limit=8&order=agency_name`);
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id,email&limit=8&order=agency_name`);
     await renderSuggestions(await res.json());
   } catch(e) {}
 }
@@ -1226,6 +1244,19 @@ function resolveAgent(agent) {
   updatePreview(); updateTickerPreview();
   window._authorisedClientsPromise = lookupAuthorisedClients(agent.id);
   showAgentHierarchy(agent);
+  checkAgentEmailField();
+}
+
+function checkAgentEmailField() {
+  const isAward = document.getElementById('reportType').value === 'Awards & Recognition';
+  const hasEmail = selectedAgent && selectedAgent.email;
+  const wrap = document.getElementById('agentEmailWrap');
+  if (isAward && !hasEmail && selectedAgent) {
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+    if (document.getElementById('agentEmailInput')) document.getElementById('agentEmailInput').value = '';
+  }
 }
 
 async function applyBranch() {
@@ -1261,7 +1292,7 @@ let _branchChildren = [], _selectedBranchAgent = null, _branchSearchTimeout = nu
 
 async function loadBranchChildren() {
   if (!_canonicalAgent) return;
-  const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${_canonicalAgent.id}&select=id,agency_name,country,jurisdiction,risk_tier,risk_score,canonical_agent_id&order=agency_name`);
+  const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?canonical_agent_id=eq.${_canonicalAgent.id}&select=id,agency_name,country,jurisdiction,risk_tier,risk_score,canonical_agent_id,email&order=agency_name`);
   _branchChildren = await res.json() || [];
 }
 
@@ -1319,7 +1350,7 @@ async function lookupAgent() {
   document.getElementById('newAgentPanel').classList.remove('visible');
   closeSuggestions();
   try {
-    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id&limit=8&order=agency_name`);
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,jurisdiction,risk_tier,country,risk_score,canonical_agent_id,email&limit=8&order=agency_name`);
     const data = await res.json();
     if (!data.length) { setStatus('agentStatus', 'error', 'No agent found matching that name.'); document.getElementById('newAgentName').value = q; document.getElementById('newAgentPanel').classList.add('visible'); return; }
     if (data.length === 1) { selectAgent(data[0]); clearStatus('agentStatus'); return; }
@@ -1518,6 +1549,34 @@ async function submitIncident() {
   setStatus('submitStatus', 'info', 'Creating incident record…');
 
   try {
+    // For Awards & Recognition — save agent email first if provided, so the DB trigger fires with it in place
+    if (isAward) {
+      const agentEmailInput = document.getElementById('agentEmailInput').value.trim();
+      const sendEmail = document.getElementById('sendAwardEmail').checked;
+      if (agentEmailInput) {
+        setStatus('submitStatus', 'info', 'Saving agent email…');
+        const emailRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${selectedAgent.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ email: agentEmailInput }),
+        });
+        if (emailRes.ok) {
+          selectedAgent.email = agentEmailInput;
+        } else {
+          console.warn('Failed to save agent email');
+        }
+      }
+      // If send email not checked, temporarily clear email so trigger skips, then restore after
+      if (!sendEmail && selectedAgent.email) {
+        await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${selectedAgent.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ email: null }),
+        });
+      }
+    }
+
+    setStatus('submitStatus', 'info', 'Creating incident record…');
     const incRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incidents`, {
       method: 'POST',
       headers: { 'Prefer': 'return=representation', 'Content-Type': 'application/json' },
@@ -1543,6 +1602,15 @@ async function submitIncident() {
     const incData = await incRes.json();
     const incidentId = incData[0].id;
     submittedIncidentId = incidentId;
+
+    // Restore agent email if we cleared it to suppress the notification
+    if (isAward && !document.getElementById('sendAwardEmail').checked && selectedAgent.email) {
+      await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${selectedAgent.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ email: selectedAgent.email }),
+      });
+    }
 
     // For Awards & Recognition — insert the issuing institution link first
     if (vals.reportType === 'Awards & Recognition' && _issuingInstitution) {
