@@ -1256,6 +1256,12 @@ function selectAgent(agent) {
   document.getElementById('branchCity').value = '';
   document.getElementById('branchMatchCard').style.display = 'none';
   clearStatus('branchStatus');
+  // If agent is already a named branch, skip the branch panel entirely
+  if (agent.canonical_agent_id) {
+    document.getElementById('branchPanel').style.display = 'none';
+    resolveAgent(agent);
+    return;
+  }
   document.getElementById('branchPanel').style.display = 'block';
   document.getElementById('agentCard').classList.remove('visible');
   document.getElementById('agentHierarchy').style.display = 'none';
@@ -1887,6 +1893,11 @@ function resetFormSilent() {
   const btn = document.getElementById('submitBtn'); btn.disabled = false; btn.className = 'btn btn-primary'; btn.innerHTML = 'Submit report';
   _selectedAccredIds = new Set(); if (_accredLoaded) renderAccredOptions(); renderAccredTags(); updateAccredTriggerLabel();
   _resetAwardFields();
+  document.getElementById('agentEmailWrap').style.display = 'none';
+  document.getElementById('agentEmailInput').value = '';
+  document.getElementById('agentEmailStatus').textContent = 'This will be saved to the agent record and used for award notifications.';
+  document.getElementById('agentEmailStatus').style.color = '#6b7280';
+  const saveBtn = document.getElementById('saveAgentEmailBtn'); saveBtn.disabled = false; saveBtn.textContent = 'Save email'; saveBtn.style.background = ''; saveBtn.style.borderColor = ''; saveBtn.style.color = '';
   updatePreview();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1925,6 +1936,11 @@ function resetForm() {
   const btn = document.getElementById('submitBtn'); btn.disabled = false; btn.className = 'btn btn-primary'; btn.innerHTML = 'Submit report';
   _selectedAccredIds = new Set(); if (_accredLoaded) renderAccredOptions(); renderAccredTags(); updateAccredTriggerLabel();
   _resetAwardFields();
+  document.getElementById('agentEmailWrap').style.display = 'none';
+  document.getElementById('agentEmailInput').value = '';
+  document.getElementById('agentEmailStatus').textContent = 'This will be saved to the agent record and used for award notifications.';
+  document.getElementById('agentEmailStatus').style.color = '#6b7280';
+  const saveBtn2 = document.getElementById('saveAgentEmailBtn'); saveBtn2.disabled = false; saveBtn2.textContent = 'Save email'; saveBtn2.style.background = ''; saveBtn2.style.borderColor = ''; saveBtn2.style.color = '';
   updatePreview();
 }
 
