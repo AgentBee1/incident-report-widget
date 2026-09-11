@@ -634,7 +634,7 @@ async function submitAuth() {
       <div class="field" style="position:relative;">
         <label>Issuing institution <span style="font-weight:400;color:#b45309;">— the institution that issued the award</span></label>
         <input type="text" id="issuingInstSearch" placeholder="Search for institution…" autocomplete="off" />
-        <div id="issuingInstDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:300;overflow:hidden;margin-top:4px;max-height:200px;overflow-y:auto;"></div>
+        <div id="issuingInstDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:300;overflow:hidden;margin-top:4px;max-height:320px;overflow-y:auto;"></div>
         <div class="issuing-inst-resolved" id="issuingInstCard">
           <span>✓</span>
           <span id="issuingInstName" style="flex:1;"></span>
@@ -1070,10 +1070,18 @@ function initIssuingInstSearch() {
     if (q.length < 2) { drop.style.display = 'none'; return; }
     _issuingInstSearchTimeout = setTimeout(async () => {
       const res = await sbFetch(
-        `${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,status&order=name&limit=10`
+        `${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,status&order=name&limit=50`
       );
       const data = await res.json();
       if (!data || !data.length) { drop.style.display = 'none'; return; }
+      const ql = q.toLowerCase();
+      data.sort((a, b) => {
+        const aStarts = a.name.toLowerCase().startsWith(ql);
+        const bStarts = b.name.toLowerCase().startsWith(ql);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+        return a.name.localeCompare(b.name);
+      });
       drop.innerHTML = data.map((inst, i) =>
         `<div class="suggestion-item" data-issuing-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:13px;">
           <div style="font-weight:500;color:#1a1d23;">${inst.name}</div>
@@ -2088,6 +2096,14 @@ function initInstManualAdd() {
       const res = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,contact_email,salutation,status,is_client&order=name&limit=10`);
       const data = await res.json();
       if (!data || !data.length) { drop.style.display = 'none'; return; }
+      const ql = q.toLowerCase();
+      data.sort((a, b) => {
+        const aStarts = a.name.toLowerCase().startsWith(ql);
+        const bStarts = b.name.toLowerCase().startsWith(ql);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+        return a.name.localeCompare(b.name);
+      });
       drop.innerHTML = data.map((inst, i) =>
         `<div class="suggestion-item" data-inst-add-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:13px;">
           <div style="font-weight:500;color:#1a1d23;">${inst.name}</div>
