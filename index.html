@@ -584,8 +584,11 @@ async function submitAuth() {
     <div id="agentEmailWrap" style="display:none;margin-top:10px;">
       <div class="field">
         <label>Agent email address <span style="font-weight:400;color:#b45309;">— no email on file for this agent</span></label>
-        <input type="email" id="agentEmailInput" placeholder="e.g. awards@agencyname.com" />
-        <div style="font-size:11px;color:#6b7280;margin-top:4px;">This will be saved to the agent record and used for award notifications.</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <input type="email" id="agentEmailInput" placeholder="e.g. awards@agencyname.com" style="flex:1;" />
+          <button type="button" id="saveAgentEmailBtn" class="btn-lookup" style="height:38px;white-space:nowrap;">Save email</button>
+        </div>
+        <div id="agentEmailStatus" style="font-size:11px;margin-top:4px;color:#6b7280;">This will be saved to the agent record and used for award notifications.</div>
       </div>
     </div>
 
@@ -1128,6 +1131,34 @@ document.getElementById('severityWeight').addEventListener('change', updateTicke
 document.getElementById('sourceUrl').addEventListener('input', updateTickerPreview);
 document.getElementById('reportType').addEventListener('change', updateTickerPreview);
 document.getElementById('reportType').addEventListener('change', toggleAwardsPanel);
+
+document.getElementById('saveAgentEmailBtn').addEventListener('click', async function() {
+  const email = document.getElementById('agentEmailInput').value.trim();
+  const statusEl = document.getElementById('agentEmailStatus');
+  if (!email) { statusEl.textContent = 'Please enter an email address.'; statusEl.style.color = '#b91c1c'; return; }
+  if (!selectedAgent) { statusEl.textContent = 'No agent selected.'; statusEl.style.color = '#b91c1c'; return; }
+  this.disabled = true; this.textContent = 'Saving…';
+  try {
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${selectedAgent.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) throw new Error('Save failed');
+    selectedAgent.email = email;
+    statusEl.textContent = '✓ Email saved to agent record.';
+    statusEl.style.color = '#15803d';
+    this.textContent = '✓ Saved';
+    this.style.background = '#f0fdf4';
+    this.style.borderColor = '#bbf7d0';
+    this.style.color = '#15803d';
+  } catch(e) {
+    statusEl.textContent = 'Failed to save email — please try again.';
+    statusEl.style.color = '#b91c1c';
+    this.disabled = false;
+    this.textContent = 'Save email';
+  }
+});
 document.getElementById('awardTitle').addEventListener('input', updateTickerPreview);
 
 // ── Agent search ─────────────────────────────────────────────────
@@ -1549,31 +1580,13 @@ async function submitIncident() {
   setStatus('submitStatus', 'info', 'Creating incident record…');
 
   try {
-    // For Awards & Recognition — save agent email first if provided, so the DB trigger fires with it in place
-    if (isAward) {
-      const agentEmailInput = document.getElementById('agentEmailInput').value.trim();
-      const sendEmail = document.getElementById('sendAwardEmail').checked;
-      if (agentEmailInput) {
-        setStatus('submitStatus', 'info', 'Saving agent email…');
-        const emailRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${selectedAgent.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ email: agentEmailInput }),
-        });
-        if (emailRes.ok) {
-          selectedAgent.email = agentEmailInput;
-        } else {
-          console.warn('Failed to save agent email');
-        }
-      }
-      // If send email not checked, temporarily clear email so trigger skips, then restore after
-      if (!sendEmail && selectedAgent.email) {
-        await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${selectedAgent.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ email: null }),
-        });
-      }
+    // For Awards & Recognition — if send email not checked, temporarily clear email so trigger skips
+    if (isAward && !document.getElementById('sendAwardEmail').checked && selectedAgent.email) {
+      await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${selectedAgent.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ email: null }),
+      });
     }
 
     setStatus('submitStatus', 'info', 'Creating incident record…');
