@@ -1468,7 +1468,7 @@ async function lookupAuthorisedClients(agentId) {
     const familyData = await familyRes.json();
     (familyData || []).forEach(a => agentIds.add(a.id));
     const idList = [...agentIds].join(',');
-    const allLinksRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${idList})&link_type=eq.authorised&select=institution_id`);
+    const allLinksRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=in.(${idList})&select=institution_id`);
     const allLinks = await allLinksRes.json();
     if (!allLinks.length) { loading.style.display = 'none'; return; }
     const uniqueIds = [...new Set(allLinks.map(l => l.institution_id))];
