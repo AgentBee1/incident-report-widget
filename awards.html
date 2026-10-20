@@ -50,7 +50,7 @@
     <table>
       <thead><tr>
         <th data-k="agent">Agent</th><th data-k="title">Award</th><th data-k="issuer">Issuer</th>
-        <th data-k="date">Date</th><th data-k="status">Status</th><th data-k="by">Submitted by</th><th>Links</th>
+        <th data-k="date">Date</th><th data-k="status">Status</th><th data-k="paid" title="Paying Kudos client">Paid?</th><th data-k="by">Submitted by</th><th>Links</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
@@ -72,18 +72,25 @@ async function load() {
     sb('kudos_awards_public?select=award_id,award_slug'),
   ]);
   const agentIds = [...new Set(awards.map(a => a.agent_id).filter(Boolean))];
-  const agents = agentIds.length ? await sb(`agents?id=in.(${agentIds.join(',')})&select=id,agency_name,canonical_agent_id`) : [];
+  const agents = agentIds.length ? await sb(`agents?id=in.(${agentIds.join(',')})&select=id,agency_name,canonical_agent_id,is_kudos_client`) : [];
   const canonIds = [...new Set(agents.map(a => a.canonical_agent_id).filter(Boolean))];
-  const canon = canonIds.length ? await sb(`agents?id=in.(${canonIds.join(',')})&select=id,agency_name`) : [];
+  const canon = canonIds.length ? await sb(`agents?id=in.(${canonIds.join(',')})&select=id,agency_name,is_kudos_client`) : [];
   const instIds = [...new Set(awards.map(a => a.issuing_institution_id).filter(Boolean))];
   const insts = instIds.length ? await sb(`institutions?id=in.(${instIds.join(',')})&select=id,name`) : [];
   const agentName = {}; const canonName = Object.fromEntries(canon.map(c => [c.id, c.agency_name]));
-  agents.forEach(a => agentName[a.id] = a.canonical_agent_id ? (canonName[a.canonical_agent_id] || a.agency_name) : a.agency_name);
+  const mainOf = {}; const paidOf = {};
+  canon.forEach(c => paidOf[c.id] = !!c.is_kudos_client);
+  agents.forEach(a => {
+    agentName[a.id] = a.canonical_agent_id ? (canonName[a.canonical_agent_id] || a.agency_name) : a.agency_name;
+    mainOf[a.id] = a.canonical_agent_id || a.id;
+    if (!a.canonical_agent_id) paidOf[a.id] = !!a.is_kudos_client;
+  });
   const instName = Object.fromEntries(insts.map(i => [i.id, i.name]));
   const slug = Object.fromEntries(pub.map(p => [p.award_id, p.award_slug]));
   rows = awards.map(a => ({
     agent: agentName[a.agent_id] || (a.requested_agent_name ? `${a.requested_agent_name} (new agent)` : ''), title: a.award_title, issuer: instName[a.issuing_institution_id] || '',
     date: a.incident_date || '', status: a.review_status || 'approved', by: a.submitted_by || '',
+    mainAgent: a.agent_id ? mainOf[a.agent_id] : null, paid: a.agent_id ? !!paidOf[mainOf[a.agent_id]] : false,
     src: a.original_source_url || '', kudos: slug[a.id] ? `https://kudos.agentbee.net/award/${slug[a.id]}` : '',
   }));
   render();
@@ -101,9 +108,34 @@ function render() {
   document.getElementById('rows').innerHTML = list.map(r => `<tr>
     <td>${esc(r.agent)}</td><td>${esc(r.title)}</td><td>${esc(r.issuer)}</td>
     <td class="nowrap">${esc(r.date)}</td><td><span class="s s-${esc(r.status)}">${label[r.status] || esc(r.status)}</span></td>
+    <td style="text-align:center;">${r.mainAgent ? `<input type="checkbox" ${r.paid ? 'checked' : ''} ${IS_ADMIN ? '' : 'disabled'} title="${r.paid ? 'Paying Kudos client' : 'Not paying'}" onchange="setPaid('${r.mainAgent}', this)" />` : ''}</td>
     <td>${esc(r.by)}</td>
     <td class="nowrap">${r.src ? `<a href="${esc(r.src)}" target="_blank" rel="noopener">Source</a>` : ''}${r.kudos ? ` · <a href="${esc(r.kudos)}" target="_blank">Kudos</a>` : ''}</td>
   </tr>`).join('');
+}
+
+const IS_ADMIN = sessionStorage.getItem('ab-role') === 'admin';
+async function setPaid(agentId, box) {
+  const paid = box.checked;
+  const name = rows.find(r => r.mainAgent === agentId)?.agent || 'this agent';
+  if (!confirm(paid
+    ? `Mark ${name} as a paying Kudos client?\n\nKudos will show their full award history, logo and website button (within 10 minutes).`
+    : `Remove paid status from ${name}?\n\nKudos will go back to showing their 3 most recent awards.`)) { box.checked = !paid; return; }
+  box.disabled = true;
+  try {
+    const r = await fetch('/api/agent-paid', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-session': sessionStorage.getItem('ab-session') || '' },
+      body: JSON.stringify({ agent_id: agentId, paid }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.ok) throw new Error(d.error || r.statusText);
+    rows.forEach(row => { if (row.mainAgent === agentId) row.paid = paid; });
+    render();
+  } catch (e) {
+    alert(`Couldn't update: ${e.message}`);
+    box.checked = !paid; box.disabled = false;
+  }
 }
 
 document.getElementById('q').addEventListener('input', render);
