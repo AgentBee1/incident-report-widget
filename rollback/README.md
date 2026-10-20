@@ -1,8 +1,11 @@
 # Rolling back the Kudos integration (21 Oct 2026)
 
-Everything changed in the Kudos integration can be put back. Each part can be rolled back
-on its own. **Rolling back the widget alone is always safe**: the new email function still
-works with the old widget.
+Everything changed in the Kudos integration can be put back.
+
+**If you roll back the widget, also roll back the award email function** (row 3). The old
+widget stops emails by briefly removing the agent's address; the new email function waits a
+few seconds before sending, so with the old widget an unticked box could still send.
+Everything else can be rolled back on its own.
 
 | Part | How to roll back |
 |---|---|
