@@ -90,6 +90,10 @@
     <div class="field">
       <label>Original announcement link <span class="hint">the LinkedIn, Instagram, Facebook or news post</span></label>
       <input type="url" id="sourceLink" placeholder="https://www.linkedin.com/posts/…" />
+      <div id="shortLinkTip" style="display:none;margin-top:6px;padding:9px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:12px;color:#92400e;">
+        This is a LinkedIn short link, which won't show the post on Kudos. <strong>Open it</strong>, then copy the address from your browser's address bar and paste it here instead.
+        <a id="shortLinkOpen" href="#" target="_blank" rel="noopener">Open the link ↗</a>
+      </div>
     </div>
 
     <div class="panel" id="dupPanel"></div>
@@ -247,6 +251,12 @@ async function runDupCheck() {
   } catch (e) { console.warn('Duplicate check failed', e); }
 }
 ['awardTitle', 'sourceLink'].forEach(id => $(id).addEventListener('input', checkDuplicates));
+const isShortLink = (u) => /^https?:\/\/(www\.)?lnkd\.in\//i.test(u.trim());
+$('sourceLink').addEventListener('input', () => {
+  const v = $('sourceLink').value.trim();
+  $('shortLinkTip').style.display = isShortLink(v) ? 'block' : 'none';
+  $('shortLinkOpen').href = isShortLink(v) ? v : '#';
+});
 
 // ── Validation, confirmation, submit ─────────────────────────────
 function showErr(msg) { $('err').textContent = msg; $('err').style.display = msg ? 'block' : 'none'; if (msg) window.scrollTo({ top: 0, behavior: 'smooth' }); }
@@ -262,6 +272,7 @@ function validate() {
   if (d > today) return 'The award date can\'t be in the future.';
   const link = $('sourceLink').value.trim();
   if (!/^https?:\/\/\S+\.\S+/.test(link)) return 'Paste the full announcement link, starting with https://';
+  if (isShortLink(link)) return 'That\'s a LinkedIn short link: open it and paste the full address from your browser bar instead.';
   if (hasWarnings && !$('dupConfirm').checked) return 'Possible duplicate: check the existing awards and tick the box to confirm.';
   return '';
 }
