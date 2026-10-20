@@ -68,10 +68,10 @@ let rows = [], sortKey = 'date', sortDir = -1;
 
 async function load() {
   const [awards, pub] = await Promise.all([
-    sb('incidents?award_title=not.is.null&award_title=neq.&select=id,agent_id,award_title,incident_date,review_status,original_source_url,issuing_institution_id,submitted_by&order=incident_date.desc'),
+    sb('incidents?award_title=not.is.null&award_title=neq.&select=id,agent_id,requested_agent_name,award_title,incident_date,review_status,original_source_url,issuing_institution_id,submitted_by&order=incident_date.desc'),
     sb('kudos_awards_public?select=award_id,award_slug'),
   ]);
-  const agentIds = [...new Set(awards.map(a => a.agent_id))];
+  const agentIds = [...new Set(awards.map(a => a.agent_id).filter(Boolean))];
   const agents = agentIds.length ? await sb(`agents?id=in.(${agentIds.join(',')})&select=id,agency_name,canonical_agent_id`) : [];
   const canonIds = [...new Set(agents.map(a => a.canonical_agent_id).filter(Boolean))];
   const canon = canonIds.length ? await sb(`agents?id=in.(${canonIds.join(',')})&select=id,agency_name`) : [];
@@ -82,7 +82,7 @@ async function load() {
   const instName = Object.fromEntries(insts.map(i => [i.id, i.name]));
   const slug = Object.fromEntries(pub.map(p => [p.award_id, p.award_slug]));
   rows = awards.map(a => ({
-    agent: agentName[a.agent_id] || '', title: a.award_title, issuer: instName[a.issuing_institution_id] || '',
+    agent: agentName[a.agent_id] || (a.requested_agent_name ? `${a.requested_agent_name} (new agent)` : ''), title: a.award_title, issuer: instName[a.issuing_institution_id] || '',
     date: a.incident_date || '', status: a.review_status || 'approved', by: a.submitted_by || '',
     src: a.original_source_url || '', kudos: slug[a.id] ? `https://kudos.agentbee.net/award/${slug[a.id]}` : '',
   }));

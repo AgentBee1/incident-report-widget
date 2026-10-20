@@ -22,22 +22,22 @@ Deno.serve(async () => {
 
   const { data: pending, error } = await supabase
     .from('incidents')
-    .select('id, agent_id, award_title, incident_date, issuing_institution_id, submitted_by, created_at')
+    .select('id, agent_id, requested_agent_name, award_title, incident_date, issuing_institution_id, submitted_by, created_at')
     .eq('review_status', 'pending')
     .order('created_at', { ascending: true });
   if (error) return new Response(`Query failed: ${error.message}`, { status: 500 });
   if (!pending?.length) return new Response('Nothing pending', { status: 200 });
 
-  const agentIds = [...new Set(pending.map((p) => p.agent_id))];
+  const agentIds = [...new Set(pending.map((p) => p.agent_id).filter(Boolean))];
   const instIds = [...new Set(pending.map((p) => p.issuing_institution_id).filter(Boolean))];
-  const { data: agents } = await supabase.from('agents').select('id, agency_name').in('id', agentIds);
+  const { data: agents } = agentIds.length ? await supabase.from('agents').select('id, agency_name').in('id', agentIds) : { data: [] };
   const { data: insts } = instIds.length ? await supabase.from('institutions').select('id, name').in('id', instIds) : { data: [] };
   const agentName = Object.fromEntries((agents ?? []).map((a) => [a.id, a.agency_name]));
   const instName = Object.fromEntries((insts ?? []).map((i) => [i.id, i.name]));
 
   const n = pending.length;
   const rows = pending.map((p) => ({
-    agent: agentName[p.agent_id] ?? 'Unknown agent',
+    agent: agentName[p.agent_id] ?? (p.requested_agent_name ? `${p.requested_agent_name} (new agent)` : 'Unknown agent'),
     title: p.award_title,
     issuer: instName[p.issuing_institution_id] ?? '',
     by: p.submitted_by ?? 'unknown',

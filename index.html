@@ -460,6 +460,7 @@ async function submitAuth() {
       if (data.sessionToken) sessionStorage.setItem('ab-session', data.sessionToken);
       sessionStorage.setItem('ab-role', data.role || 'admin');
       sessionStorage.setItem('ab-name', name || (data.role === 'admin' ? 'Admin' : 'Staff'));
+      if (data.role !== 'admin') { location.href = '/award.html'; return; }
       applyRoleUI();
       window._supabaseKey = data.supabaseKey || '';
       document.getElementById('auth-screen').classList.add('hidden');
@@ -478,6 +479,9 @@ async function submitAuth() {
   // Sessions from before roles were added must log in again.
   if (sessionStorage.getItem('ab-admin-auth') === 'true' && !sessionStorage.getItem('ab-role')) {
     sessionStorage.removeItem('ab-admin-auth');
+  }
+  if (sessionStorage.getItem('ab-admin-auth') === 'true' && sessionStorage.getItem('ab-role') !== 'admin') {
+    location.replace('/award.html');
   }
   if (sessionStorage.getItem('ab-admin-auth') === 'true') {
     window._supabaseKey = sessionStorage.getItem('ab-supabase-key') || '';
@@ -528,6 +532,7 @@ async function submitAuth() {
       <span id="roleBar" style="display:flex;gap:12px;align-items:center;font-size:12px;">
         <span id="roleBadge" style="padding:2px 8px;border-radius:20px;background:#eef2ff;color:#3730a3;"></span>
         <a href="/awards.html" style="color:#1d4ed8;">All awards</a>
+        <a href="#" onclick="sessionStorage.clear();location.href='/';return false;" style="color:#6b7280;">Log out</a>
         <a href="/review.html" id="reviewLink" style="color:#1d4ed8;display:none;">Review queue <span id="reviewCount"></span></a>
       </span>
     </div>
