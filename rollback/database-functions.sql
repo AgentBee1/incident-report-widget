@@ -132,3 +132,5 @@ where i.award_title is not null and i.award_title <> '' and coalesce(i.is_voided
 -- Staff new-agent requests: allows awards without an agent while pending. Harmless if left.
 -- alter table public.incidents drop constraint if exists incidents_agent_required_unless_pending,
 --   drop column if exists requested_agent_name, drop column if exists requested_agent_website;
+-- Contractor payment tracking: submitted_role, contractor_paid, contractor_paid_at, contractor_paid_by.
+-- Harmless if left (nothing else reads them).
