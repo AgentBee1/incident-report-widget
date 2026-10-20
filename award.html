@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Submit an award — AgentBee</title>
+<style>
+  :root { --ink:#1a1d23; --muted:#6b7280; --line:#e5e7eb; --blue:#1d4ed8; --amber:#b45309; --red:#b91c1c; --green:#15803d; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background:#f6f7f9; color:var(--ink); font-size:14px; }
+  .page { max-width: 640px; margin: 0 auto; padding: 24px 16px 60px; }
+  .top { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; font-size:12px; margin-bottom:14px; }
+  .top a { color: var(--blue); }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .lead { color:var(--muted); margin:0 0 18px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; }
+  .field { margin-bottom:16px; position:relative; }
+  label { display:block; font-weight:600; font-size:13px; margin-bottom:5px; }
+  .hint { font-weight:400; color:var(--muted); font-size:12px; }
+  input[type=text], input[type=url], input[type=date] { width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px; font:inherit; }
+  input:focus { outline:2px solid #93c5fd; border-color:transparent; }
+  .drop { display:none; position:absolute; left:0; right:0; top:100%; margin-top:4px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.08); z-index:20; max-height:280px; overflow:auto; }
+  .drop div { padding:9px 12px; cursor:pointer; }
+  .drop div:hover { background:#f3f4f6; }
+  .drop small { color:var(--muted); }
+  .chosen { display:none; margin-top:6px; padding:8px 12px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; font-size:13px; justify-content:space-between; gap:8px; }
+  .chosen button { background:none; border:0; color:var(--muted); cursor:pointer; font-size:12px; }
+  .check { display:flex; gap:8px; align-items:flex-start; font-size:13px; margin-top:8px; }
+  .check input { margin-top:3px; }
+  .newagent { display:none; margin-top:10px; padding:12px; background:#f9fafb; border:1px solid var(--line); border-radius:8px; }
+  .newagent .field { margin-bottom:10px; }
+  .panel { display:none; margin:4px 0 16px; padding:12px 14px; border:1px solid var(--line); border-radius:9px; font-size:12px; background:#fff; }
+  .warn { color:var(--amber); margin-bottom:6px; }
+  .err { display:none; color:var(--red); background:#fef2f2; border:1px solid #fecaca; padding:10px 12px; border-radius:8px; margin-bottom:12px; }
+  .btn { font:inherit; font-weight:600; border-radius:8px; padding:10px 18px; cursor:pointer; border:1px solid transparent; }
+  .primary { background:var(--blue); color:#fff; }
+  .secondary { background:#fff; color:var(--ink); border-color:#d1d5db; }
+  .btn:disabled { opacity:.6; cursor:default; }
+  .modal { display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); align-items:center; justify-content:center; padding:16px; z-index:50; }
+  .modal .box { background:#fff; border-radius:12px; padding:22px; max-width:480px; width:100%; }
+  .modal dl { display:grid; grid-template-columns:max-content 1fr; gap:6px 14px; margin:14px 0 18px; }
+  .modal dt { color:var(--muted); }
+  .modal dd { margin:0; font-weight:600; word-break:break-word; }
+  .done { display:none; text-align:center; padding:30px 10px; }
+  .badge { padding:1px 6px; border-radius:10px; font-size:11px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <span id="who"></span>
+    <span><a href="/awards.html">All awards</a> · <a href="#" id="logout">Log out</a></span>
+  </div>
+  <h1>Submit an award</h1>
+  <p class="lead">Your submission goes to the review queue. Nothing is published until it's approved.</p>
+
+  <div class="card" id="formCard">
+    <div class="err" id="err"></div>
+
+    <div class="field">
+      <label>Agent</label>
+      <input type="text" id="agentSearch" placeholder="Start typing the agency name…" autocomplete="off" />
+      <div class="drop" id="agentDrop"></div>
+      <div class="chosen" id="agentChosen"><span id="agentChosenName"></span><button type="button" id="agentClear">✕ Change</button></div>
+      <label class="check"><input type="checkbox" id="agentMissing" /> <span>The agent isn't in the list</span></label>
+      <div class="newagent" id="newAgent">
+        <div class="field"><label>Agency name</label><input type="text" id="newAgentName" placeholder="Full agency name, as on their website" /></div>
+        <div class="field" style="margin-bottom:0;"><label>Agency website <span class="hint">(optional)</span></label><input type="url" id="newAgentWebsite" placeholder="https://…" /></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Award title <span class="hint">exactly as announced</span></label>
+      <input type="text" id="awardTitle" placeholder="e.g. Partner of the Year 2026" />
+    </div>
+
+    <div class="field">
+      <label>Issuing institution</label>
+      <input type="text" id="instSearch" placeholder="Start typing the institution name…" autocomplete="off" />
+      <div class="drop" id="instDrop"></div>
+      <div class="chosen" id="instChosen"><span id="instChosenName"></span><button type="button" id="instClear">✕ Change</button></div>
+      <div class="hint" style="margin-top:4px;">Can't find it? Don't submit yet: send the admin the institution's name so it can be added first.</div>
+    </div>
+
+    <div class="field">
+      <label>Award date <span class="hint">the date it was announced</span></label>
+      <input type="date" id="awardDate" />
+    </div>
+
+    <div class="field">
+      <label>Original announcement link <span class="hint">the LinkedIn, Instagram, Facebook or news post</span></label>
+      <input type="url" id="sourceLink" placeholder="https://www.linkedin.com/posts/…" />
+      <div id="shortLinkTip" style="display:none;margin-top:6px;padding:9px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:12px;color:#92400e;">
+        This is a LinkedIn short link, which won't show the post on Kudos. <strong>Open it</strong>, then copy the address from your browser's address bar and paste it here instead.
+        <a id="shortLinkOpen" href="#" target="_blank" rel="noopener">Open the link ↗</a>
+      </div>
+    </div>
+
+    <div class="panel" id="dupPanel"></div>
+    <label class="check" id="dupConfirmWrap" style="display:none;margin:-6px 0 16px;"><input type="checkbox" id="dupConfirm" /> <span>I've checked the existing awards above and this one isn't a duplicate.</span></label>
+
+    <button class="btn primary" id="reviewBtn">Review &amp; submit</button>
+  </div>
+
+  <div class="card done" id="doneCard">
+    <div style="font-size:40px;">🏆</div>
+    <h2 style="margin:8px 0 6px;">Submitted for review</h2>
+    <p class="lead" id="doneText"></p>
+    <button class="btn primary" id="anotherBtn">Submit another award</button>
+  </div>
+</div>
+
+<div class="modal" id="confirm">
+  <div class="box">
+    <h2 style="margin:0;font-size:18px;">Check before submitting</h2>
+    <dl id="summary"></dl>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn secondary" id="backBtn">Go back</button>
+      <button class="btn primary" id="submitBtn">Submit for review</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://mtatzzrbapftzwuxrcko.supabase.co';
+const KEY = sessionStorage.getItem('ab-supabase-key') || '';
+if (sessionStorage.getItem('ab-admin-auth') !== 'true' || !sessionStorage.getItem('ab-role')) location.href = '/';
+if (sessionStorage.getItem('ab-role') === 'admin') location.href = '/';
+const NAME = sessionStorage.getItem('ab-name') || 'Staff';
+document.getElementById('who').textContent = `${NAME} · Staff`;
+document.getElementById('logout').onclick = (e) => { e.preventDefault(); sessionStorage.clear(); location.href = '/'; };
+
+const $ = (id) => document.getElementById(id);
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const sbGet = (path) => fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } }).then(r => { if (!r.ok) throw new Error(`Lookup failed (${r.status})`); return r.json(); });
+const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Sydney' });
+$('awardDate').max = today;
+
+let agent = null;   // { id, name } — always the main brand record
+let inst = null;    // { id, name }
+
+// ── Searchable pickers ───────────────────────────────────────────
+function picker({ input, drop, chosen, chosenName, clear, search, onPick }) {
+  let timer;
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 2) { drop.style.display = 'none'; return; }
+    timer = setTimeout(async () => {
+      try {
+        const items = await search(q);
+        drop.innerHTML = items.length
+          ? items.map((it, i) => `<div data-i="${i}">${esc(it.name)} ${it.sub ? `<small>· ${esc(it.sub)}</small>` : ''}</div>`).join('')
+          : '<div style="color:#6b7280;cursor:default;">No matches</div>';
+        drop._items = items; drop.style.display = 'block';
+      } catch (e) { drop.innerHTML = `<div style="color:#b91c1c;">${esc(e.message)}</div>`; drop.style.display = 'block'; }
+    }, 250);
+  });
+  drop.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-i]'); if (!el) return;
+    const it = drop._items[+el.dataset.i];
+    onPick(it); drop.style.display = 'none';
+    input.style.display = 'none'; chosenName.textContent = it.name + (it.sub ? ` · ${it.sub}` : ''); chosen.style.display = 'flex';
+  });
+  clear.addEventListener('click', () => {
+    onPick(null); chosen.style.display = 'none'; input.style.display = ''; input.value = ''; input.focus();
+  });
+  document.addEventListener('click', (e) => { if (!drop.contains(e.target) && e.target !== input) drop.style.display = 'none'; });
+}
+
+picker({
+  input: $('agentSearch'), drop: $('agentDrop'), chosen: $('agentChosen'), chosenName: $('agentChosenName'), clear: $('agentClear'),
+  // Branch / variant records are shown and saved as their main brand.
+  search: async (q) => {
+    const rows = await sbGet(`agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,country,canonical_agent_id&limit=15&order=agency_name`);
+    const canonIds = [...new Set(rows.map(r => r.canonical_agent_id).filter(Boolean))];
+    const canon = canonIds.length ? await sbGet(`agents?id=in.(${canonIds.join(',')})&select=id,agency_name,country`) : [];
+    const byId = Object.fromEntries(canon.map(c => [c.id, c]));
+    const out = new Map();
+    for (const r of rows) {
+      const main = r.canonical_agent_id ? byId[r.canonical_agent_id] : r;
+      if (main && !out.has(main.id)) out.set(main.id, { id: main.id, name: main.agency_name, sub: main.country || '' });
+    }
+    return [...out.values()];
+  },
+  onPick: (it) => { agent = it; checkDuplicates(); },
+});
+
+picker({
+  input: $('instSearch'), drop: $('instDrop'), chosen: $('instChosen'), chosenName: $('instChosenName'), clear: $('instClear'),
+  search: async (q) => (await sbGet(`institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,country&limit=12&order=name`))
+    .map(i => ({ id: i.id, name: i.name, sub: i.country || '' })),
+  onPick: (it) => { inst = it; checkDuplicates(); },
+});
+
+$('agentMissing').addEventListener('change', (e) => {
+  const missing = e.target.checked;
+  $('newAgent').style.display = missing ? 'block' : 'none';
+  $('agentSearch').disabled = missing;
+  if (missing && agent) $('agentClear').click();
+  $('agentSearch').placeholder = missing ? 'Not needed — enter the agency details below' : 'Start typing the agency name…';
+  checkDuplicates();
+});
+
+// ── Duplicate check ──────────────────────────────────────────────
+const norm = t => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+function postKeys(url) {
+  const u = String(url || ''); const keys = new Set();
+  (u.match(/\d{15,}/g) || []).forEach(k => keys.add(k));
+  const ig = u.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/); if (ig) keys.add(ig[1]);
+  const sh = u.match(/lnkd\.in\/(?:p\/)?([A-Za-z0-9_-]+)/); if (sh) keys.add(sh[1]);
+  return [...keys];
+}
+let dupTimer, hasWarnings = false;
+function checkDuplicates() { clearTimeout(dupTimer); dupTimer = setTimeout(runDupCheck, 350); }
+async function runDupCheck() {
+  const link = $('sourceLink').value.trim();
+  const title = $('awardTitle').value.trim();
+  const sel = 'id,award_title,incident_date,review_status,issuing_institution_id,agent_id,requested_agent_name';
+  try {
+    let existing = [];
+    if (agent) {
+      const group = await sbGet(`agents?or=(id.eq.${agent.id},canonical_agent_id.eq.${agent.id})&select=id`);
+      existing = await sbGet(`incidents?agent_id=in.(${group.map(g => g.id).join(',')})&award_title=not.is.null&select=${sel}&order=incident_date.desc`);
+    }
+    let linkHits = [];
+    for (const k of postKeys(link)) linkHits.push(...await sbGet(`incidents?award_title=not.is.null&original_source_url=ilike.*${encodeURIComponent(k)}*&select=${sel}`));
+    if (/^https?:\/\//.test(link)) linkHits.push(...await sbGet(`incidents?award_title=not.is.null&original_source_url=eq.${encodeURIComponent(link)}&select=${sel}`));
+    linkHits = [...new Map(linkHits.map(h => [h.id, h])).values()];
+    const instIds = [...new Set([...existing, ...linkHits].map(a => a.issuing_institution_id).filter(Boolean))];
+    const names = instIds.length ? Object.fromEntries((await sbGet(`institutions?id=in.(${instIds.join(',')})&select=id,name`)).map(i => [i.id, i.name])) : {};
+
+    const warnings = [];
+    if (linkHits.length) warnings.push(`This announcement link is already on record: ${linkHits.map(h => `"${h.award_title}"`).join(', ')}. That's only OK if the same post announces a different award.`);
+    if (title && inst) {
+      const nt = norm(title);
+      const sim = existing.filter(a => a.issuing_institution_id === inst.id && (norm(a.award_title) === nt || norm(a.award_title).includes(nt) || nt.includes(norm(a.award_title))));
+      if (sim.length) warnings.push(`${agent.name} already has a similar award from ${inst.name}: ${sim.map(a => `"${a.award_title}" (${a.incident_date || 'no date'})`).join(', ')}.`);
+    }
+    hasWarnings = warnings.length > 0;
+    const status = s => s === 'pending' ? '<span class="badge" style="background:#fffbeb;color:#92400e;">pending</span>' : s === 'rejected' ? '<span class="badge" style="background:#fef2f2;color:#b91c1c;">rejected</span>' : '<span class="badge" style="background:#f0fdf4;color:#15803d;">live</span>';
+    let html = warnings.map(w => `<div class="warn">⚠️ ${esc(w)}</div>`).join('');
+    if (agent) {
+      html += `<div style="font-weight:600;margin:4px 0 4px;">Existing awards for ${esc(agent.name)} (${existing.length})</div>` +
+        (existing.length ? existing.map(a => `<div style="padding:3px 0;border-top:1px solid #f3f4f6;">${status(a.review_status)} ${esc(a.award_title)} · ${esc(names[a.issuing_institution_id] || '')} · ${esc(a.incident_date || '')}</div>`).join('') : '<div class="hint">None yet.</div>');
+    }
+    $('dupPanel').innerHTML = html;
+    $('dupPanel').style.display = html ? 'block' : 'none';
+    $('dupConfirmWrap').style.display = hasWarnings ? 'flex' : 'none';
+    if (!hasWarnings) $('dupConfirm').checked = false;
+  } catch (e) { console.warn('Duplicate check failed', e); }
+}
+['awardTitle', 'sourceLink'].forEach(id => $(id).addEventListener('input', checkDuplicates));
+const isShortLink = (u) => /^https?:\/\/(www\.)?lnkd\.in\//i.test(u.trim());
+$('sourceLink').addEventListener('input', () => {
+  const v = $('sourceLink').value.trim();
+  $('shortLinkTip').style.display = isShortLink(v) ? 'block' : 'none';
+  $('shortLinkOpen').href = isShortLink(v) ? v : '#';
+});
+
+// ── Validation, confirmation, submit ─────────────────────────────
+function showErr(msg) { $('err').textContent = msg; $('err').style.display = msg ? 'block' : 'none'; if (msg) window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function validate() {
+  const missing = $('agentMissing').checked;
+  if (!missing && !agent) return 'Choose the agent from the list, or tick "The agent isn\'t in the list".';
+  if (missing && $('newAgentName').value.trim().length < 2) return 'Enter the agency name.';
+  if (missing && $('newAgentWebsite').value.trim() && !/^https?:\/\/\S+\.\S+/.test($('newAgentWebsite').value.trim())) return 'The agency website should start with https://';
+  if ($('awardTitle').value.trim().length < 3) return 'Enter the award title.';
+  if (!inst) return 'Choose the issuing institution from the list.';
+  const d = $('awardDate').value;
+  if (!d) return 'Enter the award date.';
+  if (d > today) return 'The award date can\'t be in the future.';
+  const link = $('sourceLink').value.trim();
+  if (!/^https?:\/\/\S+\.\S+/.test(link)) return 'Paste the full announcement link, starting with https://';
+  if (isShortLink(link)) return 'That\'s a LinkedIn short link: open it and paste the full address from your browser bar instead.';
+  if (hasWarnings && !$('dupConfirm').checked) return 'Possible duplicate: check the existing awards and tick the box to confirm.';
+  return '';
+}
+function sourceKind(url) {
+  const h = (() => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } })();
+  return /linkedin|lnkd\.in/.test(h) ? 'LinkedIn' : /instagram/.test(h) ? 'Instagram' : /facebook|fb\.com/.test(h) ? 'Facebook' : h || 'link';
+}
+$('reviewBtn').addEventListener('click', async () => {
+  await runDupCheck();
+  const msg = validate(); showErr(msg); if (msg) return;
+  const missing = $('agentMissing').checked;
+  const link = $('sourceLink').value.trim();
+  const kind = sourceKind(link);
+  $('summary').innerHTML = `
+    <dt>Agent</dt><dd>${missing ? `${esc($('newAgentName').value.trim())} <span class="hint">(new — admin will add)</span>` : esc(agent.name)}</dd>
+    <dt>Award</dt><dd>${esc($('awardTitle').value.trim())}</dd>
+    <dt>Issued by</dt><dd>${esc(inst.name)}</dd>
+    <dt>Date</dt><dd>${esc(new Date($('awardDate').value + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }))}</dd>
+    <dt>Source</dt><dd>${esc(kind)}${['LinkedIn','Instagram','Facebook'].includes(kind) ? '' : ' <span style="color:#b45309;">(not a social media post: is this right?)</span>'}</dd>`;
+  $('confirm').style.display = 'flex';
+});
+$('backBtn').addEventListener('click', () => { $('confirm').style.display = 'none'; });
+
+$('submitBtn').addEventListener('click', async () => {
+  const btn = $('submitBtn'); btn.disabled = true; btn.textContent = 'Submitting…';
+  const missing = $('agentMissing').checked;
+  const agentLabel = missing ? $('newAgentName').value.trim() : agent.name;
+  const record = {
+    agent_id: missing ? null : agent.id,
+    requested_agent_name: missing ? agentLabel : null,
+    requested_agent_website: missing ? ($('newAgentWebsite').value.trim() || null) : null,
+    report_type: 'Awards & Recognition',
+    category: 'Reputational',
+    severity_weight: 0,
+    source_type: 'web_source',
+    incident_date: $('awardDate').value,
+    award_title: $('awardTitle').value.trim(),
+    issuing_institution_id: inst.id,
+    original_source_url: $('sourceLink').value.trim(),
+    description: `${agentLabel} received an award from ${inst.name}.`,
+    notify_agent: false,
+    review_status: 'pending',
+    submitted_by: NAME,
+    submitted_role: 'staff',
+  };
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/incidents`, {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify(record),
+    });
+    if (!r.ok) throw new Error(`Couldn't save (${r.status}): ${(await r.text()).slice(0, 200)}`);
+    $('confirm').style.display = 'none';
+    $('formCard').style.display = 'none';
+    $('doneText').textContent = `"${record.award_title}" for ${agentLabel} is in the review queue.`;
+    $('doneCard').style.display = 'block';
+  } catch (e) {
+    $('confirm').style.display = 'none'; showErr(e.message);
+  } finally { btn.disabled = false; btn.textContent = 'Submit for review'; }
+});
+$('anotherBtn').addEventListener('click', () => location.reload());
+</script>
+</body>
+</html>
