@@ -128,3 +128,7 @@ where i.award_title is not null and i.award_title <> '' and coalesce(i.is_voided
 -- harmless if left. To remove them as well:
 -- alter table public.incidents drop column if exists notify_agent, drop column if exists review_status,
 --   drop column if exists submitted_by, drop column if exists reviewed_by, drop column if exists reviewed_at;
+
+-- Staff new-agent requests: allows awards without an agent while pending. Harmless if left.
+-- alter table public.incidents drop constraint if exists incidents_agent_required_unless_pending,
+--   drop column if exists requested_agent_name, drop column if exists requested_agent_website;
