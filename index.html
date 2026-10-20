@@ -1666,6 +1666,7 @@ async function submitIncident() {
         notify_agent: isAward ? (currentRole() === 'admin' && document.getElementById('sendAwardEmail').checked) : null,
         review_status: (isAward && currentRole() !== 'admin') ? 'pending' : 'approved',
         submitted_by: sessionStorage.getItem('ab-name') || null,
+        submitted_role: currentRole() === 'admin' ? 'admin' : 'staff',
       award_title: (vals.reportType === 'Awards & Recognition')
           ? (document.getElementById('awardTitle').value.trim() || null)
           : null,

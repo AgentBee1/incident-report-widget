@@ -38,6 +38,11 @@
   </div>
   <div class="tools">
     <input id="q" type="search" placeholder="Search agent, award, issuer or link…" />
+    <select id="paidFilter">
+      <option value="">All payments</option>
+      <option value="unpaid">Contractor unpaid</option>
+      <option value="paid">Contractor paid</option>
+    </select>
     <select id="status">
       <option value="">All statuses</option>
       <option value="approved">Live</option>
@@ -50,7 +55,7 @@
     <table>
       <thead><tr>
         <th data-k="agent">Agent</th><th data-k="title">Award</th><th data-k="issuer">Issuer</th>
-        <th data-k="date">Date</th><th data-k="status">Status</th><th data-k="by">Submitted by</th><th>Links</th>
+        <th data-k="date">Date</th><th data-k="status">Status</th><th data-k="by">Submitted by</th><th data-k="paid" title="Has the contractor been paid for this submission?">Paid?</th><th>Links</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
@@ -68,7 +73,7 @@ let rows = [], sortKey = 'date', sortDir = -1;
 
 async function load() {
   const [awards, pub] = await Promise.all([
-    sb('incidents?award_title=not.is.null&award_title=neq.&select=id,agent_id,requested_agent_name,award_title,incident_date,review_status,original_source_url,issuing_institution_id,submitted_by&order=incident_date.desc'),
+    sb('incidents?award_title=not.is.null&award_title=neq.&select=id,agent_id,requested_agent_name,award_title,incident_date,review_status,original_source_url,issuing_institution_id,submitted_by,submitted_role,contractor_paid,contractor_paid_at,contractor_paid_by&order=incident_date.desc'),
     sb('kudos_awards_public?select=award_id,award_slug'),
   ]);
   const agentIds = [...new Set(awards.map(a => a.agent_id).filter(Boolean))];
@@ -84,6 +89,8 @@ async function load() {
   rows = awards.map(a => ({
     agent: agentName[a.agent_id] || (a.requested_agent_name ? `${a.requested_agent_name} (new agent)` : ''), title: a.award_title, issuer: instName[a.issuing_institution_id] || '',
     date: a.incident_date || '', status: a.review_status || 'approved', by: a.submitted_by || '',
+    id: a.id, staff: a.submitted_role === 'staff', paid: !!a.contractor_paid,
+    paidNote: a.contractor_paid ? `Paid ${a.contractor_paid_at ? new Date(a.contractor_paid_at).toLocaleDateString('en-AU') : ''}${a.contractor_paid_by ? ' by ' + a.contractor_paid_by : ''}` : 'Not paid yet',
     src: a.original_source_url || '', kudos: slug[a.id] ? `https://kudos.agentbee.net/award/${slug[a.id]}` : '',
   }));
   render();
@@ -92,20 +99,47 @@ async function load() {
 function render() {
   const q = document.getElementById('q').value.trim().toLowerCase();
   const st = document.getElementById('status').value;
+  const pf = document.getElementById('paidFilter').value;
   const list = rows
     .filter(r => !st || r.status === st)
+    .filter(r => !pf || (r.staff && (pf === 'paid' ? r.paid : !r.paid)))
     .filter(r => !q || [r.agent, r.title, r.issuer, r.src, r.by].join(' ').toLowerCase().includes(q))
     .sort((a, b) => String(a[sortKey]).localeCompare(String(b[sortKey]), 'en', { sensitivity: 'base' }) * sortDir);
-  document.getElementById('count').textContent = `${list.length} of ${rows.length} awards`;
+  const unpaid = list.filter(r => r.staff && !r.paid && r.status !== 'rejected').length;
+  document.getElementById('count').textContent = `${list.length} of ${rows.length} awards` + (unpaid ? ` · ${unpaid} staff submission${unpaid === 1 ? '' : 's'} not yet paid` : '');
   const label = { approved: 'live', pending: 'pending', rejected: 'rejected' };
   document.getElementById('rows').innerHTML = list.map(r => `<tr>
     <td>${esc(r.agent)}</td><td>${esc(r.title)}</td><td>${esc(r.issuer)}</td>
     <td class="nowrap">${esc(r.date)}</td><td><span class="s s-${esc(r.status)}">${label[r.status] || esc(r.status)}</span></td>
     <td>${esc(r.by)}</td>
+    <td style="text-align:center;">${r.staff ? `<input type="checkbox" ${r.paid ? 'checked' : ''} ${IS_ADMIN ? '' : 'disabled'} title="${esc(r.paidNote)}" onchange="setPaid('${r.id}', this)" />` : ''}</td>
     <td class="nowrap">${r.src ? `<a href="${esc(r.src)}" target="_blank" rel="noopener">Source</a>` : ''}${r.kudos ? ` · <a href="${esc(r.kudos)}" target="_blank">Kudos</a>` : ''}</td>
   </tr>`).join('');
 }
 
+const IS_ADMIN = sessionStorage.getItem('ab-role') === 'admin';
+async function setPaid(id, box) {
+  const paid = box.checked;
+  box.disabled = true;
+  try {
+    const r = await fetch('/api/contractor-paid', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-session': sessionStorage.getItem('ab-session') || '' },
+      body: JSON.stringify({ incident_id: id, paid, by: sessionStorage.getItem('ab-name') || 'Admin' }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.ok) throw new Error(d.error || r.statusText);
+    const row = rows.find(x => x.id === id);
+    row.paid = paid;
+    row.paidNote = paid ? `Paid ${new Date().toLocaleDateString('en-AU')} by ${sessionStorage.getItem('ab-name') || 'Admin'}` : 'Not paid yet';
+    render();
+  } catch (e) {
+    alert(`Couldn't update: ${e.message}`);
+    box.checked = !paid; box.disabled = false;
+  }
+}
+
+document.getElementById('paidFilter').addEventListener('change', render);
 document.getElementById('q').addEventListener('input', render);
 document.getElementById('status').addEventListener('change', render);
 document.querySelectorAll('th[data-k]').forEach(th => th.addEventListener('click', () => {

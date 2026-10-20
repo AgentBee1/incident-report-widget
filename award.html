@@ -305,6 +305,7 @@ $('submitBtn').addEventListener('click', async () => {
     notify_agent: false,
     review_status: 'pending',
     submitted_by: NAME,
+    submitted_role: 'staff',
   };
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/incidents`, {
