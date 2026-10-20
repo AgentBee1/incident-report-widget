@@ -14,4 +14,4 @@ Everything else can be rolled back on its own.
 | **Award email function** | Deploy `rollback/award-notification/index.ts` as the `award-notification` Edge Function. |
 | **Database functions** | Run `rollback/database-functions.sql` in the Supabase SQL editor. |
 | **Postmark email template** | Paste the bodies from `rollback/postmark-template-46464153.md` back into the template. |
-| **Circle posting function** | Delete the `kudos-circle-post` Edge Function in Supabase (the old widget never calls it). |
+| **Circle posting function** | Part of the widget (`api/circle-post.js`), so it goes with the widget rollback. |

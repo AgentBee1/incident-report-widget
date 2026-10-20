@@ -456,6 +456,7 @@ async function submitAuth() {
     if (res.ok && data.ok) {
       sessionStorage.setItem('ab-admin-auth', 'true');
       if (data.supabaseKey) sessionStorage.setItem('ab-supabase-key', data.supabaseKey);
+      if (data.sessionToken) sessionStorage.setItem('ab-session', data.sessionToken);
       window._supabaseKey = data.supabaseKey || '';
       document.getElementById('auth-screen').classList.add('hidden');
       document.getElementById('main-content').style.display = 'block';
@@ -641,6 +642,11 @@ async function submitAuth() {
           <button id="clearIssuingInstBtn" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;padding:0;">✕ Remove</button>
         </div>
       </div>
+      <div class="field" style="margin-top:12px;">
+        <label>Original announcement link <span style="font-weight:400;color:#b45309;">— required: the LinkedIn, Instagram, Facebook or news post</span></label>
+        <input type="url" id="originalSourceUrl" placeholder="https://www.linkedin.com/posts/…" />
+        <div style="font-size:11px;color:#a16207;margin-top:3px;">Shown as evidence on the Kudos award page. The Circle post is created automatically when you submit.</div>
+      </div>
       <!-- Award notification toggle -->
       <div style="margin-top:16px;padding:14px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:9px;display:flex;align-items:flex-start;gap:12px;">
         <input type="checkbox" id="sendAwardEmail" style="margin-top:2px;width:15px;height:15px;cursor:pointer;flex-shrink:0;" />
@@ -728,7 +734,7 @@ async function submitAuth() {
       <div class="accred-selected-tags" id="accredSelectedTags"></div>
     </div>
 
-    <div class="field field-row">
+    <div class="field field-row" id="sourceUrlField">
       <label>Circle.so report URL <span style="font-weight:400;color:#9ca3af;">(optional — link to the published report on AgentBee)</span></label>
       <input type="url" id="sourceUrl" placeholder="https://agentbee.circle.so/…" />
     </div>
@@ -839,6 +845,16 @@ async function submitAuth() {
       <div class="summary-item" id="sum-accred-wrap" style="display:none;"><div class="summary-label">Accreditations</div><div class="summary-val" id="sum-accred">—</div></div>
     </div>
     <div class="status" id="submitStatus"></div>
+    <div id="kudosResult" style="display:none;margin-top:12px;padding:14px 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;font-size:13px;">
+      <div style="font-weight:600;color:#15803d;margin-bottom:8px;">🏆 Award saved</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span style="color:#6b7280;">Kudos link:</span>
+        <a id="kudosLink" href="#" target="_blank" style="color:#1d4ed8;word-break:break-all;"></a>
+        <button type="button" class="btn btn-secondary" id="copyKudosBtn" style="padding:4px 10px;font-size:12px;">Copy</button>
+      </div>
+      <div id="circleResult" style="margin-top:8px;color:#6b7280;"></div>
+      <button type="button" class="btn btn-secondary" id="retryCircleBtn" style="display:none;margin-top:8px;padding:5px 12px;font-size:12px;">Retry Circle post</button>
+    </div>
   </div>
 
   <!-- Email protocol -->
@@ -1056,6 +1072,7 @@ let _issuingInstSearchTimeout = null;
 function toggleAwardsPanel() {
   const isAward = document.getElementById('reportType').value === 'Awards & Recognition';
   document.getElementById('awardsPanel').classList.toggle('visible', isAward);
+  document.getElementById('sourceUrlField').style.display = isAward ? 'none' : '';
   document.getElementById('instLinkageNotice').classList.toggle('visible', isAward);
   // Hide email protocol banner for awards — client institutions notified via ticker automatically
   document.getElementById('emailProtocolBanner').style.display = isAward ? 'none' : '';
@@ -1586,6 +1603,9 @@ async function submitIncident() {
     if (!document.getElementById('awardTitle').value.trim()) {
       setStatus('submitStatus', 'error', 'Please enter the award title.'); return;
     }
+    if (!/^https?:\/\//i.test(document.getElementById('originalSourceUrl').value.trim())) {
+      setStatus('submitStatus', 'error', 'Please paste the original announcement link (starting with https://).'); return;
+    }
     if (!_issuingInstitution) {
       setStatus('submitStatus', 'error', 'Please select the issuing institution for this award.'); return;
     }
@@ -1596,14 +1616,6 @@ async function submitIncident() {
   setStatus('submitStatus', 'info', 'Creating incident record…');
 
   try {
-    // For Awards & Recognition — if send email not checked, temporarily clear email so trigger skips
-    if (isAward && !document.getElementById('sendAwardEmail').checked && selectedAgent.email) {
-      await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${selectedAgent.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ email: null }),
-      });
-    }
 
     setStatus('submitStatus', 'info', 'Creating incident record…');
     const incRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incidents`, {
@@ -1617,7 +1629,10 @@ async function submitIncident() {
         description: vals.description,
         source_type: document.getElementById('sourceType').value || null,
         report_type: vals.reportType || null,
-        source_url: document.getElementById('sourceUrl').value.trim() || null,
+        // Awards: source_url is filled in with the Circle post link after it's created.
+        source_url: isAward ? null : (document.getElementById('sourceUrl').value.trim() || null),
+        original_source_url: isAward ? (document.getElementById('originalSourceUrl').value.trim() || null) : null,
+        notify_agent: isAward ? document.getElementById('sendAwardEmail').checked : null,
       award_title: (vals.reportType === 'Awards & Recognition')
           ? (document.getElementById('awardTitle').value.trim() || null)
           : null,
@@ -1632,14 +1647,6 @@ async function submitIncident() {
     const incidentId = incData[0].id;
     submittedIncidentId = incidentId;
 
-    // Restore agent email if we cleared it to suppress the notification
-    if (isAward && !document.getElementById('sendAwardEmail').checked && selectedAgent.email) {
-      await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${selectedAgent.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ email: selectedAgent.email }),
-      });
-    }
 
     // For Awards & Recognition — insert the issuing institution link first
     if (vals.reportType === 'Awards & Recognition' && _issuingInstitution) {
@@ -1700,6 +1707,7 @@ async function submitIncident() {
     document.getElementById('commsBtn').disabled = false;
     btn.className = 'btn btn-success'; btn.innerHTML = '✓ Submitted';
     document.getElementById('addAnotherBtn').style.display = 'inline-flex';
+    if (isAward) await createCirclePostForAward(incidentId);
   } catch(e) { setStatus('submitStatus', 'error', e.message); btn.disabled = false; btn.innerHTML = 'Submit report'; }
 }
 
@@ -1856,6 +1864,9 @@ async function confirmEmailProtocol() {
 // ── Reset ────────────────────────────────────────────────────────
 function _resetAwardFields() {
   _issuingInstitution = null;
+  document.getElementById('originalSourceUrl').value = '';
+  document.getElementById('kudosResult').style.display = 'none';
+  document.getElementById('sourceUrlField').style.display = '';
   document.getElementById('awardTitle').value = '';
   document.getElementById('issuingInstSearch').value = '';
   document.getElementById('issuingInstCard').classList.remove('visible');
@@ -2181,13 +2192,71 @@ function updateTickerPreview() {
     else { badge.textContent = 'Informational'; badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;'; }
   } else { badge.textContent = 'No severity set'; badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;'; }
 
-  const url = document.getElementById('sourceUrl').value.trim();
+  const isAwardType = document.getElementById('reportType').value === 'Awards & Recognition';
+  const url = isAwardType ? 'https://kudos.agentbee.net/' : document.getElementById('sourceUrl').value.trim();
   const linkLine = document.getElementById('tickerLinkLine'), linkPreview = document.getElementById('tickerLinkPreview'), linkAnchor = document.getElementById('tickerLinkAnchor');
   if (url && url.startsWith('http')) { linkLine.style.display = 'none'; linkPreview.style.display = 'block'; linkAnchor.href = url; linkAnchor.title = url; }
   else { linkLine.style.display = 'block'; linkPreview.style.display = 'none'; }
 }
 
+// ── Kudos integration: Circle cross-reference post ────────────────
+// Creates the Circle post (agent name + Kudos preview card + View Award link), then
+// stores its link on the award as source_url, as before.
+async function createCirclePostForAward(incidentId) {
+  const box = document.getElementById('kudosResult');
+  const circleEl = document.getElementById('circleResult');
+  const retryBtn = document.getElementById('retryCircleBtn');
+  box.style.display = 'block'; retryBtn.style.display = 'none'; retryBtn.dataset.incidentId = incidentId;
+  circleEl.textContent = 'Creating Circle post…';
+  try {
+    const res = await fetch('/api/circle-post', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-session': sessionStorage.getItem('ab-session') || '' },
+      body: JSON.stringify({ incident_id: incidentId, draft: window.KUDOS_TEST_MODE === true }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data.kudosUrl) showKudosLink(data.kudosUrl);
+    if (!res.ok || !data.ok) throw new Error(data.error || res.statusText);
+    if (data.circleUrl) {
+      await sbFetch(`${SUPABASE_URL}/rest/v1/incidents?id=eq.${incidentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ source_url: data.circleUrl }),
+      });
+    }
+    circleEl.innerHTML = data.circleUrl
+      ? `Circle post ${window.KUDOS_TEST_MODE ? '(draft) ' : ''}created: <a href="${data.circleUrl}" target="_blank" style="color:#1d4ed8;">${data.circleUrl}</a>`
+      : 'Circle post created.';
+  } catch (e) {
+    circleEl.innerHTML = `<span style="color:#b91c1c;">⚠️ The award is saved, but the Circle post wasn't created: ${String(e.message || e).replace(/</g, '&lt;')}</span>`;
+    retryBtn.style.display = 'inline-flex';
+    if (!document.getElementById('kudosLink').textContent) {
+      // Fall back to looking the link up directly so it can still be copied.
+      try {
+        const r = await sbFetch(`${SUPABASE_URL}/rest/v1/kudos_awards_public?award_id=eq.${incidentId}&select=award_slug`);
+        const [row] = await r.json();
+        if (row) showKudosLink(`https://kudos.agentbee.net/award/${row.award_slug}`);
+      } catch {}
+    }
+  }
+}
+
+function showKudosLink(url) {
+  const a = document.getElementById('kudosLink');
+  a.href = url; a.textContent = url;
+}
+
 // ── Wire up all event listeners ──────────────────────────────────
+document.getElementById('copyKudosBtn').addEventListener('click', async function() {
+  const url = document.getElementById('kudosLink').textContent;
+  if (!url) return;
+  try { await navigator.clipboard.writeText(url); this.textContent = 'Copied ✓'; }
+  catch { window.prompt('Copy this link:', url); }
+  setTimeout(() => { this.textContent = 'Copy'; }, 2000);
+});
+document.getElementById('retryCircleBtn').addEventListener('click', function() {
+  if (this.dataset.incidentId) createCirclePostForAward(this.dataset.incidentId);
+});
 document.getElementById('parseHandoffBtn').addEventListener('click', parseHandoff);
 document.getElementById('clearHandoffBtn').addEventListener('click', clearHandoff);
 document.getElementById('agentLookupBtn').addEventListener('click', lookupAgent);
