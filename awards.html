@@ -21,6 +21,8 @@
   th, td { text-align:left; padding:9px 12px; border-bottom:1px solid #f1f2f4; vertical-align:top; }
   th { font-size:12px; color:var(--muted); font-weight:600; background:#fafbfc; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
   td.nowrap { white-space:nowrap; }
+  th.c, td.c { text-align:center; width:64px; }
+  td.c input { margin:0; vertical-align:middle; }
   .s { font-size:11px; padding:2px 8px; border-radius:10px; white-space:nowrap; }
   .s-approved { background:#f0fdf4; color:#15803d; }
   .s-pending { background:#fffbeb; color:#92400e; }
@@ -55,7 +57,7 @@
     <table>
       <thead><tr>
         <th data-k="agent">Agent</th><th data-k="title">Award</th><th data-k="issuer">Issuer</th>
-        <th data-k="date">Date</th><th data-k="status">Status</th><th data-k="by">Submitted by</th><th data-k="paid" title="Has the contractor been paid for this submission?">Paid?</th><th>Links</th>
+        <th data-k="date">Date</th><th data-k="status">Status</th><th data-k="by">Submitted by</th><th data-k="paid" class="c" title="Has the contractor been paid for this submission?">Paid?</th><th>Links</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
@@ -112,7 +114,7 @@ function render() {
     <td>${esc(r.agent)}</td><td>${esc(r.title)}</td><td>${esc(r.issuer)}</td>
     <td class="nowrap">${esc(r.date)}</td><td><span class="s s-${esc(r.status)}">${label[r.status] || esc(r.status)}</span></td>
     <td>${esc(r.by)}</td>
-    <td style="text-align:center;">${r.staff ? `<input type="checkbox" ${r.paid ? 'checked' : ''} ${IS_ADMIN ? '' : 'disabled'} title="${esc(r.paidNote)}" onchange="setPaid('${r.id}', this)" />` : ''}</td>
+    <td class="c">${r.staff ? `<input type="checkbox" ${r.paid ? 'checked' : ''} ${IS_ADMIN ? '' : 'disabled'} title="${esc(r.paidNote)}" onchange="setPaid('${r.id}', this)" />` : ''}</td>
     <td class="nowrap">${r.src ? `<a href="${esc(r.src)}" target="_blank" rel="noopener">Source</a>` : ''}${r.kudos ? ` · <a href="${esc(r.kudos)}" target="_blank">Kudos</a>` : ''}</td>
   </tr>`).join('');
 }
