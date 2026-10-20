@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>All awards — AgentBee</title>
+<style>
+  :root { --ink:#1a1d23; --muted:#6b7280; --line:#e5e7eb; --blue:#1d4ed8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background:#f6f7f9; color:var(--ink); font-size:14px; }
+  .page { max-width: 1200px; margin: 0 auto; padding: 24px 16px 60px; }
+  .top { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+  h1 { margin:0; font-size:22px; }
+  a { color: var(--blue); }
+  .muted { color: var(--muted); }
+  .tools { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  input, select { padding:9px 12px; border:1px solid #d1d5db; border-radius:8px; font:inherit; background:#fff; }
+  input { flex:1; min-width:220px; }
+  .wrap { background:#fff; border:1px solid var(--line); border-radius:12px; overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:9px 12px; border-bottom:1px solid #f1f2f4; vertical-align:top; }
+  th { font-size:12px; color:var(--muted); font-weight:600; background:#fafbfc; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td.nowrap { white-space:nowrap; }
+  .s { font-size:11px; padding:2px 8px; border-radius:10px; white-space:nowrap; }
+  .s-approved { background:#f0fdf4; color:#15803d; }
+  .s-pending { background:#fffbeb; color:#92400e; }
+  .s-rejected { background:#fef2f2; color:#b91c1c; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <div>
+      <h1>All awards</h1>
+      <div class="muted">Check here before submitting an award, to avoid duplicates. Includes pending and rejected awards.</div>
+    </div>
+    <div><a href="/">← Back to widget</a><span id="reviewLink"></span></div>
+  </div>
+  <div class="tools">
+    <input id="q" type="search" placeholder="Search agent, award, issuer or link…" />
+    <select id="status">
+      <option value="">All statuses</option>
+      <option value="approved">Live</option>
+      <option value="pending">Pending</option>
+      <option value="rejected">Rejected</option>
+    </select>
+  </div>
+  <div class="muted" id="count" style="margin-bottom:8px;">Loading…</div>
+  <div class="wrap">
+    <table>
+      <thead><tr>
+        <th data-k="agent">Agent</th><th data-k="title">Award</th><th data-k="issuer">Issuer</th>
+        <th data-k="date">Date</th><th data-k="status">Status</th><th data-k="by">Submitted by</th><th>Links</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://mtatzzrbapftzwuxrcko.supabase.co';
+const KEY = sessionStorage.getItem('ab-supabase-key') || '';
+if (sessionStorage.getItem('ab-admin-auth') !== 'true') { location.href = '/'; }
+if (sessionStorage.getItem('ab-role') === 'admin') document.getElementById('reviewLink').innerHTML = ' · <a href="/review.html">Review queue</a>';
+const sb = (path) => fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } }).then(r => r.json());
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let rows = [], sortKey = 'date', sortDir = -1;
+
+async function load() {
+  const [awards, pub] = await Promise.all([
+    sb('incidents?award_title=not.is.null&award_title=neq.&select=id,agent_id,award_title,incident_date,review_status,original_source_url,issuing_institution_id,submitted_by&order=incident_date.desc'),
+    sb('kudos_awards_public?select=award_id,award_slug'),
+  ]);
+  const agentIds = [...new Set(awards.map(a => a.agent_id))];
+  const agents = agentIds.length ? await sb(`agents?id=in.(${agentIds.join(',')})&select=id,agency_name,canonical_agent_id`) : [];
+  const canonIds = [...new Set(agents.map(a => a.canonical_agent_id).filter(Boolean))];
+  const canon = canonIds.length ? await sb(`agents?id=in.(${canonIds.join(',')})&select=id,agency_name`) : [];
+  const instIds = [...new Set(awards.map(a => a.issuing_institution_id).filter(Boolean))];
+  const insts = instIds.length ? await sb(`institutions?id=in.(${instIds.join(',')})&select=id,name`) : [];
+  const agentName = {}; const canonName = Object.fromEntries(canon.map(c => [c.id, c.agency_name]));
+  agents.forEach(a => agentName[a.id] = a.canonical_agent_id ? (canonName[a.canonical_agent_id] || a.agency_name) : a.agency_name);
+  const instName = Object.fromEntries(insts.map(i => [i.id, i.name]));
+  const slug = Object.fromEntries(pub.map(p => [p.award_id, p.award_slug]));
+  rows = awards.map(a => ({
+    agent: agentName[a.agent_id] || '', title: a.award_title, issuer: instName[a.issuing_institution_id] || '',
+    date: a.incident_date || '', status: a.review_status || 'approved', by: a.submitted_by || '',
+    src: a.original_source_url || '', kudos: slug[a.id] ? `https://kudos.agentbee.net/award/${slug[a.id]}` : '',
+  }));
+  render();
+}
+
+function render() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const st = document.getElementById('status').value;
+  const list = rows
+    .filter(r => !st || r.status === st)
+    .filter(r => !q || [r.agent, r.title, r.issuer, r.src, r.by].join(' ').toLowerCase().includes(q))
+    .sort((a, b) => String(a[sortKey]).localeCompare(String(b[sortKey]), 'en', { sensitivity: 'base' }) * sortDir);
+  document.getElementById('count').textContent = `${list.length} of ${rows.length} awards`;
+  const label = { approved: 'live', pending: 'pending', rejected: 'rejected' };
+  document.getElementById('rows').innerHTML = list.map(r => `<tr>
+    <td>${esc(r.agent)}</td><td>${esc(r.title)}</td><td>${esc(r.issuer)}</td>
+    <td class="nowrap">${esc(r.date)}</td><td><span class="s s-${esc(r.status)}">${label[r.status] || esc(r.status)}</span></td>
+    <td>${esc(r.by)}</td>
+    <td class="nowrap">${r.src ? `<a href="${esc(r.src)}" target="_blank" rel="noopener">Source</a>` : ''}${r.kudos ? ` · <a href="${esc(r.kudos)}" target="_blank">Kudos</a>` : ''}</td>
+  </tr>`).join('');
+}
+
+document.getElementById('q').addEventListener('input', render);
+document.getElementById('status').addEventListener('change', render);
+document.querySelectorAll('th[data-k]').forEach(th => th.addEventListener('click', () => {
+  const k = th.dataset.k; sortDir = sortKey === k ? -sortDir : 1; sortKey = k; render();
+}));
+load().catch(e => { document.getElementById('count').textContent = `Couldn't load awards: ${e.message}`; });
+</script>
+</body>
+</html>

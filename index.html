@@ -442,6 +442,7 @@
 <script>
 async function submitAuth() {
   const passphrase = document.getElementById('passphraseInput').value;
+  const name = (document.getElementById('authNameInput').value || '').trim();
   if (!passphrase) return;
   const btn = document.getElementById('authSubmitBtn');
   const btnText = document.getElementById('authBtnText');
@@ -457,6 +458,9 @@ async function submitAuth() {
       sessionStorage.setItem('ab-admin-auth', 'true');
       if (data.supabaseKey) sessionStorage.setItem('ab-supabase-key', data.supabaseKey);
       if (data.sessionToken) sessionStorage.setItem('ab-session', data.sessionToken);
+      sessionStorage.setItem('ab-role', data.role || 'admin');
+      sessionStorage.setItem('ab-name', name || (data.role === 'admin' ? 'Admin' : 'Staff'));
+      applyRoleUI();
       window._supabaseKey = data.supabaseKey || '';
       document.getElementById('auth-screen').classList.add('hidden');
       document.getElementById('main-content').style.display = 'block';
@@ -471,6 +475,10 @@ async function submitAuth() {
 }
 
 (function() {
+  // Sessions from before roles were added must log in again.
+  if (sessionStorage.getItem('ab-admin-auth') === 'true' && !sessionStorage.getItem('ab-role')) {
+    sessionStorage.removeItem('ab-admin-auth');
+  }
   if (sessionStorage.getItem('ab-admin-auth') === 'true') {
     window._supabaseKey = sessionStorage.getItem('ab-supabase-key') || '';
     function restoreSession() {
@@ -496,7 +504,11 @@ async function submitAuth() {
       </div>
     </div>
     <h1>Sign in</h1>
-    <p>Enter your admin passphrase to continue.</p>
+    <p>Enter your name and passphrase to continue.</p>
+    <div class="auth-field">
+      <label>Your name</label>
+      <input type="text" id="authNameInput" placeholder="e.g. Geoff" autocomplete="name" />
+    </div>
     <div class="auth-field">
       <label>Passphrase</label>
       <input type="password" id="passphraseInput" placeholder="Enter passphrase" onkeydown="if(event.key==='Enter')submitAuth()" />
@@ -511,7 +523,14 @@ async function submitAuth() {
 <div class="page" id="main-content" style="display:none;">
 
   <div class="page-header">
-    <div class="breadcrumb"><span>Admin</span> › Incident Management › New Report</div>
+    <div class="breadcrumb" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <span><span>Admin</span> › Incident Management › New Report</span>
+      <span id="roleBar" style="display:flex;gap:12px;align-items:center;font-size:12px;">
+        <span id="roleBadge" style="padding:2px 8px;border-radius:20px;background:#eef2ff;color:#3730a3;"></span>
+        <a href="/awards.html" style="color:#1d4ed8;">All awards</a>
+        <a href="/review.html" id="reviewLink" style="color:#1d4ed8;display:none;">Review queue <span id="reviewCount"></span></a>
+      </span>
+    </div>
     <h1>New Incident Report</h1>
     <p>Create a new incident or report and link it to affected institutions.</p>
   </div>
@@ -646,6 +665,10 @@ async function submitAuth() {
         <label>Original announcement link <span style="font-weight:400;color:#b45309;">— required: the LinkedIn, Instagram, Facebook or news post</span></label>
         <input type="url" id="originalSourceUrl" placeholder="https://www.linkedin.com/posts/…" />
         <div style="font-size:11px;color:#a16207;margin-top:3px;">Shown as evidence on the Kudos award page. The Circle post is created automatically when you submit.</div>
+      </div>
+      <div id="dupPanel" style="display:none;margin-top:14px;padding:12px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:9px;font-size:12px;"></div>
+      <div id="staffReviewNote" style="display:none;margin-top:12px;padding:10px 14px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:9px;font-size:12px;color:#3730a3;">
+        🕒 Awards you submit go to the review queue. Nothing is published, posted to Circle or emailed until it's approved.
       </div>
       <!-- Award notification toggle -->
       <div style="margin-top:16px;padding:14px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:9px;display:flex;align-items:flex-start;gap:12px;">
@@ -1073,6 +1096,7 @@ function toggleAwardsPanel() {
   const isAward = document.getElementById('reportType').value === 'Awards & Recognition';
   document.getElementById('awardsPanel').classList.toggle('visible', isAward);
   document.getElementById('sourceUrlField').style.display = isAward ? 'none' : '';
+  if (isAward) checkAwardDuplicates(); else document.getElementById('dupPanel').style.display = 'none';
   document.getElementById('instLinkageNotice').classList.toggle('visible', isAward);
   // Hide email protocol banner for awards — client institutions notified via ticker automatically
   document.getElementById('emailProtocolBanner').style.display = isAward ? 'none' : '';
@@ -1124,6 +1148,7 @@ function initIssuingInstSearch() {
     document.getElementById('issuingInstName').textContent = inst.name;
     document.getElementById('issuingInstCard').classList.add('visible');
     autoPopulateAwardDescription();
+    checkAwardDuplicates();
   });
 
   document.getElementById('clearIssuingInstBtn').addEventListener('click', () => {
@@ -1309,6 +1334,7 @@ function resolveAgent(agent) {
   window._authorisedClientsPromise = lookupAuthorisedClients(agent.id);
   showAgentHierarchy(agent);
   checkAgentEmailField();
+  checkAwardDuplicates();
 }
 
 function checkAgentEmailField() {
@@ -1633,6 +1659,8 @@ async function submitIncident() {
         source_url: isAward ? null : (document.getElementById('sourceUrl').value.trim() || null),
         original_source_url: isAward ? (document.getElementById('originalSourceUrl').value.trim() || null) : null,
         notify_agent: isAward ? document.getElementById('sendAwardEmail').checked : null,
+        review_status: (isAward && currentRole() !== 'admin') ? 'pending' : 'approved',
+        submitted_by: sessionStorage.getItem('ab-name') || null,
       award_title: (vals.reportType === 'Awards & Recognition')
           ? (document.getElementById('awardTitle').value.trim() || null)
           : null,
@@ -1707,7 +1735,11 @@ async function submitIncident() {
     document.getElementById('commsBtn').disabled = false;
     btn.className = 'btn btn-success'; btn.innerHTML = '✓ Submitted';
     document.getElementById('addAnotherBtn').style.display = 'inline-flex';
-    if (isAward) await createCirclePostForAward(incidentId);
+    if (isAward && currentRole() !== 'admin') {
+      setStatus('submitStatus', 'success', `Award submitted for review. It will go live once it's approved.`);
+    } else if (isAward) {
+      await createCirclePostForAward(incidentId);
+    }
   } catch(e) { setStatus('submitStatus', 'error', e.message); btn.disabled = false; btn.innerHTML = 'Submit report'; }
 }
 
@@ -1865,6 +1897,7 @@ async function confirmEmailProtocol() {
 function _resetAwardFields() {
   _issuingInstitution = null;
   document.getElementById('originalSourceUrl').value = '';
+  document.getElementById('dupPanel').style.display = 'none';
   document.getElementById('kudosResult').style.display = 'none';
   document.getElementById('sourceUrlField').style.display = '';
   document.getElementById('awardTitle').value = '';
@@ -2241,6 +2274,107 @@ async function createCirclePostForAward(incidentId) {
   }
 }
 
+// ── Roles ─────────────────────────────────────────────────────────
+function currentRole() { return sessionStorage.getItem('ab-role') || 'staff'; }
+
+async function applyRoleUI() {
+  const role = currentRole();
+  const badge = document.getElementById('roleBadge');
+  if (!badge) return;
+  badge.textContent = `${sessionStorage.getItem('ab-name') || ''} · ${role === 'admin' ? 'Admin' : 'Staff'}`;
+  document.getElementById('reviewLink').style.display = role === 'admin' ? '' : 'none';
+  document.getElementById('staffReviewNote').style.display = role === 'admin' ? 'none' : 'block';
+  if (role === 'admin') {
+    try {
+      const r = await sbFetch(`${SUPABASE_URL}/rest/v1/incidents?review_status=eq.pending&select=id`, { headers: { Prefer: 'count=exact', Range: '0-0' } });
+      const total = (r.headers.get('content-range') || '').split('/')[1];
+      document.getElementById('reviewCount').textContent = total && total !== '0' ? `(${total})` : '';
+    } catch {}
+  }
+}
+
+// ── Duplicate check for awards ────────────────────────────────────
+// Shows the agent's existing awards (live, pending, rejected) and warns when the same
+// post link, or the same issuer with a similar title, is already on record.
+function _norm(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+function _postKeys(url) {
+  const u = String(url || '');
+  const keys = new Set();
+  (u.match(/\d{15,}/g) || []).forEach(k => keys.add(k));                       // LinkedIn / Facebook ids
+  const ig = u.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/); if (ig) keys.add(ig[1]);
+  const short = u.match(/lnkd\.in\/(?:p\/)?([A-Za-z0-9_-]+)/); if (short) keys.add(short[1]);
+  return [...keys];
+}
+let _dupTimer = null;
+function checkAwardDuplicates() {
+  clearTimeout(_dupTimer);
+  _dupTimer = setTimeout(_checkAwardDuplicates, 350);
+}
+async function _checkAwardDuplicates() {
+  const panel = document.getElementById('dupPanel');
+  if (document.getElementById('reportType').value !== 'Awards & Recognition') { panel.style.display = 'none'; return; }
+  const link = document.getElementById('originalSourceUrl').value.trim();
+  const title = document.getElementById('awardTitle').value.trim();
+  if (!selectedAgent && !link) { panel.style.display = 'none'; return; }
+  try {
+    const sel = 'id,award_title,incident_date,review_status,original_source_url,issuing_institution_id,agent_id';
+    let existing = [];
+    if (selectedAgent) {
+      const canon = selectedAgent.canonical_agent_id || selectedAgent.id;
+      const ar = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?or=(id.eq.${canon},canonical_agent_id.eq.${canon})&select=id`);
+      const ids = (await ar.json()).map(a => a.id);
+      if (ids.length) {
+        const r = await sbFetch(`${SUPABASE_URL}/rest/v1/incidents?agent_id=in.(${ids.join(',')})&award_title=not.is.null&select=${sel}&order=incident_date.desc`);
+        existing = await r.json();
+      }
+    }
+    // Same post link anywhere in the database (any agent).
+    let linkHits = [];
+    for (const key of _postKeys(link)) {
+      const r = await sbFetch(`${SUPABASE_URL}/rest/v1/incidents?award_title=not.is.null&original_source_url=ilike.*${encodeURIComponent(key)}*&select=${sel}`);
+      linkHits.push(...await r.json());
+    }
+    if (link) {
+      const r = await sbFetch(`${SUPABASE_URL}/rest/v1/incidents?award_title=not.is.null&original_source_url=eq.${encodeURIComponent(link)}&select=${sel}`);
+      linkHits.push(...await r.json());
+    }
+    linkHits = [...new Map(linkHits.map(h => [h.id, h])).values()];
+
+    // Issuer names for display.
+    const instIds = [...new Set([...existing, ...linkHits].map(a => a.issuing_institution_id).filter(Boolean))];
+    const names = {};
+    if (instIds.length) {
+      const r = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?id=in.(${instIds.join(',')})&select=id,name`);
+      (await r.json()).forEach(i => names[i.id] = i.name);
+    }
+
+    const warnings = [];
+    if (linkHits.length) warnings.push(`⚠️ This announcement link is already on record (${linkHits.map(h => `"${h.award_title}"`).join(', ')}). It's only OK if the same post announces a different award.`);
+    if (title && _issuingInstitution) {
+      const nt = _norm(title);
+      const similar = existing.filter(a => a.issuing_institution_id === _issuingInstitution.id && nt &&
+        (_norm(a.award_title) === nt || _norm(a.award_title).includes(nt) || nt.includes(_norm(a.award_title))));
+      if (similar.length) warnings.push(`⚠️ This agent already has a similar award from ${_issuingInstitution.name}: ${similar.map(a => `"${a.award_title}" (${a.incident_date || 'no date'})`).join(', ')}.`);
+    }
+
+    const badge = s => s === 'pending' ? '<span style="color:#92400e;background:#fffbeb;padding:1px 6px;border-radius:10px;">pending</span>'
+      : s === 'rejected' ? '<span style="color:#b91c1c;background:#fef2f2;padding:1px 6px;border-radius:10px;">rejected</span>'
+      : '<span style="color:#15803d;background:#f0fdf4;padding:1px 6px;border-radius:10px;">live</span>';
+    const esc = t => String(t || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    let html = warnings.map(w => `<div style="color:#b45309;margin-bottom:8px;">${esc(w)}</div>`).join('');
+    if (selectedAgent) {
+      html += `<div style="font-weight:600;color:#374151;margin-bottom:6px;">Existing awards for ${esc(selectedAgent.agency_name)} (${existing.length})</div>`;
+      html += existing.length
+        ? existing.map(a => `<div style="padding:4px 0;border-top:1px solid #f3f4f6;">${badge(a.review_status)} <strong>${esc(a.award_title)}</strong> · ${esc(names[a.issuing_institution_id] || 'unknown issuer')} · ${esc(a.incident_date || '')}</div>`).join('')
+        : '<div style="color:#6b7280;">None yet.</div>';
+    }
+    panel.innerHTML = html;
+    panel.style.display = html ? 'block' : 'none';
+  } catch (e) {
+    console.warn('Duplicate check failed', e);
+  }
+}
+
 function showKudosLink(url) {
   const a = document.getElementById('kudosLink');
   a.href = url; a.textContent = url;
@@ -2254,6 +2388,9 @@ document.getElementById('copyKudosBtn').addEventListener('click', async function
   catch { window.prompt('Copy this link:', url); }
   setTimeout(() => { this.textContent = 'Copy'; }, 2000);
 });
+document.getElementById('originalSourceUrl').addEventListener('input', checkAwardDuplicates);
+document.getElementById('awardTitle').addEventListener('input', checkAwardDuplicates);
+applyRoleUI();
 document.getElementById('retryCircleBtn').addEventListener('click', function() {
   if (this.dataset.incidentId) createCirclePostForAward(this.dataset.incidentId);
 });

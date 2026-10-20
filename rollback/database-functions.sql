@@ -102,4 +102,29 @@ begin
 end;
 $function$;
 
--- alter table public.incidents drop column if exists notify_agent;
+-- Review step (added later the same day): stop the approval trigger and the daily summary.
+drop trigger if exists award_notification_on_approval on public.incidents;
+select cron.unschedule('kudos-review-digest');
+
+-- Public Kudos view as it was before the review step (no review_status filter).
+create or replace view public.kudos_awards_public
+with (security_invoker = false) as
+select
+  i.id as award_id,
+  public.kudos_slugify(ca.agency_name || ' ' || i.award_title) || '-' || left(i.id::text, 6) as award_slug,
+  i.award_title, i.incident_date as award_date,
+  ca.id as agent_id, ca.agency_name as agent_name, public.kudos_slugify(ca.agency_name) as agent_slug,
+  ca.country as agent_country, ca.website as agent_website, ca.logo_url as agent_logo_url,
+  coalesce(ca.is_kudos_client, false) as is_kudos_client,
+  inst.name as issuer_name, inst.country as issuer_country,
+  i.original_source_url as source_url, i.created_at
+from public.incidents i
+join public.agents a on a.id = i.agent_id
+join public.agents ca on ca.id = coalesce(a.canonical_agent_id, a.id)
+left join public.institutions inst on inst.id = i.issuing_institution_id
+where i.award_title is not null and i.award_title <> '' and coalesce(i.is_voided, false) = false;
+
+-- The new columns (notify_agent, review_status, submitted_by, reviewed_by, reviewed_at) are
+-- harmless if left. To remove them as well:
+-- alter table public.incidents drop column if exists notify_agent, drop column if exists review_status,
+--   drop column if exists submitted_by, drop column if exists reviewed_by, drop column if exists reviewed_at;

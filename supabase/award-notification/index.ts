@@ -1,4 +1,4 @@
-// award-notification Edge Function (v5, Kudos integration, 21 Oct 2026)
+// award-notification Edge Function (v6, Kudos integration + review step, 21 Oct 2026)
 //
 // Called by the award_notification_trigger when an award is saved. Emails the agent via
 // Postmark with a link to their award on kudos.agentbee.net.
@@ -60,14 +60,19 @@ Deno.serve(async (req) => {
     // Trust the database, not the request body.
     const { data: award } = await supabase
       .from('incidents')
-      .select('id, agent_id, report_type, award_title, issuing_institution_id, notify_agent, created_at, is_voided')
+      .select('id, agent_id, report_type, award_title, issuing_institution_id, notify_agent, created_at, reviewed_at, review_status, is_voided')
       .eq('id', record.id)
       .single();
 
     if (!award || award.report_type !== 'Awards & Recognition' || award.is_voided) {
       return new Response('Ignored: not an award', { status: 200 });
     }
-    if (Date.now() - new Date(award.created_at).getTime() > MAX_AGE_MS) {
+    if (award.review_status && award.review_status !== 'approved') {
+      return new Response('Ignored: award not approved yet', { status: 200 });
+    }
+    // "Newly published" = saved (or approved, for staff submissions) in the last 10 minutes.
+    const publishedAt = award.reviewed_at || award.created_at;
+    if (Date.now() - new Date(publishedAt).getTime() > MAX_AGE_MS) {
       return new Response('Ignored: not a newly saved award', { status: 200 });
     }
     if (award.notify_agent === false) {
