@@ -80,8 +80,10 @@ export default async function handler(req, res) {
     };
     if (process.env.CIRCLE_AUTHOR_EMAIL) payload.user_email = process.env.CIRCLE_AUTHOR_EMAIL;
 
-    const post = await circle('/posts', payload);
-    return res.status(200).json({ ok: true, circleUrl: post.url || null, circlePostId: post.id, kudosUrl });
+    // Circle replies with { success, message, post: {...} }.
+    const created = await circle('/posts', payload);
+    const post = created.post || created;
+    return res.status(200).json({ ok: true, circleUrl: post.url || null, circlePostId: post.id || null, kudosUrl });
   } catch (e) {
     console.error('circle-post failed:', e);
     return res.status(502).json({ error: String(e.message || e) });
