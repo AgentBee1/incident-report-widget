@@ -32,6 +32,13 @@
   .warn { color:#b45309; font-size:12px; margin-top:10px; }
   .result { margin-top:10px; font-size:13px; }
   iframe { width:100%; border:0; background:#fff; border-radius:8px; }
+  .pub { display:inline-block; background:#eff6ff; color:var(--blue); border:1px solid #bfdbfe; border-radius:10px; padding:1px 8px; font-weight:600; margin-right:4px; }
+  .said { font-size:12px; color:#374151; background:#f9fafb; border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin:-4px 0 10px; }
+  .drop { display:none; position:absolute; left:0; right:0; top:100%; background:#fff; border:1px solid var(--line); border-radius:8px; z-index:5; max-height:220px; overflow:auto; }
+  .drop div { padding:7px 10px; cursor:pointer; }
+  .drop div:hover { background:#f3f4f6; }
+  .drop .none { color:var(--muted); cursor:default; }
+  img.upload { width:100%; border-radius:8px; border:1px solid var(--line); background:#fff; display:block; }
   .empty { text-align:center; padding:60px 16px; color:var(--muted); background:#fff; border:1px solid var(--line); border-radius:12px; }
   @media (max-width: 800px) { .card { grid-template-columns: 1fr; } .card .left { border-right:0; border-bottom:1px solid var(--line); } }
 </style>
@@ -77,7 +84,7 @@ function embedSrc(url) {
 }
 
 async function load() {
-  const pending = await sb('incidents?review_status=eq.pending&select=id,agent_id,requested_agent_name,requested_agent_website,award_title,incident_date,original_source_url,issuing_institution_id,notify_agent,submitted_by,created_at&order=created_at.asc');
+  const pending = await sb('incidents?review_status=eq.pending&select=id,agent_id,requested_agent_name,requested_agent_website,award_title,incident_date,original_source_url,issuing_institution_id,notify_agent,submitted_by,description,created_at&order=created_at.asc');
   document.getElementById('summary').textContent = pending.length
     ? `${pending.length} award${pending.length === 1 ? '' : 's'} waiting for review`
     : '';
@@ -109,7 +116,8 @@ async function load() {
     return `
     <div class="card" id="card-${p.id}">
       <div class="left">
-        <div class="meta">Submitted by <strong>${esc(p.submitted_by || 'unknown')}</strong> · ${new Date(p.created_at).toLocaleString('en-AU')}</div>
+        <div class="meta">${isPublic(p) ? '<span class="pub">Public submission</span> ' : ''}Submitted by <strong>${esc(p.submitted_by || 'unknown')}</strong> · ${new Date(p.created_at).toLocaleString('en-AU')}</div>
+        ${isPublic(p) ? `<div class="said">${esc(p.description)}</div>` : ''}
         ${p.agent_id ? `
           <div style="font-size:16px;font-weight:700;">${esc(c.agency_name || a.agency_name)}
             <a href="#" style="font-size:12px;font-weight:400;margin-left:6px;" onclick="toggleAgentPicker('${p.id}');return false;">change agent</a></div>
@@ -135,7 +143,13 @@ async function load() {
             </div>
           </div>`}
         </div>
-        <div class="muted" style="margin-top:2px;">Issued by <strong>${esc(instName[p.issuing_institution_id] || '—')}</strong></div>
+        <label>Issued by</label>
+        <div id="instSel-${p.id}" style="font-size:13px;">${p.issuing_institution_id ? `<strong>${esc(instName[p.issuing_institution_id] || '—')}</strong>` : '<span class="warn" style="margin:0;">No issuer matched yet. Pick one below.</span>'}
+          <a href="#" style="font-size:12px;margin-left:6px;" onclick="toggleInstPicker('${p.id}');return false;">${p.issuing_institution_id ? 'change' : ''}</a></div>
+        <div id="instPick-${p.id}" style="display:${p.issuing_institution_id ? 'none' : 'block'};position:relative;margin-top:6px;">
+          <input type="text" placeholder="Search institutions…" oninput="searchInsts('${p.id}', this.value)" autocomplete="off" />
+          <div id="instDrop-${p.id}" class="drop"></div>
+        </div>
         <label>Award title</label>
         <input type="text" data-f="award_title" value="${esc(p.award_title)}" />
         <div class="row">
@@ -161,10 +175,40 @@ async function load() {
       <div class="right">
         <div style="font-size:12px;font-weight:600;margin-bottom:8px;">Source</div>
         ${src ? `<iframe src="${esc(src)}" height="560" loading="lazy"></iframe>` : ''}
-        <div style="margin-top:8px;font-size:12px;">${p.original_source_url ? `<a href="${esc(p.original_source_url)}" target="_blank" rel="noopener">Open the original post ↗</a>` : '<span class="warn">No source link entered.</span>'}</div>
+        ${!src && isUpload(p) && !/\(uploaded PDF\)/.test(p.description || '') ? `<img class="upload" src="${esc(p.original_source_url)}" alt="Uploaded award evidence" onerror="this.remove()" />` : ''}
+        <div style="margin-top:8px;font-size:12px;">${p.original_source_url ? `<a href="${esc(p.original_source_url)}" target="_blank" rel="noopener">${isUpload(p) ? 'Open the uploaded file ↗' : 'Open the original post ↗'}</a>` : '<span class="warn">No source link entered.</span>'}</div>
       </div>
     </div>`;
   }).join('');
+}
+
+const isPublic = p => p.submitted_by === 'Public Kudos form';
+const isUpload = p => /(^|\.)circle\.so$/.test((() => { try { return new URL(p.original_source_url).hostname; } catch { return ''; } })());
+
+// ── Issuer picker (public submissions arrive as free text) ──────
+const pickedInsts = {};
+let instTimer;
+function toggleInstPicker(id) {
+  const el = document.getElementById(`instPick-${id}`);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function searchInsts(id, q) {
+  clearTimeout(instTimer);
+  const drop = document.getElementById(`instDrop-${id}`);
+  if (q.trim().length < 2) { drop.style.display = 'none'; return; }
+  instTimer = setTimeout(async () => {
+    const rows = await sb(`institutions?name=ilike.*${encodeURIComponent(q.trim())}*&select=id,name,country&limit=12&order=name`);
+    drop.innerHTML = rows.length ? rows.map(r => `<div onclick="pickInst('${id}','${r.id}',this.dataset.n)" data-n="${esc(r.name)}">${esc(r.name)}${r.country ? ` · ${esc(r.country)}` : ''}</div>`).join('')
+      : '<div class="none">No matches</div>';
+    drop.style.display = 'block';
+  }, 250);
+}
+function pickInst(id, instId, name) {
+  pickedInsts[id] = instId;
+  document.getElementById(`instDrop-${id}`).style.display = 'none';
+  document.getElementById(`instPick-${id}`).style.display = 'none';
+  document.getElementById(`instSel-${id}`).innerHTML = `<strong>${esc(name)}</strong> <span style="color:#15803d;font-size:12px;">✓ will be saved</span>
+    <a href="#" style="font-size:12px;margin-left:6px;" onclick="toggleInstPicker('${id}');return false;">change</a>`;
 }
 
 // ── Agent picker (for new or wrongly chosen agents) ──────────────
@@ -206,6 +250,7 @@ async function act(id, action, btn) {
       if (!body.new_agent.agency_name) { res.innerHTML = '<span style="color:#b91c1c;">Enter the agency name.</span>'; return; }
     }
     body.edits = {};
+    if (pickedInsts[id]) body.edits.issuing_institution_id = pickedInsts[id];
     card.querySelectorAll('[data-f]').forEach(el => {
       body.edits[el.dataset.f] = el.type === 'checkbox' ? el.checked : (el.value.trim() || null);
     });

@@ -11,7 +11,7 @@ import { sb, createCirclePost } from './_kudos.js';
 // links the issuing institution, sends the held-back client ticker entries, then creates the
 // Circle cross-reference post.
 
-const EDITABLE = ['award_title', 'incident_date', 'original_source_url', 'notify_agent'];
+const EDITABLE = ['award_title', 'incident_date', 'original_source_url', 'notify_agent', 'issuing_institution_id'];
 const uuid = (v) => /^[0-9a-f-]{36}$/i.test(v || '');
 
 export default async function handler(req, res) {
@@ -50,6 +50,7 @@ export default async function handler(req, res) {
     if (changes.award_title !== undefined && !String(changes.award_title || '').trim()) {
       return res.status(400).json({ error: 'Award title cannot be empty.' });
     }
+    if (changes.issuing_institution_id !== undefined && !uuid(changes.issuing_institution_id)) delete changes.issuing_institution_id;
 
     // Agent: an existing record picked at review, or a new one created now.
     let agentId = award.agent_id;
@@ -87,12 +88,13 @@ export default async function handler(req, res) {
     });
 
     // Link the issuing institution, as the admin form does on submit.
-    if (award.issuing_institution_id) {
-      const linked = await sb(`incident_institution_links?incident_id=eq.${id}&institution_id=eq.${award.issuing_institution_id}&select=incident_id`);
+    const instId = changes.issuing_institution_id || award.issuing_institution_id;
+    if (instId) {
+      const linked = await sb(`incident_institution_links?incident_id=eq.${id}&institution_id=eq.${instId}&select=incident_id`);
       if (!linked.length) {
         await sb('incident_institution_links', {
           method: 'POST', headers: { Prefer: 'return=minimal' },
-          body: JSON.stringify([{ incident_id: id, institution_id: award.issuing_institution_id }]),
+          body: JSON.stringify([{ incident_id: id, institution_id: instId }]),
         });
       }
     }
