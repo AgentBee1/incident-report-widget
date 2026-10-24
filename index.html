@@ -1072,27 +1072,34 @@ function showParseResult(type, msg) {
 function autoPopulateAwardDescription() {
   const reportType = document.getElementById('reportType').value;
   if (reportType !== 'Awards & Recognition') return;
-  if (!selectedAgent || !_issuingInstitution) return;
+  const agent = selectedAgent || _canonicalAgent;
+  if (!agent || !_issuingInstitution) return;
 
-  const agentName = selectedAgent.agency_name;
-  const instName = _issuingInstitution.name;
-  const text = `${agentName} received an award from ${instName}.`;
+  const text = `${agent.agency_name} received an award from ${_issuingInstitution.name}.`;
+  // Overwrite only if the box is empty or still holds auto-text (ours, or left over
+  // from a browser form restore / earlier selection). Anything hand-written is kept.
+  const isAutoText = el => !el.value.trim() || el.dataset.autoPopulated === 'true' ||
+    /^[\s\S]{1,200} received an award from [\s\S]{1,200}\.$/.test(el.value.trim());
 
-  // Only auto-populate if the field is empty or still has the previous auto-text
   const descEl = document.getElementById('description');
   const summaryEl = document.getElementById('deidentifiedSummary');
-
-  if (!descEl.value.trim() || descEl.dataset.autoPopulated === 'true') {
+  if (isAutoText(descEl)) {
     descEl.value = text;
     descEl.dataset.autoPopulated = 'true';
     onDescriptionInput();
   }
-
-  if (!summaryEl.value.trim() || summaryEl.dataset.autoPopulated === 'true') {
+  if (isAutoText(summaryEl)) {
     summaryEl.value = text;
     summaryEl.dataset.autoPopulated = 'true';
   }
 }
+
+// Typing in either box hands it back to the user, so later picks don't overwrite it.
+['description', 'deidentifiedSummary'].forEach(id => {
+  const el = document.getElementById(id);
+  el.setAttribute('autocomplete', 'off');
+  el.addEventListener('input', () => { el.dataset.autoPopulated = 'false'; });
+});
 
 // ── Awards & Recognition panel ───────────────────────────────────
 let _issuingInstSearchTimeout = null;
@@ -1101,7 +1108,7 @@ function toggleAwardsPanel() {
   const isAward = document.getElementById('reportType').value === 'Awards & Recognition';
   document.getElementById('awardsPanel').classList.toggle('visible', isAward);
   document.getElementById('sourceUrlField').style.display = isAward ? 'none' : '';
-  if (isAward) checkAwardDuplicates(); else document.getElementById('dupPanel').style.display = 'none';
+  if (isAward) { checkAwardDuplicates(); autoPopulateAwardDescription(); } else document.getElementById('dupPanel').style.display = 'none';
   document.getElementById('instLinkageNotice').classList.toggle('visible', isAward);
   // Hide email protocol banner for awards — client institutions notified via ticker automatically
   document.getElementById('emailProtocolBanner').style.display = isAward ? 'none' : '';
@@ -1303,6 +1310,7 @@ let _canonicalAgent = null;
 function selectAgent(agent) {
   _canonicalAgent = agent;
   _selectedBranchAgent = null;
+  selectedAgent = null;
   window._authorisedClientsPromise = null;
   agentInput.value = agent.agency_name;
   const matchList = document.getElementById('agentMatchList');
@@ -1313,6 +1321,7 @@ function selectAgent(agent) {
   document.getElementById('branchCity').value = '';
   document.getElementById('branchMatchCard').style.display = 'none';
   clearStatus('branchStatus');
+  if (_issuingInstitution) autoPopulateAwardDescription();
   // If agent is already a named branch, skip the branch panel entirely
   if (agent.canonical_agent_id) {
     document.getElementById('branchPanel').style.display = 'none';
