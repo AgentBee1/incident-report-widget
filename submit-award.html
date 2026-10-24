@@ -267,9 +267,12 @@
   });
 
   $('anotherBtn').addEventListener('click', () => {
+    const name = $('businessName').value; // same agency, next award
     $('awardForm').reset(); showFile();
+    $('businessName').value = name;
     $('doneView').style.display = 'none';
     $('formView').style.display = 'block';
+    $('awardTitle').focus();
   });
 })();
 </script>
