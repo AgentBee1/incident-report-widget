@@ -794,12 +794,19 @@ async function submitAuth() {
 
     <div id="otherClientsPanel" style="display:none;margin-bottom:18px;">
       <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-        <span>🏛️</span> Agent is an authorised agent of these AgentBee client institutions
+        <span>🏛️</span> AgentBee client institutions linked to this agent
         <span id="otherClientsBadge" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:20px;font-size:10px;font-weight:600;padding:2px 8px;"></span>
       </div>
-      <div id="otherClientsTags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      <div id="authClientsGroup" style="display:none;margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:600;color:#15803d;margin-bottom:6px;">Authorised agent of <span style="font-weight:400;color:#6b7280;">— shown in their <strong>Your Agents</strong> widget</span></div>
+        <div id="otherClientsTags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
+      <div id="radarClientsGroup" style="display:none;">
+        <div style="font-size:11px;font-weight:600;color:#b91c1c;margin-bottom:6px;">On Risk Radar of <span style="font-weight:400;color:#6b7280;">— not authorised; shown in their <strong>Risk Radar</strong></span></div>
+        <div id="radarClientsTags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
       <div style="font-size:11px;color:#6b7280;margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6;">
-        These institutions will see this incident in their <strong>Your Agents</strong> widget. They are not listed below unless you add them manually.
+        All of these clients get this report in their ticker and weekly digest. They are not listed below unless you add them manually.
       </div>
       <div id="tickerPreview" style="margin-top:14px;background:#f8faff;border:1px solid #dbeafe;border-radius:10px;overflow:hidden;">
         <div style="padding:9px 14px;background:#eff6ff;border-bottom:1px solid #dbeafe;font-size:11px;font-weight:600;color:#1d4ed8;display:flex;align-items:center;gap:6px;">
@@ -1527,17 +1534,25 @@ async function lookupAuthorisedClients(agentId) {
     const familyData = await familyRes.json();
     (familyData || []).forEach(a => agentIds.add(a.id));
     const idList = [...agentIds].join(',');
-    const allLinksRes = await sbFetch(`${SUPABASE_URL}/rest/v1/agent_institution_links?agent_id=in.(${idList})&select=institution_id`);
+    // Single source of truth: institution_agent_links. link_type 'authorised' = Your Agents,
+    // 'linked' = Risk Radar. (agent_institution_links is legacy and no longer read.)
+    const allLinksRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institution_agent_links?agent_id=in.(${idList})&select=institution_id,link_type`);
     const allLinks = await allLinksRes.json();
-    if (!allLinks.length) { loading.style.display = 'none'; return; }
+    if (!Array.isArray(allLinks) || !allLinks.length) { loading.style.display = 'none'; return; }
+    const authorisedIds = new Set(allLinks.filter(l => l.link_type === 'authorised').map(l => l.institution_id));
     const uniqueIds = [...new Set(allLinks.map(l => l.institution_id))];
-    const instRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?id=in.(${uniqueIds.join(',')})&select=id,name,status,is_client&order=name`);
+    const instRes = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?id=in.(${uniqueIds.join(',')})&select=id,name,status&order=name`);
     const institutions = await instRes.json();
-    const clients = institutions.filter(i => i.is_client || i.status === 'Client');
+    const clients = institutions.filter(i => i.status === 'Client');
     loading.style.display = 'none';
     if (!clients.length) return;
-    tagsEl.innerHTML = clients.map(i => `<span class="inst-tag auth" title="Status: ${i.status || 'Client'}"><span class="dot green"></span>${i.name}</span>`).join('');
-    badge.textContent = `${clients.length} client${clients.length !== 1 ? 's' : ''}`;
+    const authClients = clients.filter(i => authorisedIds.has(i.id));
+    const radarClients = clients.filter(i => !authorisedIds.has(i.id));
+    tagsEl.innerHTML = authClients.map(i => `<span class="inst-tag auth" title="Authorised"><span class="dot green"></span>${i.name}</span>`).join('');
+    document.getElementById('radarClientsTags').innerHTML = radarClients.map(i => `<span class="inst-tag risk" title="Risk Radar"><span class="dot red"></span>${i.name}</span>`).join('');
+    document.getElementById('authClientsGroup').style.display = authClients.length ? 'block' : 'none';
+    document.getElementById('radarClientsGroup').style.display = radarClients.length ? 'block' : 'none';
+    badge.textContent = `${authClients.length} authorised · ${radarClients.length} risk radar`;
     panel.style.display = 'block';
     window._authorisedClientInstitutions = clients;
     updateTickerPreview();
@@ -1938,6 +1953,7 @@ function resetFormSilent() {
   clearParentAgent();
   document.getElementById('otherClientsPanel').style.display = 'none';
   document.getElementById('otherClientsTags').innerHTML = '';
+  document.getElementById('radarClientsTags').innerHTML = '';
   window._authorisedClientInstitutions = [];
   window._authorisedClientsPromise = null;
   clearStatus('agentStatus');
@@ -1983,6 +1999,7 @@ function resetForm() {
   clearParentAgent();
   document.getElementById('otherClientsPanel').style.display = 'none';
   document.getElementById('otherClientsTags').innerHTML = '';
+  document.getElementById('radarClientsTags').innerHTML = '';
   window._authorisedClientInstitutions = [];
   window._authorisedClientsPromise = null;
   clearStatus('agentStatus');
