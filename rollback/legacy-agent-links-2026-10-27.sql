@@ -109,4 +109,4 @@ join public.agents a on a.id = i.agent_id
 where l.created_at >= '2026-10-27'
 on conflict (agent_id, institution_id) do nothing;
 
--- 5) Widget: git revert the widget commit in AgentBee1/incident-report-widget
+-- 5) Code: git revert 3ac2c15 in AgentBee1/incident-report-widget and 0c82429 in AgentBee1/AI-monitoring
