@@ -1,4 +1,6 @@
-// award-notification Edge Function (v6, Kudos integration + review step, 21 Oct 2026)
+// award-notification Edge Function (v7, aggregator issuers, 27 Oct 2026)
+// v7: names aggregator issuers (issuing_agent_id) as "<name> (agent aggregator)".
+// v6: Kudos integration + review step, 21 Oct 2026
 //
 // Called by the award_notification_trigger when an award is saved. Emails the agent via
 // Postmark with a link to their award on kudos.agentbee.net.
@@ -121,9 +123,13 @@ Deno.serve(async (req) => {
     // The agent's award page on Kudos.
     const { data: pub } = await supabase
       .from('kudos_awards_public')
-      .select('award_slug, agent_name')
+      .select('award_slug, agent_name, issuer_name, issuer_type')
       .eq('award_id', award.id)
       .single();
+    // Aggregator issuers (e.g. upGrad GSP) are agents, not institutions; name them as such.
+    if (pub?.issuer_type === 'aggregator' && pub.issuer_name) {
+      issuingInstitution = `${pub.issuer_name} (agent aggregator)`;
+    }
     const awardsUrl = pub?.award_slug ? `${KUDOS_SITE}/award/${pub.award_slug}` : `${KUDOS_SITE}/`;
     if (pub?.agent_name) agentName = pub.agent_name;
 

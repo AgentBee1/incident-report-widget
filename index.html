@@ -239,6 +239,15 @@
       margin-top: 8px; font-size: 12px; color: #15803d; font-weight: 500;
     }
     .issuing-inst-resolved.visible { display: flex; }
+    .issuer-mode-btn {
+      margin-top: 8px; background: none; border: 1px dashed #f59e0b; color: #b45309;
+      border-radius: 7px; padding: 4px 10px; font-size: 12px; font-weight: 500; cursor: pointer;
+    }
+    .issuer-mode-btn:hover { background: #fffbeb; }
+    .agg-badge {
+      display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: .02em;
+      color: #6d28d9; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 10px; padding: 1px 7px;
+    }
     .inst-linkage-notice {
       display: none; font-size: 11px; color: #92400e; background: #fffbeb;
       border: 1px solid #fde68a; border-radius: 6px; padding: 8px 10px;
@@ -657,14 +666,34 @@ async function submitAuth() {
         <input type="text" id="awardTitle" placeholder="e.g. Agent of the Year 2026, Best Recruiter Award" />
       </div>
       <div class="field" style="position:relative;">
-        <label>Issuing institution <span style="font-weight:400;color:#b45309;">— the institution that issued the award</span></label>
-        <input type="text" id="issuingInstSearch" placeholder="Search for institution…" autocomplete="off" />
-        <div id="issuingInstDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:300;overflow:hidden;margin-top:4px;max-height:320px;overflow-y:auto;"></div>
-        <div class="issuing-inst-resolved" id="issuingInstCard">
-          <span>✓</span>
-          <span id="issuingInstName" style="flex:1;"></span>
-          <button id="clearIssuingInstBtn" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;padding:0;">✕ Remove</button>
+        <label id="issuerLabel">Issuing institution <span style="font-weight:400;color:#b45309;">— the institution that issued the award</span></label>
+        <!-- Institution issuer (default) -->
+        <div id="instIssuerWrap">
+          <div style="position:relative;">
+            <input type="text" id="issuingInstSearch" placeholder="Search for institution…" autocomplete="off" />
+            <div id="issuingInstDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:300;overflow:hidden;margin-top:4px;max-height:320px;overflow-y:auto;"></div>
+          </div>
+          <div class="issuing-inst-resolved" id="issuingInstCard">
+            <span>✓</span>
+            <span id="issuingInstName" style="flex:1;"></span>
+            <button id="clearIssuingInstBtn" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;padding:0;">✕ Remove</button>
+          </div>
         </div>
+        <!-- Aggregator issuer (an agent that awards its sub-agents) -->
+        <div id="aggIssuerWrap" style="display:none;">
+          <div style="position:relative;">
+            <input type="text" id="issuingAggSearch" placeholder="Search agents (e.g. upGrad GSP)…" autocomplete="off" />
+            <div id="issuingAggDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.08);z-index:300;overflow:hidden;margin-top:4px;max-height:320px;overflow-y:auto;"></div>
+          </div>
+          <div class="issuing-inst-resolved" id="issuingAggCard">
+            <span>✓</span>
+            <span id="issuingAggName" style="flex:1;"></span>
+            <span class="agg-badge">Aggregator</span>
+            <button id="clearIssuingAggBtn" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;padding:0;">✕ Remove</button>
+          </div>
+          <div class="status" id="issuingAggStatus" style="margin-top:6px;"></div>
+        </div>
+        <button type="button" class="issuer-mode-btn" id="issuerModeBtn">Aggregator award</button>
       </div>
       <div class="field" style="margin-top:12px;">
         <label>Original announcement link <span style="font-weight:400;color:#b45309;">— required: the LinkedIn, Instagram, Facebook or news post</span></label>
@@ -956,6 +985,13 @@ const SUPABASE_KEY = sessionStorage.getItem('ab-supabase-key') || '';
 
 let selectedAgent = null;
 let _issuingInstitution = null; // for Awards & Recognition
+let _issuingAgent = null;       // aggregator issuer (an agent), used instead of an institution
+let _issuerMode = 'institution'; // 'institution' | 'aggregator'
+// The award's issuer, whichever kind is selected for the current mode.
+function currentIssuer() {
+  if (_issuerMode === 'aggregator') return _issuingAgent ? { kind: 'aggregator', id: _issuingAgent.id, name: _issuingAgent.agency_name } : null;
+  return _issuingInstitution ? { kind: 'institution', id: _issuingInstitution.id, name: _issuingInstitution.name } : null;
+}
 let analysisResults = { authorised: [], risk: [], unknown: [] };
 let submittedIncidentId = null;
 let searchTimeout = null;
@@ -1080,9 +1116,12 @@ function autoPopulateAwardDescription() {
   const reportType = document.getElementById('reportType').value;
   if (reportType !== 'Awards & Recognition') return;
   const agent = selectedAgent || _canonicalAgent;
-  if (!agent || !_issuingInstitution) return;
+  const issuer = currentIssuer();
+  if (!agent || !issuer) return;
 
-  const text = `${agent.agency_name} received an award from ${_issuingInstitution.name}.`;
+  const text = issuer.kind === 'aggregator'
+    ? `${agent.agency_name} received an award from ${issuer.name} (agent aggregator).`
+    : `${agent.agency_name} received an award from ${issuer.name}.`;
   // Overwrite only if the box is empty or still holds auto-text (ours, or left over
   // from a browser form restore / earlier selection). Anything hand-written is kept.
   const isAutoText = el => !el.value.trim() || el.dataset.autoPopulated === 'true' ||
@@ -1178,6 +1217,150 @@ function initIssuingInstSearch() {
 
   document.addEventListener('click', e => {
     if (!e.target.closest('#issuingInstSearch') && !e.target.closest('#issuingInstDrop'))
+      drop.style.display = 'none';
+  });
+}
+
+// ── Aggregator issuer ─────────────────────────────────────────────
+// Some aggregators (e.g. upGrad GSP) award their sub-agents. They live in `agents`,
+// not `institutions`, so the award's issuer is saved as issuing_agent_id instead.
+let _issuingAggSearchTimeout = null;
+const _escHtml = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function _recipientCanonicalId() {
+  const a = selectedAgent || _canonicalAgent;
+  return a ? (a.canonical_agent_id || a.id) : null;
+}
+
+function clearIssuingAgent() {
+  _issuingAgent = null;
+  document.getElementById('issuingAggSearch').value = '';
+  document.getElementById('issuingAggCard').classList.remove('visible');
+  clearStatus('issuingAggStatus');
+}
+
+function clearIssuingInstitution() {
+  _issuingInstitution = null;
+  document.getElementById('issuingInstSearch').value = '';
+  document.getElementById('issuingInstCard').classList.remove('visible');
+}
+
+function setIssuerMode(mode) {
+  _issuerMode = mode === 'aggregator' ? 'aggregator' : 'institution';
+  const agg = _issuerMode === 'aggregator';
+  // Switching clears the other kind, so a stale id can't be saved alongside.
+  if (agg) clearIssuingInstitution(); else clearIssuingAgent();
+  document.getElementById('instIssuerWrap').style.display = agg ? 'none' : '';
+  document.getElementById('aggIssuerWrap').style.display = agg ? '' : 'none';
+  document.getElementById('issuerLabel').innerHTML = agg
+    ? 'Issuing aggregator <span style="font-weight:400;color:#b45309;">— the agent aggregator that issued the award to its sub-agent</span>'
+    : 'Issuing institution <span style="font-weight:400;color:#b45309;">— the institution that issued the award</span>';
+  document.getElementById('issuerModeBtn').textContent = agg ? '← Issuing institution' : 'Aggregator award';
+  checkAwardDuplicates();
+}
+
+function initIssuingAggSearch() {
+  const input = document.getElementById('issuingAggSearch');
+  const drop = document.getElementById('issuingAggDrop');
+
+  document.getElementById('issuerModeBtn').addEventListener('click', () => {
+    setIssuerMode(_issuerMode === 'aggregator' ? 'institution' : 'aggregator');
+    if (_issuerMode === 'aggregator') input.focus();
+  });
+
+  input.addEventListener('input', () => {
+    clearTimeout(_issuingAggSearchTimeout);
+    clearStatus('issuingAggStatus');
+    const q = input.value.trim();
+    if (q.length < 2) { drop.style.display = 'none'; return; }
+    _issuingAggSearchTimeout = setTimeout(async () => {
+      try {
+        const res = await sbFetch(
+          `${SUPABASE_URL}/rest/v1/agents?agency_name=ilike.*${encodeURIComponent(q)}*&select=id,agency_name,country,canonical_agent_id,is_aggregator&order=agency_name&limit=40`
+        );
+        const rows = await res.json();
+        if (!Array.isArray(rows) || !rows.length) { drop.style.display = 'none'; return; }
+
+        // Collapse branches/duplicates onto their canonical record.
+        const byId = new Map(rows.map(r => [r.id, r]));
+        const missing = [...new Set(rows.map(r => r.canonical_agent_id).filter(id => id && !byId.has(id)))];
+        if (missing.length) {
+          const cr = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=in.(${missing.join(',')})&select=id,agency_name,country,canonical_agent_id,is_aggregator`);
+          (await cr.json()).forEach(r => byId.set(r.id, r));
+        }
+        const canon = new Map();
+        rows.forEach(r => {
+          const c = byId.get(r.canonical_agent_id || r.id) || r;
+          canon.set(c.id, c);
+        });
+        const recipient = _recipientCanonicalId();
+        const ql = q.toLowerCase();
+        const data = [...canon.values()]
+          .filter(a => a.id !== recipient)
+          .sort((a, b) =>
+            (b.is_aggregator ? 1 : 0) - (a.is_aggregator ? 1 : 0) ||
+            (b.agency_name.toLowerCase().startsWith(ql) ? 1 : 0) - (a.agency_name.toLowerCase().startsWith(ql) ? 1 : 0) ||
+            a.agency_name.localeCompare(b.agency_name))
+          .slice(0, 30);
+        if (!data.length) { drop.style.display = 'none'; return; }
+
+        drop.innerHTML = data.map((a, i) =>
+          `<div class="suggestion-item" data-agg-index="${i}" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:13px;">
+            <div style="font-weight:500;color:#1a1d23;">${_escHtml(a.agency_name)} ${a.is_aggregator ? '<span class="agg-badge">Aggregator</span>' : ''}</div>
+            <div style="font-size:11px;color:#9ca3af;">${_escHtml(a.country || '')}${a.is_aggregator ? '' : (a.country ? ' · ' : '') + 'not yet flagged as an aggregator'}</div>
+          </div>`
+        ).join('');
+        drop._results = data;
+        drop.style.display = 'block';
+      } catch (e) {
+        console.warn('Aggregator search failed', e);
+        drop.style.display = 'none';
+      }
+    }, 250);
+  });
+
+  drop.addEventListener('click', async e => {
+    e.stopPropagation();
+    const item = e.target.closest('[data-agg-index]');
+    if (!item) return;
+    const agent = drop._results[parseInt(item.getAttribute('data-agg-index'))];
+    if (!agent) return;
+    drop.style.display = 'none';
+
+    if (agent.id === _recipientCanonicalId()) {
+      setStatus('issuingAggStatus', 'error', 'The issuer can\'t be the same agent that received the award.');
+      return;
+    }
+
+    if (!agent.is_aggregator) {
+      if (!confirm(`Mark ${agent.agency_name} as an aggregator?`)) { clearIssuingAgent(); return; }
+      try {
+        const r = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${agent.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ is_aggregator: true }),
+        });
+        if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.message || r.statusText); }
+        agent.is_aggregator = true;
+      } catch (err) {
+        clearIssuingAgent();
+        setStatus('issuingAggStatus', 'error', `Couldn't flag ${agent.agency_name} as an aggregator: ${err.message || err}`);
+        return;
+      }
+    }
+
+    _issuingAgent = agent;
+    input.value = agent.agency_name;
+    document.getElementById('issuingAggName').textContent = agent.agency_name;
+    document.getElementById('issuingAggCard').classList.add('visible');
+    clearStatus('issuingAggStatus');
+    autoPopulateAwardDescription();
+    checkAwardDuplicates();
+  });
+
+  document.getElementById('clearIssuingAggBtn').addEventListener('click', clearIssuingAgent);
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#issuingAggSearch') && !e.target.closest('#issuingAggDrop'))
       drop.style.display = 'none';
   });
 }
@@ -1328,7 +1511,7 @@ function selectAgent(agent) {
   document.getElementById('branchCity').value = '';
   document.getElementById('branchMatchCard').style.display = 'none';
   clearStatus('branchStatus');
-  if (_issuingInstitution) autoPopulateAwardDescription();
+  if (currentIssuer()) autoPopulateAwardDescription();
   // If agent is already a named branch, skip the branch panel entirely
   if (agent.canonical_agent_id) {
     document.getElementById('branchPanel').style.display = 'none';
@@ -1344,7 +1527,7 @@ function selectAgent(agent) {
 function resolveAgent(agent) {
   selectedAgent = agent;
   // Trigger auto-populate if issuing institution already selected
-  if (_issuingInstitution) autoPopulateAwardDescription();
+  if (currentIssuer()) autoPopulateAwardDescription();
   document.getElementById('agentCardName').textContent = agent.agency_name;
   document.getElementById('agentCardMeta').textContent = [agent.jurisdiction, agent.country].filter(Boolean).join(' · ') + (agent.risk_score != null ? ' · Score: ' + agent.risk_score : '');
   document.getElementById('agentCardTier').textContent = agent.risk_tier || 'Unknown';
@@ -1661,7 +1844,14 @@ async function submitIncident() {
     if (!/^https?:\/\//i.test(document.getElementById('originalSourceUrl').value.trim())) {
       setStatus('submitStatus', 'error', 'Please paste the original announcement link (starting with https://).'); return;
     }
-    if (!_issuingInstitution) {
+    if (_issuerMode === 'aggregator') {
+      if (!_issuingAgent) {
+        setStatus('submitStatus', 'error', 'Please select the issuing aggregator for this award.'); return;
+      }
+      if (_issuingAgent.id === (selectedAgent.canonical_agent_id || selectedAgent.id) || _issuingAgent.id === selectedAgent.id) {
+        setStatus('submitStatus', 'error', 'The issuing aggregator can\'t be the same agent that received the award.'); return;
+      }
+    } else if (!_issuingInstitution) {
       setStatus('submitStatus', 'error', 'Please select the issuing institution for this award.'); return;
     }
   }
@@ -1694,8 +1884,11 @@ async function submitIncident() {
       award_title: (vals.reportType === 'Awards & Recognition')
           ? (document.getElementById('awardTitle').value.trim() || null)
           : null,
-        issuing_institution_id: (vals.reportType === 'Awards & Recognition' && _issuingInstitution)
+        issuing_institution_id: (isAward && _issuerMode === 'institution' && _issuingInstitution)
           ? _issuingInstitution.id
+          : null,
+        issuing_agent_id: (isAward && _issuerMode === 'aggregator' && _issuingAgent)
+          ? _issuingAgent.id
           : null,
       })
     });
@@ -1925,6 +2118,7 @@ async function confirmEmailProtocol() {
 
 // ── Reset ────────────────────────────────────────────────────────
 function _resetAwardFields() {
+  setIssuerMode('institution');
   _issuingInstitution = null;
   document.getElementById('originalSourceUrl').value = '';
   document.getElementById('dupPanel').style.display = 'none';
@@ -2351,7 +2545,7 @@ async function _checkAwardDuplicates() {
   const title = document.getElementById('awardTitle').value.trim();
   if (!selectedAgent && !link) { panel.style.display = 'none'; return; }
   try {
-    const sel = 'id,award_title,incident_date,review_status,original_source_url,issuing_institution_id,agent_id';
+    const sel = 'id,award_title,incident_date,review_status,original_source_url,issuing_institution_id,issuing_agent_id,agent_id';
     let existing = [];
     if (selectedAgent) {
       const canon = selectedAgent.canonical_agent_id || selectedAgent.id;
@@ -2381,14 +2575,21 @@ async function _checkAwardDuplicates() {
       const r = await sbFetch(`${SUPABASE_URL}/rest/v1/institutions?id=in.(${instIds.join(',')})&select=id,name`);
       (await r.json()).forEach(i => names[i.id] = i.name);
     }
+    const aggIds = [...new Set([...existing, ...linkHits].map(a => a.issuing_agent_id).filter(Boolean))];
+    if (aggIds.length) {
+      const r = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=in.(${aggIds.join(',')})&select=id,agency_name`);
+      (await r.json()).forEach(a => names[a.id] = `${a.agency_name} (aggregator)`);
+    }
+    const issuerOf = a => a.issuing_agent_id || a.issuing_institution_id;
 
     const warnings = [];
     if (linkHits.length) warnings.push(`⚠️ This announcement link is already on record (${linkHits.map(h => `"${h.award_title}"`).join(', ')}). It's only OK if the same post announces a different award.`);
-    if (title && _issuingInstitution) {
+    const issuer = currentIssuer();
+    if (title && issuer) {
       const nt = _norm(title);
-      const similar = existing.filter(a => a.issuing_institution_id === _issuingInstitution.id && nt &&
+      const similar = existing.filter(a => issuerOf(a) === issuer.id && nt &&
         (_norm(a.award_title) === nt || _norm(a.award_title).includes(nt) || nt.includes(_norm(a.award_title))));
-      if (similar.length) warnings.push(`⚠️ This agent already has a similar award from ${_issuingInstitution.name}: ${similar.map(a => `"${a.award_title}" (${a.incident_date || 'no date'})`).join(', ')}.`);
+      if (similar.length) warnings.push(`⚠️ This agent already has a similar award from ${issuer.name}: ${similar.map(a => `"${a.award_title}" (${a.incident_date || 'no date'})`).join(', ')}.`);
     }
 
     const badge = s => s === 'pending' ? '<span style="color:#92400e;background:#fffbeb;padding:1px 6px;border-radius:10px;">pending</span>'
@@ -2399,7 +2600,7 @@ async function _checkAwardDuplicates() {
     if (selectedAgent) {
       html += `<div style="font-weight:600;color:#374151;margin-bottom:6px;">Existing awards for ${esc(selectedAgent.agency_name)} (${existing.length})</div>`;
       html += existing.length
-        ? existing.map(a => `<div style="padding:4px 0;border-top:1px solid #f3f4f6;">${badge(a.review_status)} <strong>${esc(a.award_title)}</strong> · ${esc(names[a.issuing_institution_id] || 'unknown issuer')} · ${esc(a.incident_date || '')}</div>`).join('')
+        ? existing.map(a => `<div style="padding:4px 0;border-top:1px solid #f3f4f6;">${badge(a.review_status)} <strong>${esc(a.award_title)}</strong> · ${esc(names[issuerOf(a)] || 'unknown issuer')} · ${esc(a.incident_date || '')}</div>`).join('')
         : '<div style="color:#6b7280;">None yet.</div>';
     }
     panel.innerHTML = html;
@@ -2456,6 +2657,7 @@ initBranchSearch();
 initAccredDropdown();
 initInstManualAdd();
 initIssuingInstSearch();
+initIssuingAggSearch();
 </script>
 </body>
 </html>

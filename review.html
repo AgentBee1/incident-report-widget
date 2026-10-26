@@ -84,7 +84,7 @@ function embedSrc(url) {
 }
 
 async function load() {
-  const pending = await sb('incidents?review_status=eq.pending&select=id,agent_id,requested_agent_name,requested_agent_website,award_title,incident_date,original_source_url,issuing_institution_id,notify_agent,submitted_by,description,created_at&order=created_at.asc');
+  const pending = await sb('incidents?review_status=eq.pending&select=id,agent_id,requested_agent_name,requested_agent_website,award_title,incident_date,original_source_url,issuing_institution_id,issuing_agent_id,notify_agent,submitted_by,description,created_at&order=created_at.asc');
   document.getElementById('summary').textContent = pending.length
     ? `${pending.length} award${pending.length === 1 ? '' : 's'} waiting for review`
     : '';
@@ -98,10 +98,15 @@ async function load() {
   const canon = canonIds.length ? await sb(`agents?id=in.(${canonIds.join(',')})&select=id,agency_name,email`) : [];
   const group = canonIds.length ? await sb(`agents?or=(id.in.(${canonIds.join(',')}),canonical_agent_id.in.(${canonIds.join(',')}))&select=id,canonical_agent_id`) : [];
   const groupIds = group.map(g => g.id);
-  const others = groupIds.length ? await sb(`incidents?agent_id=in.(${groupIds.join(',')})&award_title=not.is.null&review_status=neq.pending&select=agent_id,award_title,incident_date,review_status,issuing_institution_id&order=incident_date.desc`) : [];
+  const others = groupIds.length ? await sb(`incidents?agent_id=in.(${groupIds.join(',')})&award_title=not.is.null&review_status=neq.pending&select=agent_id,award_title,incident_date,review_status,issuing_institution_id,issuing_agent_id&order=incident_date.desc`) : [];
   const instIds = [...new Set([...pending, ...others].map(x => x.issuing_institution_id).filter(Boolean))];
   const insts = instIds.length ? await sb(`institutions?id=in.(${instIds.join(',')})&select=id,name`) : [];
   const instName = Object.fromEntries(insts.map(i => [i.id, i.name]));
+  // Aggregator issuers are agents; label them so the reviewer sees the issuer type.
+  const aggIds = [...new Set([...pending, ...others].map(x => x.issuing_agent_id).filter(Boolean))];
+  const aggs = aggIds.length ? await sb(`agents?id=in.(${aggIds.join(',')})&select=id,agency_name`) : [];
+  aggs.forEach(a => { instName[a.id] = `${a.agency_name} (Aggregator)`; });
+  const issuerOf = x => x.issuing_agent_id || x.issuing_institution_id;
   const agentById = Object.fromEntries(agents.map(a => [a.id, a]));
   const canonById = Object.fromEntries(canon.map(a => [a.id, a]));
   const groupOf = Object.fromEntries(group.map(g => [g.id, g.canonical_agent_id || g.id]));
@@ -111,7 +116,7 @@ async function load() {
     const c = canonById[a.canonical_agent_id || a.id] || a;
     const email = a.email || c.email;
     const mine = others.filter(o => groupOf[o.agent_id] === (a.canonical_agent_id || a.id));
-    const similar = mine.filter(o => o.issuing_institution_id === p.issuing_institution_id);
+    const similar = mine.filter(o => issuerOf(o) && issuerOf(o) === issuerOf(p));
     const src = embedSrc(p.original_source_url);
     return `
     <div class="card" id="card-${p.id}">
@@ -144,9 +149,9 @@ async function load() {
           </div>`}
         </div>
         <label>Issued by</label>
-        <div id="instSel-${p.id}" style="font-size:13px;">${p.issuing_institution_id ? `<strong>${esc(instName[p.issuing_institution_id] || '—')}</strong>` : '<span class="warn" style="margin:0;">No issuer matched yet. Pick one below.</span>'}
-          <a href="#" style="font-size:12px;margin-left:6px;" onclick="toggleInstPicker('${p.id}');return false;">${p.issuing_institution_id ? 'change' : ''}</a></div>
-        <div id="instPick-${p.id}" style="display:${p.issuing_institution_id ? 'none' : 'block'};position:relative;margin-top:6px;">
+        <div id="instSel-${p.id}" style="font-size:13px;">${issuerOf(p) ? `<strong>${esc(instName[issuerOf(p)] || '—')}</strong>` : '<span class="warn" style="margin:0;">No issuer matched yet. Pick one below.</span>'}
+          <a href="#" style="font-size:12px;margin-left:6px;" onclick="toggleInstPicker('${p.id}');return false;">${issuerOf(p) ? 'change' : ''}</a></div>
+        <div id="instPick-${p.id}" style="display:${issuerOf(p) ? 'none' : 'block'};position:relative;margin-top:6px;">
           <input type="text" placeholder="Search institutions…" oninput="searchInsts('${p.id}', this.value)" autocomplete="off" />
           <div id="instDrop-${p.id}" class="drop"></div>
         </div>
@@ -161,7 +166,7 @@ async function load() {
           Email the agent when approved ${email ? `(${esc(email)})` : '<span class="muted">(no email on file)</span>'}</label>
         ${similar.length ? `<div class="warn">⚠️ Possible duplicate: this agent already has ${similar.map(o => `"${esc(o.award_title)}" (${esc(o.incident_date || 'no date')}, ${esc(o.review_status === 'approved' ? 'live' : o.review_status)})`).join(', ')} from the same issuer.</div>` : ''}
         <div class="others"><strong>Other awards for this agent (${mine.length})</strong>
-          ${mine.length ? mine.map(o => `<div>${esc(o.award_title)} · ${esc(instName[o.issuing_institution_id] || '')} · ${esc(o.incident_date || '')} · ${o.review_status === 'approved' ? 'live' : esc(o.review_status)}</div>`).join('') : '<div class="muted">None</div>'}
+          ${mine.length ? mine.map(o => `<div>${esc(o.award_title)} · ${esc(instName[issuerOf(o)] || '')} · ${esc(o.incident_date || '')} · ${o.review_status === 'approved' ? 'live' : esc(o.review_status)}</div>`).join('') : '<div class="muted">None</div>'}
         </div>
         <div class="actions">
           <button class="approve" onclick="act('${p.id}','approve',this)">✓ Approve &amp; publish</button>

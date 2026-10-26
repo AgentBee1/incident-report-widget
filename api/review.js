@@ -51,6 +51,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Award title cannot be empty.' });
     }
     if (changes.issuing_institution_id !== undefined && !uuid(changes.issuing_institution_id)) delete changes.issuing_institution_id;
+    // Picking an institution at review replaces an aggregator issuer (only one issuer allowed).
+    if (changes.issuing_institution_id) changes.issuing_agent_id = null;
 
     // Agent: an existing record picked at review, or a new one created now.
     let agentId = award.agent_id;

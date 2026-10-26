@@ -75,7 +75,7 @@ let rows = [], sortKey = 'date', sortDir = -1;
 
 async function load() {
   const [awards, pub] = await Promise.all([
-    sb('incidents?award_title=not.is.null&award_title=neq.&select=id,agent_id,requested_agent_name,award_title,incident_date,review_status,original_source_url,issuing_institution_id,submitted_by,submitted_role,contractor_paid,contractor_paid_at,contractor_paid_by&order=incident_date.desc'),
+    sb('incidents?award_title=not.is.null&award_title=neq.&select=id,agent_id,requested_agent_name,award_title,incident_date,review_status,original_source_url,issuing_institution_id,issuing_agent_id,submitted_by,submitted_role,contractor_paid,contractor_paid_at,contractor_paid_by&order=incident_date.desc'),
     sb('kudos_awards_public?select=award_id,award_slug'),
   ]);
   const agentIds = [...new Set(awards.map(a => a.agent_id).filter(Boolean))];
@@ -87,9 +87,12 @@ async function load() {
   const agentName = {}; const canonName = Object.fromEntries(canon.map(c => [c.id, c.agency_name]));
   agents.forEach(a => agentName[a.id] = a.canonical_agent_id ? (canonName[a.canonical_agent_id] || a.agency_name) : a.agency_name);
   const instName = Object.fromEntries(insts.map(i => [i.id, i.name]));
+  const aggIds = [...new Set(awards.map(a => a.issuing_agent_id).filter(Boolean))];
+  const aggs = aggIds.length ? await sb(`agents?id=in.(${aggIds.join(',')})&select=id,agency_name`) : [];
+  aggs.forEach(a => { instName[a.id] = `${a.agency_name} (Aggregator)`; });
   const slug = Object.fromEntries(pub.map(p => [p.award_id, p.award_slug]));
   rows = awards.map(a => ({
-    agent: agentName[a.agent_id] || (a.requested_agent_name ? `${a.requested_agent_name} (new agent)` : ''), title: a.award_title, issuer: instName[a.issuing_institution_id] || '',
+    agent: agentName[a.agent_id] || (a.requested_agent_name ? `${a.requested_agent_name} (new agent)` : ''), title: a.award_title, issuer: instName[a.issuing_agent_id || a.issuing_institution_id] || '',
     date: a.incident_date || '', status: a.review_status || 'approved', by: a.submitted_by || '',
     id: a.id, staff: a.submitted_role === 'staff', paid: !!a.contractor_paid,
     paidNote: a.contractor_paid ? `Paid ${a.contractor_paid_at ? new Date(a.contractor_paid_at).toLocaleDateString('en-AU') : ''}${a.contractor_paid_by ? ' by ' + a.contractor_paid_by : ''}` : 'Not paid yet',
