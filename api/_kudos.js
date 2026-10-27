@@ -62,6 +62,9 @@ export async function createCirclePost(incidentId, { draft = false } = {}) {
     status: draft ? 'draft' : 'published',
     topics: TOPIC_ID ? [TOPIC_ID] : undefined,
     tiptap_body: { body: { type: 'doc', content } },
+    // Circle leaves these null (shown as off) unless set explicitly.
+    is_comments_enabled: true,
+    is_liking_enabled: true,
   };
   if (process.env.CIRCLE_AUTHOR_EMAIL) payload.user_email = process.env.CIRCLE_AUTHOR_EMAIL;
 
