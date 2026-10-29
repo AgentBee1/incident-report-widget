@@ -84,7 +84,8 @@ function embedSrc(url) {
 }
 
 async function load() {
-  const pending = await sb('incidents?review_status=eq.pending&select=id,agent_id,requested_agent_name,requested_agent_website,award_title,incident_date,original_source_url,issuing_institution_id,issuing_agent_id,notify_agent,submitted_by,description,created_at&order=created_at.asc');
+  const pending = await sb('incidents?review_status=eq.pending&select=id,agent_id,requested_agent_name,requested_agent_website,award_title,incident_date,original_source_url,issuing_institution_id,issuing_agent_id,notify_agent,notify_institution,submitted_by,description,created_at&order=created_at.asc');
+  pending.forEach(p => { pendingById[p.id] = p; });
   document.getElementById('summary').textContent = pending.length
     ? `${pending.length} award${pending.length === 1 ? '' : 's'} waiting for review`
     : '';
@@ -166,6 +167,7 @@ async function load() {
         <input type="url" data-f="original_source_url" value="${esc(p.original_source_url)}" />
         <label class="check"><input type="checkbox" data-f="notify_agent" ${p.notify_agent ? 'checked' : ''} ${email ? '' : 'disabled'} />
           Email the agent when approved ${email ? `(${esc(email)})` : '<span class="muted">(no email on file)</span>'}</label>
+        <div id="instNotify-${p.id}">${p.issuing_agent_id ? '' : instNotifyHtml(p.id, instRec[p.issuing_institution_id])}</div>
         ${similar.length ? `<div class="warn">⚠️ Possible duplicate: this agent already has ${similar.map(o => `"${esc(o.award_title)}" (${esc(o.incident_date || 'no date')}, ${esc(o.review_status === 'approved' ? 'live' : o.review_status)})`).join(', ')} from the same issuer.</div>` : ''}
         <div class="others"><strong>Other awards for this agent (${mine.length})</strong>
           ${mine.length ? mine.map(o => `<div>${esc(o.award_title)} · ${esc(instName[issuerOf(o)] || '')} · ${esc(o.incident_date || '')} · ${o.review_status === 'approved' ? 'live' : esc(o.review_status)}</div>`).join('') : '<div class="muted">None</div>'}
@@ -220,6 +222,8 @@ async function pickInst(id, instId, name) {
     try { const [r] = await sb(`institutions?id=eq.${instId}&select=id,name,contact_email,is_client,status`); if (r) instRec[instId] = r; } catch {}
   }
   document.getElementById(`instEmail-${id}`).innerHTML = instEmailHtml(id, instRec[instId]);
+  instNotifyTouched[id] = false;
+  document.getElementById(`instNotify-${id}`).innerHTML = instNotifyHtml(id, instRec[instId]);
 }
 
 // ── Issuing institution email ────────────────────────────────────
@@ -229,7 +233,7 @@ const isClientInst = i => i && (i.is_client === true || i.status === 'Client');
 function instEmailHtml(id, inst) {
   if (!inst) return '';
   if (isClientInst(inst)) return '<div class="muted" style="font-size:12px;margin-top:6px;">Client institution: told via their ticker and weekly digest, not the Kudos email.</div>';
-  if (String(inst.contact_email || '').trim()) return `<div class="muted" style="font-size:12px;margin-top:6px;">The institution will get the daily Kudos email (${esc(inst.contact_email)}).</div>`;
+  if (String(inst.contact_email || '').trim()) return `<div class="muted" style="font-size:12px;margin-top:6px;">Institution contact: ${esc(inst.contact_email)}</div>`;
   return `<div style="margin-top:8px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;">
       <div style="font-size:12px;font-weight:600;color:#92400e;margin-bottom:6px;">No contact email for ${esc(inst.name)}. Add one to let them know about this award (optional).</div>
       <div style="display:flex;gap:8px;">
@@ -239,6 +243,35 @@ function instEmailHtml(id, inst) {
       <div id="instEmailSt-${id}" style="font-size:12px;margin-top:4px;"></div>
     </div>`;
 }
+// Institution Kudos email checkbox. Default: the award's saved choice, otherwise on for
+// awards dated within the last 3 months and off for older (back-loaded) ones.
+const pendingById = {};
+const instNotifyTouched = {};
+const isRecentDate = d => {
+  if (!d) return true;
+  const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - 3);
+  return d >= cutoff.toISOString().split('T')[0];
+};
+function instNotifyHtml(id, inst) {
+  if (!inst || isClientInst(inst)) return '';
+  const p = pendingById[id] || {};
+  const date = document.querySelector(`#card-${id} [data-f="incident_date"]`)?.value ?? p.incident_date;
+  const recent = isRecentDate(date);
+  const checked = p.notify_institution ?? recent;
+  return `<label class="check"><input type="checkbox" data-f="notify_institution" ${checked ? 'checked' : ''} onchange="instNotifyTouched['${id}']=true" />
+      Email ${esc(inst.name)} when approved <span class="muted">(daily Kudos email${recent ? '' : '; off by default, award is over 3 months old'})</span></label>`;
+}
+function refreshInstNotify(id) {
+  const el = document.getElementById(`instNotify-${id}`);
+  if (!el || instNotifyTouched[id]) return;
+  const instId = pickedInsts[id] || (pendingById[id] || {}).issuing_institution_id;
+  if ((pendingById[id] || {}).issuing_agent_id && !pickedInsts[id]) return;
+  el.innerHTML = instNotifyHtml(id, instRec[instId]);
+}
+document.addEventListener('change', (e) => {
+  if (e.target.matches('[data-f="incident_date"]')) refreshInstNotify(e.target.closest('.card').id.slice('card-'.length));
+});
+
 async function saveInstEmail(id, instId, btn) {
   const input = document.getElementById(`instEmailIn-${id}`);
   const st = document.getElementById(`instEmailSt-${id}`);

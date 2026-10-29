@@ -721,6 +721,14 @@ async function submitAuth() {
           <div style="font-size:11px;color:#a16207;margin-top:3px;">Immediately emails the agent to let them know their award has been recorded on AgentBee Kudos. Requires an email address on file.</div>
         </div>
       </div>
+      <!-- Institution Kudos email toggle (admin only; non-client issuing institutions) -->
+      <div id="instNotifyToggle" style="display:none;margin-top:10px;padding:14px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:9px;align-items:flex-start;gap:12px;">
+        <input type="checkbox" id="sendInstEmail" style="margin-top:2px;width:15px;height:15px;cursor:pointer;flex-shrink:0;" />
+        <div>
+          <label for="sendInstEmail" id="sendInstEmailLabel" style="font-size:13px;font-weight:600;color:#92400e;cursor:pointer;">🏛️ Email the issuing institution</label>
+          <div id="sendInstEmailHint" style="font-size:11px;color:#a16207;margin-top:3px;"></div>
+        </div>
+      </div>
     </div>
 
     <div class="grid-3 field-row">
@@ -1277,9 +1285,47 @@ function checkInstEmailField() {
   const show = isAward && !!inst && !isClientInst && !String(inst.contact_email || '').trim();
   if (show && wrap.dataset.instId !== inst.id) _resetInstEmailUI();
   wrap.dataset.instId = show ? inst.id : '';
+  updateInstNotifyToggle();
   if (!show && !(inst && inst._emailSavedHere)) { wrap.style.display = 'none'; _resetInstEmailUI(); return; }
   wrap.style.display = 'block';
 }
+
+// ── Institution Kudos email toggle ───────────────────────────────
+// Default: on for awards dated within the last 3 months, off for older (back-loaded)
+// awards. Once ticked or unticked by hand, the choice is kept until the form resets.
+let _instNotifyTouched = false;
+function _awardIsRecent() {
+  const d = document.getElementById('incidentDate').value;
+  if (!d) return true;
+  const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - 3);
+  return d >= cutoff.toISOString().split('T')[0];
+}
+function updateInstNotifyToggle() {
+  const box = document.getElementById('instNotifyToggle');
+  if (!box) return;
+  const isAward = document.getElementById('reportType').value === 'Awards & Recognition';
+  const inst = _issuerMode === 'institution' ? _issuingInstitution : null;
+  const isClientInst = inst && (inst.is_client === true || inst.status === 'Client');
+  const show = currentRole() === 'admin' && isAward && !!inst && !isClientInst;
+  box.style.display = show ? 'flex' : 'none';
+  if (!show) return;
+  const recent = _awardIsRecent();
+  const cb = document.getElementById('sendInstEmail');
+  if (!_instNotifyTouched) cb.checked = recent;
+  document.getElementById('sendInstEmailLabel').textContent = `🏛️ Email ${inst.name} about this award`;
+  const hasEmail = !!String(inst.contact_email || '').trim();
+  document.getElementById('sendInstEmailHint').textContent =
+    (recent ? 'Included in the next daily Kudos email to the institution (weekdays, 8pm Sydney).'
+            : 'Off by default: the award date is more than 3 months ago (back-loaded award). Tick to email them anyway.')
+    + (hasEmail ? '' : ' No contact email on file yet — add one above or it will be skipped.');
+}
+function _resetInstNotifyToggle() {
+  _instNotifyTouched = false;
+  document.getElementById('sendInstEmail').checked = false;
+  document.getElementById('instNotifyToggle').style.display = 'none';
+}
+document.getElementById('sendInstEmail').addEventListener('change', () => { _instNotifyTouched = true; });
+document.getElementById('incidentDate').addEventListener('change', updateInstNotifyToggle);
 document.getElementById('saveInstEmailBtn').addEventListener('click', async function() {
   const email = document.getElementById('instEmailInput').value.trim();
   const statusEl = document.getElementById('instEmailStatus');
@@ -1919,6 +1965,8 @@ async function submitIncident() {
     }
   }
 
+  if (isAward) updateInstNotifyToggle(); // date may have been filled in without a change event
+
   const btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Submitting…';
   setStatus('submitStatus', 'info', 'Creating incident record…');
@@ -1941,6 +1989,10 @@ async function submitIncident() {
         source_url: isAward ? null : (document.getElementById('sourceUrl').value.trim() || null),
         original_source_url: isAward ? (document.getElementById('originalSourceUrl').value.trim() || null) : null,
         notify_agent: isAward ? (currentRole() === 'admin' && document.getElementById('sendAwardEmail').checked) : null,
+        // Institution Kudos email: admin's choice when the toggle is shown; otherwise null
+        // (database default: send if the award date is within 3 months).
+        notify_institution: (isAward && document.getElementById('instNotifyToggle').style.display !== 'none')
+          ? document.getElementById('sendInstEmail').checked : null,
         review_status: (isAward && currentRole() !== 'admin') ? 'pending' : 'approved',
         submitted_by: sessionStorage.getItem('ab-name') || null,
         submitted_role: currentRole() === 'admin' ? 'admin' : 'staff',
@@ -2197,6 +2249,7 @@ function _resetAwardFields() {
   const summaryEl = document.getElementById('deidentifiedSummary');
   descEl.dataset.autoPopulated = 'false';
   summaryEl.dataset.autoPopulated = 'false';
+  _resetInstNotifyToggle();
   checkInstEmailField();
 }
 

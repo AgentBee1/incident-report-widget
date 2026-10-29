@@ -3,7 +3,7 @@ import { sb, createCirclePost } from './_kudos.js';
 
 // Review queue actions (admin only).
 //   { action: 'approve', incident_id, agent_id?, new_agent?: { agency_name, website, country },
-//     edits?: { award_title, incident_date, original_source_url, notify_agent } }
+//     edits?: { award_title, incident_date, original_source_url, notify_agent, notify_institution } }
 //   { action: 'reject',  incident_id, reason }
 //
 // Approve: sets the agent (picked or newly created) if needed, saves edits, marks the award
@@ -11,7 +11,7 @@ import { sb, createCirclePost } from './_kudos.js';
 // links the issuing institution, sends the held-back client ticker entries, then creates the
 // Circle cross-reference post.
 
-const EDITABLE = ['award_title', 'incident_date', 'original_source_url', 'notify_agent', 'issuing_institution_id'];
+const EDITABLE = ['award_title', 'incident_date', 'original_source_url', 'notify_agent', 'notify_institution', 'issuing_institution_id'];
 const uuid = (v) => /^[0-9a-f-]{36}$/i.test(v || '');
 
 export default async function handler(req, res) {
