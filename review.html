@@ -100,8 +100,9 @@ async function load() {
   const groupIds = group.map(g => g.id);
   const others = groupIds.length ? await sb(`incidents?agent_id=in.(${groupIds.join(',')})&award_title=not.is.null&review_status=neq.pending&select=agent_id,award_title,incident_date,review_status,issuing_institution_id,issuing_agent_id&order=incident_date.desc`) : [];
   const instIds = [...new Set([...pending, ...others].map(x => x.issuing_institution_id).filter(Boolean))];
-  const insts = instIds.length ? await sb(`institutions?id=in.(${instIds.join(',')})&select=id,name`) : [];
+  const insts = instIds.length ? await sb(`institutions?id=in.(${instIds.join(',')})&select=id,name,contact_email,is_client,status`) : [];
   const instName = Object.fromEntries(insts.map(i => [i.id, i.name]));
+  insts.forEach(i => { instRec[i.id] = i; });
   // Aggregator issuers are agents; label them so the reviewer sees the issuer type.
   const aggIds = [...new Set([...pending, ...others].map(x => x.issuing_agent_id).filter(Boolean))];
   const aggs = aggIds.length ? await sb(`agents?id=in.(${aggIds.join(',')})&select=id,agency_name`) : [];
@@ -155,6 +156,7 @@ async function load() {
           <input type="text" placeholder="Search institutions…" oninput="searchInsts('${p.id}', this.value)" autocomplete="off" />
           <div id="instDrop-${p.id}" class="drop"></div>
         </div>
+        <div id="instEmail-${p.id}">${p.issuing_agent_id ? '' : instEmailHtml(p.id, instRec[p.issuing_institution_id])}</div>
         <label>Award title</label>
         <input type="text" data-f="award_title" value="${esc(p.award_title)}" />
         <div class="row">
@@ -208,12 +210,58 @@ function searchInsts(id, q) {
     drop.style.display = 'block';
   }, 250);
 }
-function pickInst(id, instId, name) {
+async function pickInst(id, instId, name) {
   pickedInsts[id] = instId;
   document.getElementById(`instDrop-${id}`).style.display = 'none';
   document.getElementById(`instPick-${id}`).style.display = 'none';
   document.getElementById(`instSel-${id}`).innerHTML = `<strong>${esc(name)}</strong> <span style="color:#15803d;font-size:12px;">✓ will be saved</span>
     <a href="#" style="font-size:12px;margin-left:6px;" onclick="toggleInstPicker('${id}');return false;">change</a>`;
+  if (!instRec[instId]) {
+    try { const [r] = await sb(`institutions?id=eq.${instId}&select=id,name,contact_email,is_client,status`); if (r) instRec[instId] = r; } catch {}
+  }
+  document.getElementById(`instEmail-${id}`).innerHTML = instEmailHtml(id, instRec[instId]);
+}
+
+// ── Issuing institution email ────────────────────────────────────
+// Non-client issuing institutions get the daily Kudos email (award-institution-digest).
+const instRec = {};
+const isClientInst = i => i && (i.is_client === true || i.status === 'Client');
+function instEmailHtml(id, inst) {
+  if (!inst) return '';
+  if (isClientInst(inst)) return '<div class="muted" style="font-size:12px;margin-top:6px;">Client institution: told via their ticker and weekly digest, not the Kudos email.</div>';
+  if (String(inst.contact_email || '').trim()) return `<div class="muted" style="font-size:12px;margin-top:6px;">The institution will get the daily Kudos email (${esc(inst.contact_email)}).</div>`;
+  return `<div style="margin-top:8px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;">
+      <div style="font-size:12px;font-weight:600;color:#92400e;margin-bottom:6px;">No contact email for ${esc(inst.name)}. Add one to let them know about this award (optional).</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" inputmode="email" id="instEmailIn-${id}" placeholder="e.g. international@university.edu" style="flex:1;" />
+        <button type="button" onclick="saveInstEmail('${id}','${inst.id}',this)" style="background:#fff;border-color:#d1d5db;white-space:nowrap;">Save email</button>
+      </div>
+      <div id="instEmailSt-${id}" style="font-size:12px;margin-top:4px;"></div>
+    </div>`;
+}
+async function saveInstEmail(id, instId, btn) {
+  const input = document.getElementById(`instEmailIn-${id}`);
+  const st = document.getElementById(`instEmailSt-${id}`);
+  const email = input.value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { st.innerHTML = '<span style="color:#b91c1c;">Enter a valid email address.</span>'; return; }
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/set_institution_contact_email`, {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_institution_id: instId, p_email: email }),
+    });
+    if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.message || `Save failed (${r.status})`); }
+    if (instRec[instId]) instRec[instId].contact_email = email;
+    // Every card with this institution now shows the saved email.
+    document.querySelectorAll('[id^="instEmail-"]').forEach(el => {
+      const cardId = el.id.slice('instEmail-'.length);
+      if (el.querySelector(`[onclick*="'${instId}'"]`)) el.innerHTML = instEmailHtml(cardId, instRec[instId]);
+    });
+  } catch (e) {
+    st.innerHTML = `<span style="color:#b91c1c;">Couldn't save: ${esc(e.message)}</span>`;
+    btn.disabled = false; btn.textContent = 'Save email';
+  }
 }
 
 // ── Agent picker (for new or wrongly chosen agents) ──────────────

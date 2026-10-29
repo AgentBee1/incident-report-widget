@@ -80,6 +80,14 @@
       <div class="drop" id="instDrop"></div>
       <div class="chosen" id="instChosen"><span id="instChosenName"></span><button type="button" id="instClear">✕ Change</button></div>
       <div class="hint" style="margin-top:4px;">Can't find it? Don't submit yet: send the admin the institution's name so it can be added first.</div>
+      <div id="instEmailWrap" style="display:none;margin-top:10px;padding:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;">
+        <label style="margin-bottom:4px;">Institution contact email <span class="hint" style="color:#b45309;">no email on file for this institution</span></label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="instEmailInput" inputmode="email" placeholder="e.g. international@university.edu" style="flex:1;" />
+          <button type="button" class="btn secondary" id="saveInstEmailBtn" style="padding:8px 14px;white-space:nowrap;">Save email</button>
+        </div>
+        <div class="hint" id="instEmailStatus" style="margin-top:4px;">Optional. Saved to the institution record and used to let them know the award is on Kudos.</div>
+      </div>
     </div>
 
     <div class="field">
@@ -188,9 +196,43 @@ picker({
 
 picker({
   input: $('instSearch'), drop: $('instDrop'), chosen: $('instChosen'), chosenName: $('instChosenName'), clear: $('instClear'),
-  search: async (q) => (await sbGet(`institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,country&limit=12&order=name`))
-    .map(i => ({ id: i.id, name: i.name, sub: i.country || '' })),
-  onPick: (it) => { inst = it; checkDuplicates(); },
+  search: async (q) => (await sbGet(`institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,country,contact_email,is_client,status&limit=12&order=name`))
+    .map(i => ({ id: i.id, name: i.name, sub: i.country || '', contact_email: i.contact_email, is_client: i.is_client, status: i.status })),
+  onPick: (it) => { inst = it; checkDuplicates(); checkInstEmail(); },
+});
+
+// ── Issuing institution email (non-clients get a Kudos email when the award is approved) ──
+function checkInstEmail() {
+  const isClientInst = inst && (inst.is_client === true || inst.status === 'Client');
+  const show = !!inst && !isClientInst && (!String(inst.contact_email || '').trim() || inst._emailSavedHere);
+  $('instEmailWrap').style.display = show ? 'block' : 'none';
+  if (!show || !inst._emailSavedHere) {
+    $('instEmailInput').value = ''; $('instEmailInput').disabled = false;
+    $('instEmailStatus').textContent = 'Optional. Saved to the institution record and used to let them know the award is on Kudos.';
+    $('instEmailStatus').style.color = '';
+    $('saveInstEmailBtn').disabled = false; $('saveInstEmailBtn').textContent = 'Save email';
+  }
+}
+$('saveInstEmailBtn').addEventListener('click', async () => {
+  const email = $('instEmailInput').value.trim();
+  const st = $('instEmailStatus'), btn = $('saveInstEmailBtn');
+  if (!inst) return;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { st.textContent = 'Enter a valid email address.'; st.style.color = 'var(--red)'; return; }
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/set_institution_contact_email`, {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_institution_id: inst.id, p_email: email }),
+    });
+    if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.message || `Save failed (${r.status})`); }
+    inst.contact_email = email; inst._emailSavedHere = true;
+    st.textContent = '✓ Email saved to the institution record.'; st.style.color = 'var(--green)';
+    btn.textContent = '✓ Saved'; $('instEmailInput').disabled = true;
+  } catch (e) {
+    st.textContent = `Couldn't save: ${e.message}`; st.style.color = 'var(--red)';
+    btn.disabled = false; btn.textContent = 'Save email';
+  }
 });
 
 $('agentMissing').addEventListener('change', (e) => {

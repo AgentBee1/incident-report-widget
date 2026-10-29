@@ -678,6 +678,15 @@ async function submitAuth() {
             <span id="issuingInstName" style="flex:1;"></span>
             <button id="clearIssuingInstBtn" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;padding:0;">✕ Remove</button>
           </div>
+          <!-- Institution email — shown when a non-client issuing institution has no email on file -->
+          <div id="instEmailWrap" style="display:none;margin-top:10px;">
+            <label style="font-size:12px;">Institution contact email <span style="font-weight:400;color:#b45309;">— no email on file for this institution</span></label>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <input type="email" id="instEmailInput" placeholder="e.g. international@university.edu" style="flex:1;" />
+              <button type="button" id="saveInstEmailBtn" class="btn-lookup" style="height:38px;white-space:nowrap;">Save email</button>
+            </div>
+            <div id="instEmailStatus" style="font-size:11px;margin-top:4px;color:#6b7280;">Optional. Saved to the institution record and used to let them know the award is on Kudos.</div>
+          </div>
         </div>
         <!-- Aggregator issuer (an agent that awards its sub-agents) -->
         <div id="aggIssuerWrap" style="display:none;">
@@ -1159,6 +1168,7 @@ function toggleAwardsPanel() {
   // Hide email protocol banner for awards — client institutions notified via ticker automatically
   document.getElementById('emailProtocolBanner').style.display = isAward ? 'none' : '';
   checkAgentEmailField();
+  checkInstEmailField();
 }
 
 function initIssuingInstSearch() {
@@ -1171,7 +1181,7 @@ function initIssuingInstSearch() {
     if (q.length < 2) { drop.style.display = 'none'; return; }
     _issuingInstSearchTimeout = setTimeout(async () => {
       const res = await sbFetch(
-        `${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,status&order=name&limit=50`
+        `${SUPABASE_URL}/rest/v1/institutions?name=ilike.*${encodeURIComponent(q)}*&select=id,name,status,is_client,contact_email&order=name&limit=50`
       );
       const data = await res.json();
       if (!data || !data.length) { drop.style.display = 'none'; return; }
@@ -1207,12 +1217,14 @@ function initIssuingInstSearch() {
     document.getElementById('issuingInstCard').classList.add('visible');
     autoPopulateAwardDescription();
     checkAwardDuplicates();
+    checkInstEmailField();
   });
 
   document.getElementById('clearIssuingInstBtn').addEventListener('click', () => {
     _issuingInstitution = null;
     input.value = '';
     document.getElementById('issuingInstCard').classList.remove('visible');
+    checkInstEmailField();
   });
 
   document.addEventListener('click', e => {
@@ -1242,7 +1254,58 @@ function clearIssuingInstitution() {
   _issuingInstitution = null;
   document.getElementById('issuingInstSearch').value = '';
   document.getElementById('issuingInstCard').classList.remove('visible');
+  checkInstEmailField();
 }
+
+// ── Issuing institution email ─────────────────────────────────────
+// Non-client issuing institutions get a daily Postmark email listing their new Kudos
+// awards. If one has no contact email on file, prompt for it (optional).
+function _resetInstEmailUI() {
+  document.getElementById('instEmailInput').value = '';
+  const st = document.getElementById('instEmailStatus');
+  st.textContent = 'Optional. Saved to the institution record and used to let them know the award is on Kudos.';
+  st.style.color = '#6b7280';
+  const b = document.getElementById('saveInstEmailBtn');
+  b.disabled = false; b.textContent = 'Save email'; b.style.background = ''; b.style.borderColor = ''; b.style.color = '';
+}
+function checkInstEmailField() {
+  const wrap = document.getElementById('instEmailWrap');
+  if (!wrap) return;
+  const isAward = document.getElementById('reportType').value === 'Awards & Recognition';
+  const inst = _issuerMode === 'institution' ? _issuingInstitution : null;
+  const isClientInst = inst && (inst.is_client === true || inst.status === 'Client');
+  const show = isAward && !!inst && !isClientInst && !String(inst.contact_email || '').trim();
+  if (show && wrap.dataset.instId !== inst.id) _resetInstEmailUI();
+  wrap.dataset.instId = show ? inst.id : '';
+  if (!show && !(inst && inst._emailSavedHere)) { wrap.style.display = 'none'; _resetInstEmailUI(); return; }
+  wrap.style.display = 'block';
+}
+document.getElementById('saveInstEmailBtn').addEventListener('click', async function() {
+  const email = document.getElementById('instEmailInput').value.trim();
+  const statusEl = document.getElementById('instEmailStatus');
+  const inst = _issuingInstitution;
+  if (!email) { statusEl.textContent = 'Please enter an email address.'; statusEl.style.color = '#b91c1c'; return; }
+  if (!inst) { statusEl.textContent = 'No institution selected.'; statusEl.style.color = '#b91c1c'; return; }
+  this.disabled = true; this.textContent = 'Saving…';
+  try {
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/rpc/set_institution_contact_email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_institution_id: inst.id, p_email: email }),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Save failed'); }
+    inst.contact_email = email;
+    inst._emailSavedHere = true;
+    statusEl.textContent = '✓ Email saved to institution record.';
+    statusEl.style.color = '#15803d';
+    this.textContent = '✓ Saved';
+    this.style.background = '#f0fdf4'; this.style.borderColor = '#bbf7d0'; this.style.color = '#15803d';
+  } catch (e) {
+    statusEl.textContent = `Failed to save email: ${e.message}`;
+    statusEl.style.color = '#b91c1c';
+    this.disabled = false; this.textContent = 'Save email';
+  }
+});
 
 function setIssuerMode(mode) {
   _issuerMode = mode === 'aggregator' ? 'aggregator' : 'institution';
@@ -2134,6 +2197,7 @@ function _resetAwardFields() {
   const summaryEl = document.getElementById('deidentifiedSummary');
   descEl.dataset.autoPopulated = 'false';
   summaryEl.dataset.autoPopulated = 'false';
+  checkInstEmailField();
 }
 
 function resetFormSilent() {
