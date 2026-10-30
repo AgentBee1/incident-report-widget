@@ -705,9 +705,22 @@ async function submitAuth() {
         <button type="button" class="issuer-mode-btn" id="issuerModeBtn">Aggregator award</button>
       </div>
       <div class="field" style="margin-top:12px;">
-        <label>Original announcement link <span style="font-weight:400;color:#b45309;">— required: the LinkedIn, Instagram, Facebook or news post</span></label>
+        <label>Announcement link <span style="font-weight:400;color:#b45309;">— the LinkedIn, Instagram, Facebook or news post, or the web page listing the award</span></label>
         <input type="url" id="originalSourceUrl" placeholder="https://www.linkedin.com/posts/…" />
-        <div style="font-size:11px;color:#a16207;margin-top:3px;">Shown as evidence on the Kudos award page. The Circle post is created automatically when you submit.</div>
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label>Award image <span style="font-weight:400;color:#b45309;">— optional; use when there's no standalone post (e.g. a screenshot of the web page)</span></label>
+        <div id="awardImageDrop" tabindex="0" style="border:1.5px dashed #fcd34d;border-radius:9px;background:#fff;padding:14px;text-align:center;font-size:12px;color:#92400e;cursor:pointer;outline:none;">
+          <div id="awardImageEmpty">📷 Drop an image here, paste a screenshot (Ctrl/⌘+V), or <span style="text-decoration:underline;">choose a file</span><div style="font-size:11px;color:#a16207;margin-top:3px;">JPG, PNG, WEBP or GIF. Large images are resized automatically.</div></div>
+          <div id="awardImageFilled" style="display:none;align-items:center;gap:12px;text-align:left;">
+            <img id="awardImagePreview" alt="Award image preview" style="max-width:160px;max-height:110px;border-radius:6px;border:1px solid #e5e7eb;" />
+            <div style="flex:1;min-width:0;"><div id="awardImageName" style="font-weight:600;color:#1a1d23;word-break:break-all;"></div><div id="awardImageSize" style="color:#6b7280;"></div></div>
+            <button type="button" id="awardImageRemove" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;">✕ Remove</button>
+          </div>
+        </div>
+        <input type="file" id="awardImageInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" />
+        <div class="status" id="awardImageStatus"></div>
+        <div style="font-size:11px;color:#a16207;margin-top:3px;">A link, an image, or both. Both are shown as evidence on the Kudos award page; the image also goes in the Circle post, which is created automatically when you submit.</div>
       </div>
       <div id="dupPanel" style="display:none;margin-top:14px;padding:12px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:9px;font-size:12px;"></div>
       <div id="staffReviewNote" style="display:none;margin-top:12px;padding:10px 14px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:9px;font-size:12px;color:#3730a3;">
@@ -1976,8 +1989,12 @@ async function submitIncident() {
     if (!document.getElementById('awardTitle').value.trim()) {
       setStatus('submitStatus', 'error', 'Please enter the award title.'); return;
     }
-    if (!/^https?:\/\//i.test(document.getElementById('originalSourceUrl').value.trim())) {
-      setStatus('submitStatus', 'error', 'Please paste the original announcement link (starting with https://).'); return;
+    const _awardLink = document.getElementById('originalSourceUrl').value.trim();
+    if (_awardLink && !/^https?:\/\//i.test(_awardLink)) {
+      setStatus('submitStatus', 'error', 'The announcement link must start with https://'); return;
+    }
+    if (!_awardLink && !_awardImage) {
+      setStatus('submitStatus', 'error', 'Please add the announcement link, an award image, or both.'); return;
     }
     if (_issuerMode === 'aggregator') {
       if (!_issuingAgent) {
@@ -1999,6 +2016,13 @@ async function submitIncident() {
 
   try {
 
+    // Award image: upload to Circle file storage first, then save its link on the award.
+    let evidenceImage = null;
+    if (isAward && _awardImage) {
+      setStatus('submitStatus', 'info', 'Uploading award image…');
+      evidenceImage = await uploadAwardImage(_awardImage);
+    }
+
     setStatus('submitStatus', 'info', 'Creating incident record…');
     const incRes = await sbFetch(`${SUPABASE_URL}/rest/v1/incidents`, {
       method: 'POST',
@@ -2014,6 +2038,8 @@ async function submitIncident() {
         // Awards: source_url is filled in with the Circle post link after it's created.
         source_url: isAward ? null : (document.getElementById('sourceUrl').value.trim() || null),
         original_source_url: isAward ? (document.getElementById('originalSourceUrl').value.trim() || null) : null,
+        evidence_image_url: evidenceImage ? evidenceImage.url : null,
+        evidence_image_signed_id: evidenceImage ? evidenceImage.signedId : null,
         notify_agent: isAward ? (currentRole() === 'admin' && document.getElementById('sendAwardEmail').checked) : null,
         // Institution Kudos email: admin's choice when the toggle is shown; otherwise null
         // (database default: send if the award date is within 3 months).
@@ -2258,11 +2284,103 @@ async function confirmEmailProtocol() {
   } catch(e) { setStatus('emailConfirmStatus', 'error', '✗ ' + e.message); btn.disabled = false; btn.innerHTML = '✓ Confirm & queue'; }
 }
 
+// ── Award image (evidence when there's no standalone post) ───────
+let _awardImage = null; // { blob, name }
+const AWARD_IMG_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+const AWARD_IMG_MAX_BYTES = 3.8 * 1024 * 1024;
+const AWARD_IMG_MAX_SIDE = 2400;
+
+function _fmtBytes(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; }
+
+// Large or oversized images are redrawn as JPEG so they stay under the upload limit.
+async function _shrinkImage(file) {
+  const bmp = await createImageBitmap(file);
+  const tooBig = file.size > AWARD_IMG_MAX_BYTES || Math.max(bmp.width, bmp.height) > AWARD_IMG_MAX_SIDE;
+  if (!tooBig || file.type === 'image/gif') { bmp.close && bmp.close(); return file; }
+  const scale = Math.min(1, AWARD_IMG_MAX_SIDE / Math.max(bmp.width, bmp.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bmp.width * scale); canvas.height = Math.round(bmp.height * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+  bmp.close && bmp.close();
+  for (const q of [0.88, 0.8, 0.7, 0.6]) {
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', q));
+    if (blob && blob.size <= AWARD_IMG_MAX_BYTES) return blob;
+  }
+  throw new Error('Image is still too large after resizing — please crop it and try again.');
+}
+
+async function setAwardImage(file) {
+  clearStatus('awardImageStatus');
+  if (!file) return;
+  if (!AWARD_IMG_TYPES.includes(file.type)) { setStatus('awardImageStatus', 'error', 'Please use a JPG, PNG, WEBP or GIF image.'); return; }
+  try {
+    const blob = await _shrinkImage(file);
+    if (blob.size > AWARD_IMG_MAX_BYTES) throw new Error('That GIF is over 4 MB — please use a smaller image.');
+    const base = (file.name && file.name !== 'image.png') ? file.name.replace(/\.[^.]+$/, '') : 'award-screenshot';
+    const ext = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' }[blob.type] || 'jpg';
+    _awardImage = { blob, name: `${base}.${ext}` };
+    const prev = document.getElementById('awardImagePreview');
+    if (prev.dataset.url) URL.revokeObjectURL(prev.dataset.url);
+    prev.dataset.url = URL.createObjectURL(blob); prev.src = prev.dataset.url;
+    document.getElementById('awardImageName').textContent = _awardImage.name;
+    document.getElementById('awardImageSize').textContent = _fmtBytes(blob.size) + (blob !== file ? ' (resized)' : '');
+    document.getElementById('awardImageEmpty').style.display = 'none';
+    document.getElementById('awardImageFilled').style.display = 'flex';
+  } catch (e) { setStatus('awardImageStatus', 'error', '✗ ' + e.message); }
+}
+
+function clearAwardImage() {
+  _awardImage = null;
+  const prev = document.getElementById('awardImagePreview');
+  if (prev.dataset.url) { URL.revokeObjectURL(prev.dataset.url); delete prev.dataset.url; }
+  prev.removeAttribute('src');
+  document.getElementById('awardImageInput').value = '';
+  document.getElementById('awardImageEmpty').style.display = '';
+  document.getElementById('awardImageFilled').style.display = 'none';
+  clearStatus('awardImageStatus');
+}
+
+async function uploadAwardImage(img) {
+  const res = await fetch(`/api/upload-evidence?name=${encodeURIComponent(img.name)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': img.blob.type, 'x-session': sessionStorage.getItem('ab-session') || '' },
+    body: img.blob,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.url) throw new Error('Award image upload failed: ' + (data.error || res.statusText));
+  return { url: data.url, signedId: data.signedId || null };
+}
+
+(function wireAwardImage() {
+  const drop = document.getElementById('awardImageDrop');
+  const input = document.getElementById('awardImageInput');
+  drop.addEventListener('click', e => { if (!e.target.closest('#awardImageRemove')) input.click(); });
+  drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
+  input.addEventListener('change', () => setAwardImage(input.files[0]));
+  document.getElementById('awardImageRemove').addEventListener('click', e => { e.stopPropagation(); clearAwardImage(); });
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.style.background = '#fffbeb'; });
+  drop.addEventListener('dragleave', () => { drop.style.background = '#fff'; });
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.style.background = '#fff'; setAwardImage(e.dataTransfer.files[0]); });
+  // Paste a screenshot anywhere on the form while it's an award (text fields keep normal paste).
+  document.addEventListener('paste', e => {
+    if (document.getElementById('reportType').value !== 'Awards & Recognition') return;
+    const item = [...(e.clipboardData?.items || [])].find(i => i.kind === 'file' && i.type.startsWith('image/'));
+    if (!item) return;
+    const t = e.target;
+    if (t !== drop && t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && t.type !== 'file'))) return;
+    e.preventDefault();
+    setAwardImage(item.getAsFile());
+  });
+})();
+
 // ── Reset ────────────────────────────────────────────────────────
 function _resetAwardFields() {
   setIssuerMode('institution');
   _issuingInstitution = null;
   document.getElementById('originalSourceUrl').value = '';
+  clearAwardImage();
   document.getElementById('dupPanel').style.display = 'none';
   document.getElementById('kudosResult').style.display = 'none';
   document.getElementById('sourceUrlField').style.display = '';

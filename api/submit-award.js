@@ -1,16 +1,15 @@
-import crypto from 'crypto';
-import { sb } from './_kudos.js';
+import { sb, uploadToCircle } from './_kudos.js';
 
 // Public award submission (submit-award.html). No login: the Supabase key stays here, and
 // every row is forced to review_status 'pending' so nothing goes live until the admin
 // approves it in review.html.
 //
-// Evidence is either a link, or an image/PDF uploaded to Circle file storage (whose URL is
-// saved as original_source_url).
+// Evidence is a link, an image or a PDF (or a link plus a file). Uploads go to Circle file
+// storage: images are saved as evidence_image_url (shown on Kudos and in the Circle post),
+// PDFs as original_source_url when no link was given.
 //
 // Env: SUPABASE_ANON_KEY, CIRCLE_API_TOKEN (both already set for this project).
 
-const CIRCLE_API = (process.env.CIRCLE_API_BASE_URL || 'https://app.circle.so/api/admin/v2').replace(/\/+$/, '');
 const MAX_FILE = 4 * 1024 * 1024;
 const MAX_BODY = MAX_FILE + 64 * 1024;
 const FILE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'application/pdf'];
@@ -56,7 +55,10 @@ export default async function handler(req, res) {
   const date = /^\d{4}-\d{2}-\d{2}$/.test(awardDate) && awardDate <= today ? awardDate : today;
 
   try {
-    const sourceUrl = hasFile ? await uploadToCircle(file) : awardLink;
+    const isImage = hasFile && file.type.startsWith('image/');
+    const upload = hasFile ? await uploadToCircle(Buffer.from(await file.arrayBuffer()), file.type, file.name) : null;
+    const linkOk = isUrl(awardLink);
+    const sourceUrl = linkOk ? awardLink : (upload && !isImage ? upload.url : null);
     const agentId = await matchAgent(businessName);
     const instId = await matchInstitution(awardedBy);
 
@@ -74,6 +76,8 @@ export default async function handler(req, res) {
         award_title: awardTitle,
         issuing_institution_id: instId,
         original_source_url: sourceUrl,
+        evidence_image_url: isImage ? upload.url : null,
+        evidence_image_signed_id: isImage ? upload.signedId : null,
         description: `${businessName} received "${awardTitle}" from ${awardedBy}. Submitted via the public Kudos form${hasFile ? ` (uploaded ${file.type === 'application/pdf' ? 'PDF' : 'image'})` : ''}${awardDate ? '' : '; date not given'}.`,
         notify_agent: false,
         review_status: 'pending',
@@ -122,32 +126,4 @@ async function matchInstitution(name) {
   if (/[*%_,()]/.test(name)) return null;
   const rows = await sb(`institutions?name=ilike.${encodeURIComponent(name)}&select=id&limit=2`);
   return rows.length === 1 ? rows[0].id : null;
-}
-
-async function uploadToCircle(file) {
-  if (!process.env.CIRCLE_API_TOKEN) throw new Error('CIRCLE_API_TOKEN is not set in this Vercel project.');
-  const buf = Buffer.from(await file.arrayBuffer());
-  const filename = (file.name || 'award').replace(/[^a-zA-Z0-9._-]/g, '_').slice(-120);
-  const r = await fetch(`${CIRCLE_API}/direct_uploads`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.CIRCLE_API_TOKEN}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      blob: {
-        key: `kudos/${Date.now()}-${filename}`,
-        filename,
-        content_type: file.type,
-        byte_size: buf.length,
-        checksum: crypto.createHash('md5').update(buf).digest('base64'),
-      },
-    }),
-  });
-  const rec = await r.json().catch(() => ({}));
-  if (!r.ok || !rec.direct_upload?.url || !rec.url) throw new Error(`Circle direct upload failed (${r.status})`);
-  const put = await fetch(rec.direct_upload.url, {
-    method: 'PUT',
-    headers: rec.direct_upload.headers || { 'Content-Type': file.type },
-    body: buf,
-  });
-  if (!put.ok) throw new Error(`Circle file storage PUT failed (${put.status})`);
-  return rec.url;
 }

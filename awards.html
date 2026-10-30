@@ -75,7 +75,7 @@ let rows = [], sortKey = 'date', sortDir = -1;
 
 async function load() {
   const [awards, pub] = await Promise.all([
-    sb('incidents?award_title=not.is.null&award_title=neq.&select=id,agent_id,requested_agent_name,award_title,incident_date,review_status,original_source_url,issuing_institution_id,issuing_agent_id,submitted_by,submitted_role,contractor_paid,contractor_paid_at,contractor_paid_by&order=incident_date.desc'),
+    sb('incidents?award_title=not.is.null&award_title=neq.&select=id,agent_id,requested_agent_name,award_title,incident_date,review_status,original_source_url,evidence_image_url,issuing_institution_id,issuing_agent_id,submitted_by,submitted_role,contractor_paid,contractor_paid_at,contractor_paid_by&order=incident_date.desc'),
     sb('kudos_awards_public?select=award_id,award_slug'),
   ]);
   const agentIds = [...new Set(awards.map(a => a.agent_id).filter(Boolean))];
@@ -96,7 +96,7 @@ async function load() {
     date: a.incident_date || '', status: a.review_status || 'approved', by: a.submitted_by || '',
     id: a.id, staff: a.submitted_role === 'staff', paid: !!a.contractor_paid,
     paidNote: a.contractor_paid ? `Paid ${a.contractor_paid_at ? new Date(a.contractor_paid_at).toLocaleDateString('en-AU') : ''}${a.contractor_paid_by ? ' by ' + a.contractor_paid_by : ''}` : 'Not paid yet',
-    src: a.original_source_url || '', kudos: slug[a.id] ? `https://kudos.agentbee.net/award/${slug[a.id]}` : '',
+    src: a.original_source_url || a.evidence_image_url || '', kudos: slug[a.id] ? `https://kudos.agentbee.net/award/${slug[a.id]}` : '',
   }));
   render();
 }

@@ -84,7 +84,7 @@ function embedSrc(url) {
 }
 
 async function load() {
-  const pending = await sb('incidents?review_status=eq.pending&select=id,agent_id,requested_agent_name,requested_agent_website,award_title,incident_date,original_source_url,issuing_institution_id,issuing_agent_id,notify_agent,notify_institution,submitted_by,description,created_at&order=created_at.asc');
+  const pending = await sb('incidents?review_status=eq.pending&select=id,agent_id,requested_agent_name,requested_agent_website,award_title,incident_date,original_source_url,evidence_image_url,issuing_institution_id,issuing_agent_id,notify_agent,notify_institution,submitted_by,description,created_at&order=created_at.asc');
   pending.forEach(p => { pendingById[p.id] = p; });
   document.getElementById('summary').textContent = pending.length
     ? `${pending.length} award${pending.length === 1 ? '' : 's'} waiting for review`
@@ -163,7 +163,7 @@ async function load() {
         <div class="row">
           <div><label>Date</label><input type="date" data-f="incident_date" value="${esc(p.incident_date)}" /></div>
         </div>
-        <label>Original announcement link</label>
+        <label>Announcement link</label>
         <input type="url" data-f="original_source_url" value="${esc(p.original_source_url)}" />
         <label class="check"><input type="checkbox" data-f="notify_agent" ${p.notify_agent ? 'checked' : ''} ${email ? '' : 'disabled'} />
           Email the agent when approved ${email ? `(${esc(email)})` : '<span class="muted">(no email on file)</span>'}</label>
@@ -183,9 +183,10 @@ async function load() {
       </div>
       <div class="right">
         <div style="font-size:12px;font-weight:600;margin-bottom:8px;">Source</div>
+        ${p.evidence_image_url ? `<img class="upload" src="${esc(p.evidence_image_url)}" alt="Award image" onerror="this.remove()" />` : ''}
         ${src ? `<iframe src="${esc(src)}" height="560" loading="lazy"></iframe>` : ''}
         ${!src && isUpload(p) && !/\(uploaded PDF\)/.test(p.description || '') ? `<img class="upload" src="${esc(p.original_source_url)}" alt="Uploaded award evidence" onerror="this.remove()" />` : ''}
-        <div style="margin-top:8px;font-size:12px;">${p.original_source_url ? `<a href="${esc(p.original_source_url)}" target="_blank" rel="noopener">${isUpload(p) ? 'Open the uploaded file ↗' : 'Open the original post ↗'}</a>` : '<span class="warn">No source link entered.</span>'}</div>
+        <div style="margin-top:8px;font-size:12px;">${p.original_source_url ? `<a href="${esc(p.original_source_url)}" target="_blank" rel="noopener">${isUpload(p) ? 'Open the uploaded file ↗' : 'Open the original post ↗'}</a>` : (p.evidence_image_url ? `<a href="${esc(p.evidence_image_url)}" target="_blank" rel="noopener">Open the image ↗</a> <span class="muted">· no link entered</span>` : '<span class="warn">No source link or image entered.</span>')}</div>
       </div>
     </div>`;
   }).join('');
