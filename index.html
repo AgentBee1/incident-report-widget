@@ -848,10 +848,10 @@ async function submitAuth() {
         <div id="otherClientsTags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
       </div>
       <div id="radarClientsGroup" style="display:none;">
-        <div style="font-size:11px;font-weight:600;color:#b91c1c;margin-bottom:6px;">On Risk Radar of <span style="font-weight:400;color:#6b7280;">— not authorised; shown in their <strong>Risk Radar</strong></span></div>
+        <div style="font-size:11px;font-weight:600;color:#b91c1c;margin-bottom:6px;">On Risk Radar of <span id="radarClientsNote" style="font-weight:400;color:#6b7280;">— not authorised; shown in their <strong>Risk Radar</strong></span></div>
         <div id="radarClientsTags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
       </div>
-      <div style="font-size:11px;color:#6b7280;margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6;">
+      <div id="clientsNotifyNote" style="font-size:11px;color:#6b7280;margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6;">
         All of these clients get this report in their ticker and weekly digest. They are not listed below unless you add them manually.
       </div>
       <div id="tickerPreview" style="margin-top:14px;background:#f8faff;border:1px solid #dbeafe;border-radius:10px;overflow:hidden;">
@@ -1494,6 +1494,7 @@ document.getElementById('severityWeight').addEventListener('change', updateTicke
 document.getElementById('sourceUrl').addEventListener('input', updateTickerPreview);
 document.getElementById('reportType').addEventListener('change', updateTickerPreview);
 document.getElementById('reportType').addEventListener('change', toggleAwardsPanel);
+document.getElementById('reportType').addEventListener('change', applyAwardNotifyLabels);
 
 document.getElementById('saveAgentEmailBtn').addEventListener('click', async function() {
   const email = document.getElementById('agentEmailInput').value.trim();
@@ -1819,6 +1820,8 @@ async function lookupAuthorisedClients(agentId) {
   const tagsEl = document.getElementById('otherClientsTags');
   const badge = document.getElementById('otherClientsBadge');
   panel.style.display = 'none'; loading.style.display = 'flex';
+  window._authorisedClientInstitutions = [];
+  window._authorisedOnlyClientInstitutions = [];
   try {
     const canonicalId = selectedAgent.canonical_agent_id || agentId;
     const agentIds = new Set([agentId, canonicalId]);
@@ -1847,8 +1850,31 @@ async function lookupAuthorisedClients(agentId) {
     badge.textContent = `${authClients.length} authorised · ${radarClients.length} risk radar`;
     panel.style.display = 'block';
     window._authorisedClientInstitutions = clients;
+    window._authorisedOnlyClientInstitutions = authClients;
+    applyAwardNotifyLabels();
     updateTickerPreview();
   } catch(e) { loading.style.display = 'none'; console.error('Client lookup failed:', e); }
+}
+
+// Awards & Recognition only notify institutions where the agent is authorised
+// (DB: notify_incident_to_linked_institutions). Risk Radar clients are shown but marked not notified.
+function applyAwardNotifyLabels() {
+  const isAward = document.getElementById('reportType').value === 'Awards & Recognition';
+  const radarTags = document.getElementById('radarClientsTags');
+  const radarNote = document.getElementById('radarClientsNote');
+  const notifyNote = document.getElementById('clientsNotifyNote');
+  if (!radarTags || !radarNote || !notifyNote) return;
+  if (isAward) {
+    radarNote.innerHTML = '— not authorised; <strong>not notified</strong> for awards';
+    radarTags.style.opacity = '0.45';
+    radarTags.title = 'Not notified — awards only go to institutions where this agent is authorised';
+    notifyNote.textContent = 'Only authorised clients get this award in their ticker and weekly digest. Risk Radar clients are not notified. Institutions you add manually below are notified.';
+  } else {
+    radarNote.innerHTML = '— not authorised; shown in their <strong>Risk Radar</strong>';
+    radarTags.style.opacity = '';
+    radarTags.title = '';
+    notifyNote.textContent = 'All of these clients get this report in their ticker and weekly digest. They are not listed below unless you add them manually.';
+  }
 }
 
 // ── Analyse institutions ─────────────────────────────────────────
@@ -2035,7 +2061,8 @@ async function submitIncident() {
     }
 
    const allLinked = [...analysisResults.authorised, ...analysisResults.risk];
-      const autoClients = (window._authorisedClientInstitutions || []).map(i => ({ institutionId: i.id, institutionName: i.name }));
+      // Awards only auto-link (and so notify) clients where the agent is authorised — not Risk Radar clients.
+      const autoClients = ((isAward ? window._authorisedOnlyClientInstitutions : window._authorisedClientInstitutions) || []).map(i => ({ institutionId: i.id, institutionName: i.name }));
       // For Awards & Recognition, add issuing institution to notification links if they're a client
       if (isAward && _issuingInstitution && (_issuingInstitution.is_client || _issuingInstitution.status === 'Client')) {
         autoClients.push({ institutionId: _issuingInstitution.id, institutionName: _issuingInstitution.name });
@@ -2266,6 +2293,7 @@ function resetFormSilent() {
   document.getElementById('otherClientsTags').innerHTML = '';
   document.getElementById('radarClientsTags').innerHTML = '';
   window._authorisedClientInstitutions = [];
+  window._authorisedOnlyClientInstitutions = [];
   window._authorisedClientsPromise = null;
   clearStatus('agentStatus');
   ['reportType','category','sourceType','severityWeight'].forEach(id => document.getElementById(id).value = '');
@@ -2312,6 +2340,7 @@ function resetForm() {
   document.getElementById('otherClientsTags').innerHTML = '';
   document.getElementById('radarClientsTags').innerHTML = '';
   window._authorisedClientInstitutions = [];
+  window._authorisedOnlyClientInstitutions = [];
   window._authorisedClientsPromise = null;
   clearStatus('agentStatus');
   ['reportType','category','sourceType','severityWeight'].forEach(id => document.getElementById(id).value = '');
