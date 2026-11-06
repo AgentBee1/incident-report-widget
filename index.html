@@ -637,7 +637,7 @@ async function submitAuth() {
     <!-- Agent email field — shown for Awards & Recognition when no email on file -->
     <div id="agentEmailWrap" style="display:none;margin-top:10px;">
       <div class="field">
-        <label>Agent email address <span style="font-weight:400;color:#b45309;">— no email on file for this agent</span></label>
+        <label>Agent email address <span style="font-weight:600;color:#b91c1c;">⚠ no email on file for this agent, so the award email can't be sent</span></label>
         <div style="display:flex;gap:8px;align-items:flex-start;">
           <input type="email" id="agentEmailInput" placeholder="e.g. awards@agencyname.com" style="flex:1;" />
           <button type="button" id="saveAgentEmailBtn" class="btn-lookup" style="height:38px;white-space:nowrap;">Save email</button>
@@ -752,8 +752,8 @@ async function submitAuth() {
       <div id="awardEmailToggle" style="margin-top:16px;padding:14px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:9px;display:flex;align-items:flex-start;gap:12px;">
         <input type="checkbox" id="sendAwardEmail" style="margin-top:2px;width:15px;height:15px;cursor:pointer;flex-shrink:0;" />
         <div>
-          <label for="sendAwardEmail" style="font-size:13px;font-weight:600;color:#92400e;cursor:pointer;">📧 Send award notification email to agent</label>
-          <div style="font-size:11px;color:#a16207;margin-top:3px;">Immediately emails the agent to let them know their award has been recorded on AgentBee Kudos. Requires an email address on file.</div>
+          <label for="sendAwardEmail" id="sendAwardEmailLabel" style="font-size:13px;font-weight:600;color:#92400e;cursor:pointer;">📧 Send award notification email to agent</label>
+          <div id="sendAwardEmailHint" style="font-size:11px;color:#a16207;margin-top:3px;">Immediately emails the agent to let them know their award has been recorded on AgentBee Kudos. Requires an email address on file.</div>
         </div>
       </div>
       <!-- Institution Kudos email toggle (admin only; non-client issuing institutions) -->
@@ -1540,17 +1540,25 @@ document.getElementById('saveAgentEmailBtn').addEventListener('click', async fun
   const statusEl = document.getElementById('agentEmailStatus');
   if (!email) { statusEl.textContent = 'Please enter an email address.'; statusEl.style.color = '#b91c1c'; return; }
   if (!selectedAgent) { statusEl.textContent = 'No agent selected.'; statusEl.style.color = '#b91c1c'; return; }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { statusEl.textContent = 'Enter a valid email address.'; statusEl.style.color = '#b91c1c'; return; }
   this.disabled = true; this.textContent = 'Saving…';
+  // Save to the canonical record (one record per agent group); the award email falls back to it for branches.
+  const targetId = selectedAgent.canonical_agent_id || selectedAgent.id;
   try {
-    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${selectedAgent.id}`, {
+    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${targetId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify({ email }),
     });
     if (!res.ok) throw new Error('Save failed');
-    selectedAgent.email = email;
-    statusEl.textContent = '✓ Email saved to agent record.';
+    if (targetId === selectedAgent.id) selectedAgent.email = email;
+    else selectedAgent._canonicalEmail = email;
+    if (_canonicalAgent && _canonicalAgent.id === targetId) _canonicalAgent.email = email;
+    statusEl.textContent = targetId === selectedAgent.id
+      ? '✓ Email saved to agent record.'
+      : '✓ Email saved to the parent (canonical) agent record.';
     statusEl.style.color = '#15803d';
+    updateAwardEmailToggle();
     this.textContent = '✓ Saved';
     this.style.background = '#f0fdf4';
     this.style.borderColor = '#bbf7d0';
@@ -1650,6 +1658,7 @@ function selectAgent(agent) {
   _canonicalAgent = agent;
   _selectedBranchAgent = null;
   selectedAgent = null;
+  checkAgentEmailField();
   window._authorisedClientsPromise = null;
   agentInput.value = agent.agency_name;
   const matchList = document.getElementById('agentMatchList');
@@ -1690,15 +1699,76 @@ function resolveAgent(agent) {
   checkAwardDuplicates();
 }
 
-function checkAgentEmailField() {
+// The award email goes to the agent's own email, falling back to its canonical record's
+// (same lookup as the award-notification Edge Function).
+function agentNotifyEmail(agent) {
+  if (!agent) return null;
+  return agent.email || agent._canonicalEmail || null;
+}
+
+async function checkAgentEmailField() {
   const isAward = document.getElementById('reportType').value === 'Awards & Recognition';
-  const hasEmail = selectedAgent && selectedAgent.email;
   const wrap = document.getElementById('agentEmailWrap');
-  if (isAward && !hasEmail && selectedAgent) {
+  const agent = selectedAgent;
+  // Branch with no email of its own: look up the canonical record's email once.
+  if (isAward && agent && !agent.email && agent.canonical_agent_id && agent._canonicalEmail === undefined) {
+    agent._canonicalEmail = null;
+    try {
+      const r = await sbFetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${agent.canonical_agent_id}&select=email`);
+      const [c] = await r.json() || [];
+      agent._canonicalEmail = (c && c.email) || null;
+    } catch (e) {}
+    if (selectedAgent !== agent) return; // agent changed while looking up
+  }
+  const hasEmail = !!agentNotifyEmail(agent);
+  if (isAward && agent && !hasEmail) {
+    if (wrap.dataset.agentId !== agent.id) {
+      wrap.dataset.agentId = agent.id;
+      document.getElementById('agentEmailInput').value = '';
+      const st = document.getElementById('agentEmailStatus');
+      st.textContent = 'This will be saved to the agent record and used for award notifications.';
+      st.style.color = '#6b7280';
+      const b = document.getElementById('saveAgentEmailBtn');
+      b.disabled = false; b.textContent = 'Save email';
+      b.style.background = ''; b.style.borderColor = ''; b.style.color = '';
+    }
     wrap.style.display = 'block';
-  } else {
+  } else if (!(isAward && agent && wrap.dataset.agentId === agent.id && hasEmail)) {
+    // Keep the "✓ Saved" state visible for the agent whose email was just added here.
     wrap.style.display = 'none';
+    wrap.dataset.agentId = '';
     if (document.getElementById('agentEmailInput')) document.getElementById('agentEmailInput').value = '';
+  }
+  updateAwardEmailToggle();
+}
+
+// The "send award email to agent" tick box only works when there's an email to send to.
+let _awardEmailWanted = false;
+document.getElementById('sendAwardEmail').addEventListener('change', e => { _awardEmailWanted = e.target.checked; });
+function updateAwardEmailToggle() {
+  const cb = document.getElementById('sendAwardEmail');
+  const hint = document.getElementById('sendAwardEmailHint');
+  const label = document.getElementById('sendAwardEmailLabel');
+  const email = agentNotifyEmail(selectedAgent);
+  if (!selectedAgent) {
+    cb.disabled = false;
+    label.style.opacity = ''; label.style.cursor = 'pointer';
+    hint.textContent = 'Immediately emails the agent to let them know their award has been recorded on AgentBee Kudos. Requires an email address on file.';
+    hint.style.color = '#a16207';
+    return;
+  }
+  if (email) {
+    if (cb.disabled) { cb.disabled = false; cb.checked = _awardEmailWanted; }
+    label.style.opacity = ''; label.style.cursor = 'pointer';
+    hint.textContent = `Immediately emails ${email} to let them know their award has been recorded on AgentBee Kudos.`;
+    hint.style.color = '#a16207';
+  } else {
+    if (!cb.disabled) _awardEmailWanted = cb.checked;
+    cb.checked = false;
+    cb.disabled = true;
+    label.style.opacity = '0.55'; label.style.cursor = 'not-allowed';
+    hint.textContent = '⚠ No email on file for this agent. Add one above to turn this on.';
+    hint.style.color = '#b91c1c';
   }
 }
 
@@ -2552,6 +2622,8 @@ function resetFormSilent() {
   _selectedAccredIds = new Set(); if (_accredLoaded) renderAccredOptions(); renderAccredTags(); updateAccredTriggerLabel();
   _resetAwardFields();
   document.getElementById('agentEmailWrap').style.display = 'none';
+  document.getElementById('agentEmailWrap').dataset.agentId = '';
+  updateAwardEmailToggle();
   document.getElementById('agentEmailInput').value = '';
   document.getElementById('agentEmailStatus').textContent = 'This will be saved to the agent record and used for award notifications.';
   document.getElementById('agentEmailStatus').style.color = '#6b7280';
@@ -2597,6 +2669,8 @@ function resetForm() {
   _selectedAccredIds = new Set(); if (_accredLoaded) renderAccredOptions(); renderAccredTags(); updateAccredTriggerLabel();
   _resetAwardFields();
   document.getElementById('agentEmailWrap').style.display = 'none';
+  document.getElementById('agentEmailWrap').dataset.agentId = '';
+  updateAwardEmailToggle();
   document.getElementById('agentEmailInput').value = '';
   document.getElementById('agentEmailStatus').textContent = 'This will be saved to the agent record and used for award notifications.';
   document.getElementById('agentEmailStatus').style.color = '#6b7280';
