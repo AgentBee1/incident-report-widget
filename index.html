@@ -1371,10 +1371,10 @@ document.getElementById('saveInstEmailBtn').addEventListener('click', async func
   if (!inst) { statusEl.textContent = 'No institution selected.'; statusEl.style.color = '#b91c1c'; return; }
   this.disabled = true; this.textContent = 'Saving…';
   try {
-    const res = await sbFetch(`${SUPABASE_URL}/rest/v1/rpc/set_institution_contact_email`, {
+    const res = await fetch('/api/set-institution-email', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p_institution_id: inst.id, p_email: email }),
+      headers: { 'Content-Type': 'application/json', 'x-session': sessionStorage.getItem('ab-session') || '' },
+      body: JSON.stringify({ institution_id: inst.id, email }),
     });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Save failed'); }
     inst.contact_email = email;

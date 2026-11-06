@@ -14,6 +14,8 @@
 2. Connect the repo to Vercel
 3. In Vercel → Settings → Environment Variables, add:
    - `SUPABASE_ANON_KEY` = `eyJ...your_anon_key...`
+   - `SUPABASE_SERVICE_ROLE_KEY` = the service role key (server functions only: approving awards and saving
+     institution emails call database functions that the public anon key can't run)
 4. Add a `vercel.json` if needed (for rewrites), otherwise Vercel serves `index.html` automatically
 
 ## Alternative: Direct key injection

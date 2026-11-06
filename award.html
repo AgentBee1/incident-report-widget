@@ -220,10 +220,10 @@ $('saveInstEmailBtn').addEventListener('click', async () => {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { st.textContent = 'Enter a valid email address.'; st.style.color = 'var(--red)'; return; }
   btn.disabled = true; btn.textContent = 'Saving…';
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/set_institution_contact_email`, {
+    const r = await fetch('/api/set-institution-email', {
       method: 'POST',
-      headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p_institution_id: inst.id, p_email: email }),
+      headers: { 'Content-Type': 'application/json', 'x-session': sessionStorage.getItem('ab-session') || '' },
+      body: JSON.stringify({ institution_id: inst.id, email }),
     });
     if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.message || `Save failed (${r.status})`); }
     inst.contact_email = email; inst._emailSavedHere = true;

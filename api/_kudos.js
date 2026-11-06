@@ -19,6 +19,27 @@ export async function sb(path, opts = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+// Service-role client for functions that are not exposed to the public anon key
+// (kudos_publish_award, set_institution_contact_email). Server-side only.
+// Env: SUPABASE_SERVICE_ROLE_KEY.
+export async function sbService(path, opts = {}) {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set in this Vercel project.');
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...opts,
+    headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', ...(opts.headers || {}) },
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    let msg = text.slice(0, 300);
+    try { msg = JSON.parse(text).message || msg; } catch {}
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
+  }
+  return text ? JSON.parse(text) : null;
+}
+
 async function circle(path, body) {
   const res = await fetch(`${CIRCLE_API}${path}`, {
     method: 'POST',

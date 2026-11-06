@@ -1,5 +1,5 @@
 import { verifySession } from './auth.js';
-import { sb, createCirclePost } from './_kudos.js';
+import { sb, sbService, createCirclePost } from './_kudos.js';
 
 // Review queue actions (admin only).
 //   { action: 'approve', incident_id, agent_id?, new_agent?: { agency_name, website, country },
@@ -100,7 +100,7 @@ export default async function handler(req, res) {
         });
       }
     }
-    const tickers = await sb('rpc/kudos_publish_award', { method: 'POST', body: JSON.stringify({ p_incident_id: id }) });
+    const tickers = await sbService('rpc/kudos_publish_award', { method: 'POST', body: JSON.stringify({ p_incident_id: id }) });
 
     let circle = null, circleError = null;
     try { circle = await createCirclePost(id); } catch (e) { circleError = String(e.message || e); }
