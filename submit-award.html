@@ -275,6 +275,12 @@
     $('awardTitle').focus();
   });
 })();
+
+  // Prefill the business name when linked from a Kudos account (?business=...).
+  (function () {
+    const b = new URLSearchParams(location.search).get('business');
+    if (b && !document.getElementById('businessName').value) document.getElementById('businessName').value = b.slice(0, 200);
+  })();
 </script>
 </body>
 </html>
