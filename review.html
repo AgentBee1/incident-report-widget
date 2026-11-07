@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Award review queue — AgentBee</title>
+<script src="/claim-card.js"></script>
 <style>
   :root { --ink:#1a1d23; --muted:#6b7280; --line:#e5e7eb; --blue:#1d4ed8; --green:#15803d; --red:#b91c1c; --amber:#92400e; }
   * { box-sizing: border-box; }
@@ -52,6 +53,7 @@
     </div>
     <div><a href="/">← Back to widget</a> · <a href="/awards.html">All awards</a></div>
   </div>
+  <div id="claims"></div>
   <div id="list"></div>
 </div>
 
@@ -371,6 +373,28 @@ async function act(id, action, btn) {
 }
 
 load().catch(e => { document.getElementById('list').innerHTML = `<div class="empty">Couldn't load the queue: ${esc(e.message)}</div>`; });
+
+// Kudos agency claims waiting for approval (kudos.agentbee.net/account).
+async function loadClaims() {
+  const box = document.getElementById('claims');
+  const session = { 'x-session': sessionStorage.getItem('ab-session') || '' };
+  const r = await fetch('/api/claim-review?list=1', { headers: session });
+  if (!r.ok) return;
+  const claims = await r.json();
+  if (!claims.length) { box.innerHTML = ''; return; }
+  box.innerHTML = `<h2 style="font-size:16px;margin:4px 0 10px">Agency claims waiting (${claims.length})</h2>` +
+    claims.map((c, i) => `<div id="claim-${i}"></div>`).join('') +
+    '<h2 style="font-size:16px;margin:24px 0 10px">Awards</h2>';
+  claims.forEach((c, i) => renderClaimCard(document.getElementById(`claim-${i}`), c, {
+    submit: (action, agentId) => fetch('/api/claim-review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...session },
+      body: JSON.stringify({ account_id: c.account_id, action, agent_id: agentId || undefined })
+    }).then(r => r.json().then(x => ({ ...x, ok: r.ok }))),
+    search: (q) => fetch(`/api/claim-review?search=${encodeURIComponent(q)}`, { headers: session }).then(r => r.json())
+  }));
+}
+loadClaims().catch(() => {});
 </script>
 </body>
 </html>
