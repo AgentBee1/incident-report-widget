@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<meta name="referrer" content="no-referrer" />
+<title>Kudos claim review — AgentBee</title>
+<style>
+  body { margin:0; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background:#f6f7f9; color:#1a1d23; font-size:14px; }
+  .page { max-width: 760px; margin: 0 auto; padding: 32px 16px 60px; }
+  h1 { margin:0 0 4px; font-size:22px; }
+  .muted { color:#6b7280; }
+  a { color:#1d4ed8; }
+  .note { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:24px; text-align:center; color:#374151; }
+</style>
+<script src="/claim-card.js"></script>
+</head>
+<body>
+<div class="page">
+  <h1>Kudos claim review</h1>
+  <p class="muted" id="sub">Someone has asked to manage an agency on Kudos.</p>
+  <div id="card"><div class="note">Loading…</div></div>
+  <p class="muted" style="font-size:12px">Pending claims are also in the <a href="/review.html">review queue</a>.</p>
+</div>
+<script>
+const params = new URLSearchParams(location.search);
+const t = params.get('t') || '';
+const card = document.getElementById('card');
+const note = (html) => (card.innerHTML = `<div class="note">${html}</div>`);
+
+fetch(`/api/claim-review?t=${encodeURIComponent(t)}`)
+  .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+  .then(({ ok, d }) => {
+    if (!ok) return note(d.message || 'This review link is not valid.');
+    if (d.status !== 'pending') {
+      return note(`This claim by <strong>${d.email}</strong> has already been <strong>${d.status === 'approved' ? 'approved' : d.status}</strong>.`);
+    }
+    if (d.link === 'used') return note('This link has already been used. Open the <a href="/review.html">review queue</a>.');
+    if (d.link === 'expired') return note('This link has expired. Open the <a href="/review.html">review queue</a> to review the claim.');
+    renderClaimCard(card, d, {
+      submit: (action, agentId) =>
+        fetch('/api/claim-review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ t, action, agent_id: agentId || undefined })
+        }).then((r) => r.json().then((x) => ({ ...x, ok: r.ok }))),
+      search: (q) => fetch(`/api/claim-review?t=${encodeURIComponent(t)}&search=${encodeURIComponent(q)}`).then((r) => r.json())
+    });
+    if (params.get('a') === 'reject') card.querySelector('.reject')?.focus();
+    else card.querySelector('.approve')?.focus();
+  })
+  .catch(() => note('Could not load this claim. Please try again.'));
+</script>
+</body>
+</html>
