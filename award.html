@@ -361,9 +361,10 @@ $('submitBtn').addEventListener('click', async () => {
     submitted_role: 'staff',
   };
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/incidents`, {
+    // Via /api/db (login-checked, service key server-side) — 15 Nov 2026.
+    const r = await fetch('/api/db?p=incidents', {
       method: 'POST',
-      headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      headers: { 'x-session': sessionStorage.getItem('ab-session') || '', 'Content-Type': 'application/json', Prefer: 'return=minimal' },
       body: JSON.stringify(record),
     });
     if (!r.ok) throw new Error(`Couldn't save (${r.status}): ${(await r.text()).slice(0, 200)}`);

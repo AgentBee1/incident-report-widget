@@ -2678,10 +2678,17 @@ function resetForm() {
   updatePreview();
 }
 
+// All Supabase calls go through /api/db (15 Nov 2026): it checks the login session and uses the
+// service key server-side, so the public anon key no longer needs write access.
 function sbFetch(url, opts = {}) {
-  const key = window._supabaseKey || sessionStorage.getItem('ab-supabase-key') || '';
-  if (!key) console.warn('sbFetch: Supabase key not set — API call will fail with 401');
-  return fetch(url, { ...opts, headers: { 'apikey': key, 'Authorization': `Bearer ${key}`, ...(opts.headers || {}) } });
+  const prefix = `${SUPABASE_URL}/rest/v1/`;
+  if (!url.startsWith(prefix)) return Promise.reject(new Error(`sbFetch: unexpected URL ${url}`));
+  const session = sessionStorage.getItem('ab-session') || '';
+  if (!session) console.warn('sbFetch: no login session — API call will fail with 401');
+  return fetch(`/api/db?p=${encodeURIComponent(url.slice(prefix.length))}`, {
+    ...opts,
+    headers: { ...(opts.headers || {}), 'x-session': session },
+  });
 }
 
 function setStatus(id, type, msg) { const el = document.getElementById(id); el.className = `status ${type}`; el.textContent = msg; }

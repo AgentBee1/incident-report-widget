@@ -8,8 +8,12 @@ const CIRCLE_API = (process.env.CIRCLE_API_BASE_URL || 'https://app.circle.so/ap
 const SPACE_ID = Number(process.env.CIRCLE_SPACE_ID || 134965);
 const TOPIC_ID = Number(process.env.CIRCLE_AWARD_TOPIC_ID || 99686);
 
+// Server-side Supabase client. Uses the service key (15 Nov 2026): the anon key no longer has
+// write access. Every caller is login-checked (review, contractor-paid, circle-post) or forces
+// safe values (submit-award: review_status 'pending').
 export async function sb(path, opts = {}) {
-  const key = process.env.SUPABASE_ANON_KEY;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set in this Vercel project.');
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     ...opts,
     headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', ...(opts.headers || {}) },
