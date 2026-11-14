@@ -5,7 +5,7 @@ import { SUPABASE_URL } from './_kudos.js';
 // Uses Claude + web search, restricted to what the institution publishes itself.
 // Never writes anything: the widget fills the field and the user saves as normal.
 //
-// Environment variables: ANTHROPIC_API_KEY, ADMIN_PASSPHRASE, SUPABASE_ANON_KEY.
+// Environment variables: ANTHROPIC_API_KEY, ADMIN_PASSPHRASE, SUPABASE_SERVICE_ROLE_KEY.
 
 export const config = { maxDuration: 60 };
 
@@ -19,7 +19,8 @@ function domainOf(s) {
 }
 
 async function loadInstitution(id) {
-  const key = process.env.SUPABASE_ANON_KEY;
+  // Service key (15 Nov 2026): contact_email is no longer readable with the anon key.
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!key || !/^[0-9a-f-]{36}$/i.test(id || '')) return null;
   const r = await fetch(`${SUPABASE_URL}/rest/v1/institutions?id=eq.${id}&select=id,name,country,website,contact_email&limit=1`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` },
